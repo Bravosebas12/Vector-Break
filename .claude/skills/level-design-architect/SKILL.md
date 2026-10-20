@@ -46,8 +46,8 @@ Use when creating, editing, validating, or loading AngleCraft puzzle levels.
 
 ## Output Contract
 
-- Level files in `levels/level-XX.json`; schema in `assets/level.schema.json`.
-- `src/level/loader.js` + `src/level/validate.js` with tests for each rejection rule.
+- Level files in `src/levels/levelN.json` (JSON `id` stays `level-XX`); schema in `assets/level.schema.json`.
+- Block/Multiplier entities in `src/js/entities/`; loader + `validateLevel` with tests for each rejection rule.
 
 ## References
 

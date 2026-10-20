@@ -44,7 +44,7 @@ Use when adding or changing game states, transitions, input handling, or turn-en
 
 ## Output Contract
 
-- `src/state/fsm.js`, `src/state/states/*.js`, `src/input/inputMap.js`.
+- FSM and input mapping live in `src/js/main.js`; extract to `src/js/system/` when they grow.
 - Tests for every transition row, including "last ball lands while still Firing" (must not end turn).
 
 ## References

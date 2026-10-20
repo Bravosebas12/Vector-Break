@@ -1,0 +1,32 @@
+/* Tokens from Design/Game UI mockup */
+:root {
+  --bg-base: #0E1117;
+  --bg-body: #080A0E;
+  --grid: #141923;
+  --border: #2A2E39;
+  --text: #E7EAF0;
+  --text-muted: #8A93A6;
+  --cyan: #00F5D4;
+  --amber: #FF9E00;
+  --magenta: #F72585;
+  --violet: #7209B7;
+  --steel: #2B2D42;
+  --font-ui: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg-body);
+  color: var(--text);
+  font-family: var(--font-ui);
+}
+
+#game {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
+  background: var(--bg-base);
+}

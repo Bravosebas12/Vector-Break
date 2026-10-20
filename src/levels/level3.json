@@ -1,0 +1,33 @@
+{
+  "id": "level-03",
+  "name": "Fortress",
+  "grid": { "cols": 9, "rows": 12 },
+  "launcher": { "x": 0.5 },
+  "shots": 12,
+  "startBalls": 8,
+  "blocks": [
+    {"type":"indestructible","col":3,"row":2},
+    {"type":"indestructible","col":4,"row":2},
+    {"type":"indestructible","col":5,"row":2},
+    {"type":"indestructible","col":3,"row":3},{"type":"indestructible","col":5,"row":3},
+    {"type":"indestructible","col":3,"row":4},{"type":"indestructible","col":5,"row":4},
+    {"type":"core","col":4,"row":3,"hp":300},
+    {"type":"reinforced","col":0,"row":1,"hp":60},
+    {"type":"reinforced","col":1,"row":1,"hp":60},
+    {"type":"reinforced","col":7,"row":1,"hp":60},
+    {"type":"reinforced","col":8,"row":1,"hp":60},
+    {"type":"reinforced","col":0,"row":6,"hp":40},
+    {"type":"reinforced","col":1,"row":6,"hp":40},
+    {"type":"reinforced","col":2,"row":6,"hp":40},
+    {"type":"reinforced","col":3,"row":6,"hp":40},
+    {"type":"reinforced","col":5,"row":6,"hp":40},
+    {"type":"reinforced","col":6,"row":6,"hp":40},
+    {"type":"reinforced","col":7,"row":6,"hp":40},
+    {"type":"reinforced","col":8,"row":6,"hp":40},
+    {"type":"standard","col":1,"row":7,"hp":12},
+    {"type":"standard","col":3,"row":7,"hp":12},
+    {"type":"standard","col":5,"row":7,"hp":12},
+    {"type":"standard","col":7,"row":7,"hp":12},
+    {"type":"multiplier","col":1,"row":9,"value":2},{"type":"multiplier","col":7,"row":9,"value":2}
+  ]
+}

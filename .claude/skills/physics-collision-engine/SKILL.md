@@ -41,7 +41,7 @@ Use when writing or changing ball movement, ball-vs-block/wall collision, the ai
 
 ## Output Contract
 
-- Pure functions in `src/physics/` (`vec.js`, `collide.js`, `raycast.js`) with no DOM access.
+- Pure modules with no DOM access: `src/js/engine/` (`Vector2D.js`, `Physics.js`, `Collision.js`) and `src/js/system/Raycaster.js`.
 - Unit tests for: corner hit, edge hit, deep penetration, reflection preserving speed, 4X speed no tunneling through a 1-cell brick.
 
 ## References

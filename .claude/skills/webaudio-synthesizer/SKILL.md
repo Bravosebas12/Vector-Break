@@ -41,7 +41,7 @@ Use when adding or changing any sound in AngleCraft. All audio is synthesized at
 
 ## Output Contract
 
-- `src/audio/audioEngine.js` (context, chain, voice cap) and `src/audio/sfx.js` (recipes).
+- `src/js/system/WebAudio.js` (context, chain, voice cap, recipes).
 - No clipping audible with 300 hits/second at 4X speed.
 
 ## References

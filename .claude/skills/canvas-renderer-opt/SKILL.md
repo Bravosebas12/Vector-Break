@@ -48,7 +48,8 @@ Use when touching the main loop, drawing code, balls, particles, or anything all
 
 ## Output Contract
 
-- `src/render/` (`loop.js`, `layers.js`, `renderer.js`) and `src/core/pool.js`.
+- Loop in `src/js/main.js`, pool in `src/js/system/ObjectPool.js`, pooled entities in `src/js/entities/`.
+- Sprites come from the atlas `assets/sprites/spritesheet@{1,2,3}x.{png,json}`; pick the scale from `devicePixelRatio`.
 - Zero allocations per frame verifiable in DevTools memory timeline during simulation.
 
 ## References

@@ -1,0 +1,25 @@
+{
+  "id": "level-01",
+  "name": "First Trap",
+  "grid": { "cols": 9, "rows": 12 },
+  "launcher": { "x": 0.5 },
+  "shots": 12,
+  "startBalls": 5,
+  "blocks": [
+    {"type":"indestructible","col":3,"row":1},
+    {"type":"indestructible","col":4,"row":1},
+    {"type":"indestructible","col":5,"row":1},
+    {"type":"indestructible","col":3,"row":2},{"type":"indestructible","col":5,"row":2},
+    {"type":"indestructible","col":3,"row":3},{"type":"indestructible","col":5,"row":3},
+    {"type":"core","col":4,"row":2,"hp":120},
+    {"type":"standard","col":0,"row":6,"hp":5},
+    {"type":"standard","col":1,"row":6,"hp":5},
+    {"type":"standard","col":2,"row":6,"hp":5},
+    {"type":"standard","col":3,"row":6,"hp":5},
+    {"type":"standard","col":5,"row":6,"hp":5},
+    {"type":"standard","col":6,"row":6,"hp":5},
+    {"type":"standard","col":7,"row":6,"hp":5},
+    {"type":"standard","col":8,"row":6,"hp":5},
+    {"type":"multiplier","col":4,"row":8,"value":1}
+  ]
+}
