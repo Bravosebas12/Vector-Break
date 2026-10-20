@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "anglecraft/level.schema.json",
+  "title": "AngleCraft Level",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "grid", "launcher", "shots", "startBalls", "blocks"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^level-[0-9]{2,3}$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 40 },
+    "grid": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cols", "rows"],
+      "properties": {
+        "cols": { "type": "integer", "minimum": 5, "maximum": 15 },
+        "rows": { "type": "integer", "minimum": 6, "maximum": 20 }
+      }
+    },
+    "launcher": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x"],
+      "properties": { "x": { "type": "number", "minimum": 0, "maximum": 1 } }
+    },
+    "shots": { "type": "integer", "minimum": 1, "maximum": 50 },
+    "startBalls": { "type": "integer", "minimum": 1, "maximum": 200 },
+    "blocks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["type", "col", "row"],
+        "properties": {
+          "type": { "enum": ["standard", "reinforced", "core", "indestructible", "multiplier"] },
+          "col": { "type": "integer", "minimum": 0 },
+          "row": { "type": "integer", "minimum": 0 }
+        },
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": { "type": { "const": "standard" }, "col": true, "row": true, "hp": { "type": "integer", "minimum": 1, "maximum": 15 } },
+            "required": ["hp"]
+          },
+          {
+            "additionalProperties": false,
+            "properties": { "type": { "const": "reinforced" }, "col": true, "row": true, "hp": { "type": "integer", "minimum": 20, "maximum": 80 } },
+            "required": ["hp"]
+          },
+          {
+            "additionalProperties": false,
+            "properties": { "type": { "const": "core" }, "col": true, "row": true, "hp": { "type": "integer", "minimum": 100, "maximum": 500 } },
+            "required": ["hp"]
+          },
+          {
+            "additionalProperties": false,
+            "properties": { "type": { "const": "indestructible" }, "col": true, "row": true }
+          },
+          {
+            "additionalProperties": false,
+            "properties": { "type": { "const": "multiplier" }, "col": true, "row": true, "value": { "type": "integer", "minimum": 1, "maximum": 5 } },
+            "required": ["value"]
+          }
+        ]
+      },
+      "contains": { "properties": { "type": { "const": "core" } } }
+    }
+  }
+}
