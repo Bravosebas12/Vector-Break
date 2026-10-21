@@ -1,0 +1,64 @@
+schema: spec-driven
+
+context: |
+  Project: vector-break (game name: AngleCraft). Web PC physics brick-breaker puzzle.
+  Stack: Canvas 2D + Vanilla JavaScript ES modules. Runtime: NO libraries, frameworks or bundlers.
+  Layout: index.html, styles.css, assets/{sprites,audio,video}, src/js/{engine,entities,system}/*.js, src/js/main.js, src/levels/level{1..3}.json (schema: .claude/skills/level-design-architect/assets/level.schema.json).
+  Architecture: engine (Vector2D, Physics, Collision), entities (Ball, Block, Multiplier), system (ObjectPool, Raycaster, WebAudio); currently empty class stubs.
+  Business docs: Design/historias_de_usuario_y_especificaci_n_de_negocio.md (v2.0, HU-01..HU-06), Design/solicitud-pendientes-diseno.md.
+  Testing: Playwright (@playwright/test) planned as DEV-ONLY dependency; NOT installed yet; no package.json yet.
+  Conventions: conventional commits, no AI attribution in commits; artifacts in English.
+
+strict_tdd: true
+
+testing:
+  status: planned_not_installed
+  runner: playwright
+  package: "@playwright/test"
+  dev_only: true
+  test_command: "npx playwright test"
+  node: "v24.14.0"
+  layers:
+    unit: false
+    integration: false
+    e2e: planned (Playwright)
+  coverage: not_available
+  linter: not_available
+  type_checker: not_available
+  formatter: not_available
+  note: "Strict TDD requires installing Playwright and creating package.json + playwright.config before the first apply task. Do not add runtime dependencies."
+
+projects:
+  - path: "."
+    stack: "Vanilla JS ES modules + Canvas 2D (no build step)"
+    test_command: "npx playwright test"
+    framework: "Playwright (planned)"
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Respect runtime constraint of no libraries, frameworks or bundlers
+    - Trace scope to user stories HU-01..HU-06
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Document architecture decisions with rationale
+    - Follow project skills (physics-collision-engine, canvas-renderer-opt, game-loop-state-manager, level-design-architect, webaudio-synthesizer)
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+    - First task group MUST bootstrap Playwright (package.json, dev dependency, config) before feature work
+    - Review budget 800 changed lines; delivery strategy auto-chain
+  apply:
+    guidelines:
+      - Follow existing code patterns and ES module structure
+      - No runtime dependencies; dev-only tooling allowed
+    tdd: true
+    test_command: "npx playwright test"
+  verify:
+    test_command: "npx playwright test"
+    build_command: ""
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
