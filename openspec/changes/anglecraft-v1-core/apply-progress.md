@@ -4,7 +4,7 @@ Mode: Strict TDD. Delivery: auto-chain / feature-branch-chain (tracker `feature/
 
 ## Slice 1: Test harness + spikes (PR 1 of 14) - COMPLETE (9/9)
 
-Tasks 1.1-1.9 are marked `[x]` in `tasks.md`. Slices 2-9b are NOT started.
+Tasks 1.1-1.9 are marked `[x]` in `tasks.md`. Slice 2 is COMPLETE (see below). Slices 3-9b are NOT started.
 
 ### Spike results
 
@@ -48,3 +48,41 @@ Honest note on RED for 1.5/1.6/1.8: these are spike/boot probes against pre-exis
 - Server returns 403 for refused paths (traversal, backslash, `:` , NUL) and 404 for missing files; also realpath check against symlink escape (hardening beyond design).
 - `package.json` has a `test` script alias (`playwright test`) and `package-lock.json` is committed (npm default); `dependencies` absent.
 - Task 1.9: spec hook requirement amended (added `aim`, `action`, `setVolley`, `start`, `audioLog`, `NOT_READY`, Title-loadLevel transition, `&loop/&audio/&stress`); scenarios updated and "Hook not ready while loading" added.
+
+## Slice 2: Physics (PR 2 of 14) - COMPLETE (5/5)
+
+Tasks 2.1-2.5 are marked `[x]` in `tasks.md`. Slices 3-9b are NOT started. Branch `feat/anglecraft-v1-slice-2` (base `feat/anglecraft-v1-slice-1`).
+
+### TDD Cycle Evidence
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| 2.1 | `tests/unit/vector.spec.js` | Unit | N/A (stub only; spike esm 2/2 re-run green) | 11 failed (stub class had no methods) | 11/11 passed | normalize ok/degenerate, 3 reflect normals, separating, 10k-reflection drift, clamp x3 | None needed |
+| 2.2 | `tests/unit/collision.spec.js` | Unit | N/A (stub only) | Written before impl; run failed (stub exports no functions) | 13/13 passed | 4 edge sides, 2 corners, 2 deep-penetration axes, touching/outside, deepest x3, resolve x3 | `Collision.scratch` shared by `deepest`; MIN_DIR_Y from Layout |
+| 2.3 | `tests/unit/layout.spec.js`, `tests/unit/rng.spec.js` | Unit | N/A (new) | Both specs failed `Cannot find module` | 11/11 passed (6 layout + 5 rng, run with vector: 22/22) | rng: same/different seed, range, reseed replay, nextInt coverage; layout: bounds both sides | None needed |
+| 2.4 | `tests/unit/pool.spec.js` | Unit | N/A (stub only) | 5 of 10 failed first run (stub class) | 12/12 passed with esm spike | acquire/release/reuse, reset, swap-remove order, inactive release, repeated exhaustion, ball pool 50/null/reset | None needed |
+| 2.5 | `tests/unit/physics.spec.js` | Unit | N/A (stub only) | 24 of 25 failed first run (stub class) | 25/25 passed after a one-test fix (see notes) | substep count 1X/2X/4X/cap, 64-substep execution, walls L/R/ceiling, clamp, no-tunnel x3 multipliers + flat side + 12 oblique angles, titanium x100 + side, deepest tie, crossing + coincident balls, landing x2, sealed floor | None needed |
+
+Note on 2.3: tasks.md lists it as GREEN-only; under Strict TDD two small specs (`layout`, `rng`) were added first (RED confirmed) because constants and a seeded PRNG are still behaviour other modules rely on. Order deviation: 2.3 was done before 2.2 GREEN because `Collision.resolve` needs `MIN_DIR_Y` from Layout.
+
+### Test Summary
+- Total new tests: 70 (vector 11, collision 13, layout 6, rng 5, pool 10, physics 25); all passing.
+- Layers: Unit/Node only (no browser launched).
+- Full command: `npx playwright test` -> `95 passed` (6.9 s), exit 0 (25 slice-1 + 70 new).
+- Pure functions/modules: Vector2D, Collision, Layout, Rng, ObjectPool, Physics (state limited to caller-provided pools/worlds).
+
+### Work Unit Evidence
+
+| Evidence | Value |
+|---|---|
+| Focused test command and exact result | `npx playwright test --project=unit tests/unit/{vector,collision,physics,pool}.spec.js` (plus layout, rng): all pass; full run 95 passed |
+| Runtime harness | N/A: pure modules, no runtime boundary in this slice |
+| Rollback boundary | `src/js/engine/{Vector2D,Collision,Physics}.js`, `src/js/system/{ObjectPool,Layout,Rng}.js`, `src/js/entities/Ball.js`, `tests/unit/{vector,collision,physics,pool,layout,rng}.spec.js`, tasks.md/apply-progress.md checkboxes |
+
+### Design notes / deviations
+- Physics world is duck-typed: `blockAt(col,row)`, `sealedFloor`, optional `onSubstep(subDt)`, `onHit(ball, surface, block, col, row)`, `onLand(ball)`. `onHit` fires only when a reflection actually happened (not for separating overlaps). `onSubstep` lets the session do emission per substep (D9) later.
+- Block damage (1 HP per hit, destroy at 0) is NOT in Physics; it is slice 5b task 5b.4 and will react to `onHit`. Titanium immunity is therefore proven at Physics level as "reflects, reports, and never mutates the block"; the HP rule itself lands with 5b.4.
+- Balls that land are reported via `onLand` (ball centre crosses y 956 moving down) and released from the pool at the end of the same step; the sealed floor (D11) reflects when the centre passes y 956.
+- Ball direction is `ball.dir` (a `Vector2D`), `ball.speed` is the scalar. `ObjectPool` exposes `items`, `count`, `size`, `created`; active objects occupy `items[0..count-1]`.
+- `Vector2D.js` and `ObjectPool.js` export only their class (keeps the slice-1 esm spike valid).
+- Size: ~1,300 changed lines (about 470 source, 830 tests), above the 800 review budget; cannot shrink without deleting tests. Recommend `size:exception` for PR 2.

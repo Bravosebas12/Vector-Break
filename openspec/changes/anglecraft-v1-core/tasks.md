@@ -51,11 +51,11 @@ Notes: slices 5, 6, 7, 9 are pre-split (each estimated at or above ~900 lines co
 
 ## Slice 2: Physics (physics; HU-02, HU-05)
 
-- [ ] 2.1 RED `tests/unit/vector.spec.js` (unit-vector direction, scalar speed, renormalize) -> GREEN `src/js/engine/Vector2D.js`. (Unit direction)
-- [ ] 2.2 RED `tests/unit/collision.spec.js` (closest-point, corner normal, deepest-only, reflect only if `D.N<0`, `|dir.y|>=0.05`) -> GREEN `src/js/engine/Collision.js`. (Circle vs AABB, Elastic reflection)
-- [ ] 2.3 GREEN `src/js/system/Layout.js` (board/grid/walls/floor 956/`MAX_VOLLEY=50`/launcher range) and `src/js/system/Rng.js` (seeded). (Board B1, Determinism)
-- [ ] 2.4 RED `tests/unit/pool.spec.js` (50 preallocated, `acquire()` null when empty, no growth) -> GREEN `src/js/system/ObjectPool.js`, `src/js/entities/Ball.js`. (Pools)
-- [ ] 2.5 RED `tests/unit/physics.spec.js` (no tunneling at 1200 px/s x4, substep `min(64,ceil)`, titanium reflection, wall/ceiling half-planes, crossing balls keep direction) -> GREEN `src/js/engine/Physics.js`. (Substepping, No ball-vs-ball, Titanium, Fixed-step)
+- [x] 2.1 RED `tests/unit/vector.spec.js` (unit-vector direction, scalar speed, renormalize) -> GREEN `src/js/engine/Vector2D.js`. (Unit direction)
+- [x] 2.2 RED `tests/unit/collision.spec.js` (closest-point, corner normal, deepest-only, reflect only if `D.N<0`, `|dir.y|>=0.05`) -> GREEN `src/js/engine/Collision.js`. (Circle vs AABB, Elastic reflection)
+- [x] 2.3 GREEN `src/js/system/Layout.js` (board/grid/walls/floor 956/`MAX_VOLLEY=50`/launcher range) and `src/js/system/Rng.js` (seeded). (Board B1, Determinism)
+- [x] 2.4 RED `tests/unit/pool.spec.js` (50 preallocated, `acquire()` null when empty, no growth) -> GREEN `src/js/system/ObjectPool.js`, `src/js/entities/Ball.js`. (Pools)
+- [x] 2.5 RED `tests/unit/physics.spec.js` (no tunneling at 1200 px/s x4, substep `min(64,ceil)`, titanium reflection, wall/ceiling half-planes, crossing balls keep direction) -> GREEN `src/js/engine/Physics.js`. (Substepping, No ball-vs-ball, Titanium, Fixed-step)
 
 ## Slice 3: Level loading (level-loading; HU-06 s4, HU-08 s4)
 
