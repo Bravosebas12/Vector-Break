@@ -81,11 +81,11 @@ Notes: slices 5, 6, 7, 9 are pre-split (each estimated at or above ~900 lines co
 
 ## Slice 5b: Volley economy, hook, boot (volley-economy; HU-03, HU-04, HU-05)
 
-- [ ] 5b.1 RED `tests/unit/volley.spec.js`: emission spacing equal at 1X/2X/4X (`simTime`), first ball on FIRE, last-ball-lands-while-Firing, Resolving order Victory > GameOver > Aiming, launcher x from first landing -> GREEN `GameSession.js` emission + Resolving. (Shot=volley, Turn-end sync, Volley size)
-- [ ] 5b.2 RED `tests/unit/orbs.spec.js`: capture once per orb per substep, `pendingBonus` reset after Resolving, volley capped at 50 -> GREEN orb capture + growth in `GameSession.js`. (Orb capture, Volley growth)
-- [ ] 5b.3 RED `tests/unit/volley-cap.spec.js`: 45 s `volleySimTime` releases balls, damage kept, `VOLLEY_CAPPED`, launcher x unchanged if none landed; `sealedFloor`/`volleyCapS` config -> GREEN cap + stress config. (Volley time cap, D11)
-- [ ] 5b.4 RED block-damage test (1 hit = 1 HP, destroy at 0) -> GREEN damage in `Physics`/session. (Block damage and destruction)
-- [ ] 5b.5 RED e2e `tests/e2e/hook.spec.js` (hook present with `?test=1`, absent without, `NOT_READY` in Loading, replay equality at `setSeed(42)`) -> GREEN `src/js/system/TestHook.js` + `src/js/main.js` boot (levels only to `setLoadProgress`). (Flag-gated hook, Determinism)
+- [x] 5b.1 RED `tests/unit/volley.spec.js`: emission spacing equal at 1X/2X/4X (`simTime`), first ball on FIRE, last-ball-lands-while-Firing, Resolving order Victory > GameOver > Aiming, launcher x from first landing -> GREEN `GameSession.js` emission + Resolving. (Shot=volley, Turn-end sync, Volley size)
+- [x] 5b.2 RED `tests/unit/orbs.spec.js`: capture once per orb per substep, `pendingBonus` reset after Resolving, volley capped at 50 -> GREEN orb capture + growth in `GameSession.js`. (Orb capture, Volley growth)
+- [x] 5b.3 RED `tests/unit/volley-cap.spec.js`: 45 s `volleySimTime` releases balls, damage kept, `VOLLEY_CAPPED`, launcher x unchanged if none landed; `sealedFloor`/`volleyCapS` config -> GREEN cap + stress config. (Volley time cap, D11)
+- [x] 5b.4 RED block-damage test (1 hit = 1 HP, destroy at 0) -> GREEN damage in `Physics`/session. (Block damage and destruction)
+- [x] 5b.5 RED e2e `tests/e2e/hook.spec.js` (hook present with `?test=1`, absent without, `NOT_READY` in Loading, replay equality at `setSeed(42)`) -> GREEN `src/js/system/TestHook.js` + `src/js/main.js` boot (levels only to `setLoadProgress`). (Flag-gated hook, Determinism)
 
 ## Slice 6a: Loop, viewport, atlas (rendering; HU-02, HU-01 s1)
 

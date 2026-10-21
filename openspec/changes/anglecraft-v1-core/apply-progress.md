@@ -188,3 +188,39 @@ Tasks 5a.1-5a.5 are marked `[x]` in `tasks.md`. Slices 5b-9b are NOT started. Br
 - `FIRE` without a valid prior `AIM` is ignored (skill: "valid angle"); keyboard Space before any mouse move does nothing.
 - `createSession` takes an injected `canAccess(index)` (default locked) until Progression (7b); `session.fsm`, `session.events`, `session.board` are exposed for tests. Volley emission, landing, Resolving and damage are slice 5b; `balls` is `[]` and Firing never advances by itself.
 - `step(dt)` counts `playTime` in Aiming/Firing/Simulating and `simTime`/`volleySimTime` (scaled by speed) in Firing/Simulating, skipped while paused.
+
+## Slice 5b: Volley economy, hook, boot (PR 5b) - COMPLETE (5/5)
+
+Tasks 5b.1-5b.5 are marked `[x]` in `tasks.md`. Slice 6a is NOT started. Branch `feat/anglecraft-v1-slice-5b` (base slice 5a-2).
+
+### TDD Cycle Evidence
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| 5b.1 | `tests/unit/volley.spec.js` | Unit | 36 session tests green | 8 failed (`setVolley` missing, no emission) | 47/47 with session | spacing at 1X/2X/4X, first ball on FIRE, 1-ball Firing->Aiming order, 4 Resolving outcomes, mirrored launcher x | float epsilon in spacing assertion |
+| 5b.2 | `tests/unit/orbs.spec.js` | Unit | 47 green | 6 failed, 1 passed | 7/7 | pass-through, once per orb across many balls, two orbs, growth 8+4, no orbs, cap 50, RESTART | test rewritten to assert K at Resolving instead of mid-turn pending |
+| 5b.3 | `tests/unit/volley-cap.spec.js` | Unit | 53 green | 2 failed (no cap), stress config already passed (config existed) | 4/4 | cap with none landed, cap after first landing, no cap on normal turn, stress 5 s | None needed |
+| 5b.4 | `tests/unit/damage.spec.js` | Unit | 57 green | 8 failed, 1 passed (indestructible) | 9/9 | standard/reinforced/core/indestructible, destroy at 0 frees the cell, damage kept on cap, stars 3/2/1, score | `result` test table trimmed (1-shot level is 3 stars) |
+| 5b.5 | `tests/e2e/hook.spec.js` | E2E | 291 unit green | 3 failed, 1 passed (absent without flag) | 4/4 | present, absent, NOT_READY while Loading (held level fetch), replay equality at seed 42 | None needed |
+
+### Test Summary
+- New tests: 11 volley, 7 orbs, 4 cap, 9 damage, 4 e2e hook (+ shared fixtures in `tests/unit/helpers/session.js`); full `npx playwright test`: 298 passed, exit 0.
+
+### Work Unit Evidence
+
+| Evidence | Value |
+|---|---|
+| Focused test command and exact result | `npx playwright test --project=unit` 291 passed; `--project=e2e tests/e2e/hook.spec.js` 4 passed |
+| Runtime harness | `tests/e2e/hook.spec.js` against `main.js` boot (real Chromium, static server) |
+| Rollback boundary | `src/js/system/{GameSession,TestHook}.js`, `src/js/main.js`, `tests/unit/{volley,orbs,volley-cap,damage}.spec.js`, `tests/unit/helpers/session.js`, `tests/e2e/hook.spec.js`, tasks.md/apply-progress.md |
+
+### Design notes / deviations
+- `GameSession.step` runs `Physics.step` with the session as world (`onSubstep` emits and captures orbs, `onHit` damages, `onLand` records the first landing). Physics runs no substep with zero balls, so emission falls back to one `dt*speed` accumulation then.
+- First ball is emitted inside `fire()`; the rest are emitted in substeps with a carried remainder (EMIT_INTERVAL 1/12 s of simTime).
+- Orb capture runs at the start of each substep (positions of the previous one) and once after `Physics.step`; value counts once per orb.
+- Added `session.setVolley(n)` (clamped 1..50) for the hook; `snapshot().balls` also carries `dx,dy`; `snapshot().result` = `{stars, score, shots}` (record joins in slice 7b). GameOver also fills `result` with 0 stars.
+- Destroyed blocks are removed from `board.blocks` and their cell is cleared at once; cores stay in `board.cores` with hp 0.
+- `main.js` loads the three level JSONs with `setLoadProgress`; `&loop=1`, `&audio=1` are NOT wired yet (slice 6a/audio). `&stress=1` (with `?test=1`) sets `sealedFloor` and `volleyCapS` Infinity. `audioLog()` returns an empty array until the Recording sink exists.
+- Hook `fire(angle)`: radians from +x, upward positive (Raycaster.sweep convention).
+- Overkill in the same substep is guarded by the cleared cell and `hp <= 0` early return; there is no dedicated two-balls-one-substep test (not reproducible through emission spacing).
+- Size: ~640 changed lines including tests and openspec edits (budget 800).
