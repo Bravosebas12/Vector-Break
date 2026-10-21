@@ -190,6 +190,8 @@ export function createSession({
         return next();
       case 'CONFIRM':
         return confirm();
+      case 'PRESS':
+        return press(action.target);
       default:
     }
   }
@@ -199,6 +201,14 @@ export function createSession({
     const target = index + 1;
     if (index === null || target >= catalog.length || !canAccess(target)) return;
     loadLevel(target);
+  }
+
+  // Modal button click: UI_CLICK on press, UI_CONFIRM when the button's action took effect.
+  function press(target) {
+    const before = fsm.state;
+    events.push('UI_CLICK');
+    dispatch({ type: target });
+    if (fsm.state !== before) events.push('UI_CONFIRM');
   }
 
   // Enter: the modal primary action (next level when offered, otherwise restart).

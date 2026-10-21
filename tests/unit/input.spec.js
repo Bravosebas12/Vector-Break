@@ -52,6 +52,7 @@ const ACTIONS = {
   RESTART: { type: 'RESTART' },
   NEXT: { type: 'NEXT' },
   CONFIRM: { type: 'CONFIRM' },
+  PRESS: { type: 'PRESS', target: 'RESTART' },
 };
 const accepted = (state, paused = false) =>
   Object.keys(ACTIONS).filter((name) => allows(state, paused, ACTIONS[name]));
@@ -68,8 +69,8 @@ test.describe('Input.allows (state gating)', () => {
     Firing: ['SPEED', 'PAUSE', 'RESTART'],
     Simulating: ['SPEED', 'PAUSE', 'RESTART'],
     Resolving: ['RESTART'],
-    Victory: ['RESTART', 'NEXT', 'CONFIRM'],
-    GameOver: ['RESTART', 'CONFIRM'],
+    Victory: ['RESTART', 'NEXT', 'CONFIRM', 'PRESS'],
+    GameOver: ['RESTART', 'CONFIRM', 'PRESS'],
   };
   for (const [state, expected] of Object.entries(table)) {
     test(`${state} accepts exactly ${expected.join(', ')}`, () => {

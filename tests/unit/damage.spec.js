@@ -74,3 +74,33 @@ test.describe('result', () => {
     expect([stars(10, 2), stars(10, 5), stars(10, 6), stars(5, 3)]).toEqual([2, 2, 1, 1]);
   });
 });
+
+test.describe('overkill', () => {
+  test('two balls hitting an HP 1 block in the same substep destroy it once', () => {
+    const s = openField(boot(), at('standard', 1));
+    s.setVolley(1);
+    fire(s); // first ball leaves; the pool is then set up by hand so both hit in one substep
+    const block = s.board.blockAt(4, 8);
+    const [a] = s.balls.items;
+    const b = s.balls.acquire();
+    for (const ball of [a, b]) {
+      ball.x = 540;
+      ball.y = 517; // top edge 503 overlaps the block bottom (504)
+      ball.dir.set(0, -1);
+      ball.speed = 1200;
+      ball.landed = false;
+    }
+    let destroyed = 0;
+    const count = (type) => type === 'DESTROY' && destroyed++;
+    stepUntil(s, (snap) => {
+      s.drainEvents(count);
+      return turnOver(snap);
+    });
+    s.drainEvents(count);
+    expect(destroyed).toBe(1);
+    expect(block.hp).toBe(0);
+    expect(s.snapshot().damage).toBe(1);
+    expect(hpOf(s)).toBeUndefined();
+    expect(s.board.blocks).not.toContain(block);
+  });
+});

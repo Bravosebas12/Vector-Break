@@ -123,6 +123,10 @@ export function createSoundMapper({ audio, now }) {
         return audio.play('sfx_ui_pause_in', {});
       case 'RESUME':
         return audio.play('sfx_ui_pause_out', {});
+      case 'UI_CLICK':
+        return audio.play('sfx_ui_click', {});
+      case 'UI_CONFIRM':
+        return audio.play('sfx_ui_confirm', {});
       case 'STARS':
         for (let i = 1; i <= a; i++) audio.play(`sfx_star_${i}`, {});
         return;

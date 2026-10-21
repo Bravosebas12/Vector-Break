@@ -440,3 +440,30 @@ Tasks 9b.1-9b.3 are marked `[x]`. Branch `feat/anglecraft-v1-slice-9b` (base sli
 - L4 was not completable: a single shot dealt at most ~12-14 core damage (fine 0.1 degree scan), so 200 HP could not fall in 12 shots. Core HP lowered to 100 (shots 12, startBalls 4 unchanged); content tests keep 100-500 and T4 <= T5 <= T6.
 - `package.json` has no `dependencies` (only devDependency `@playwright/test` 1.63.0).
 - One unidentified failure was seen in one of the first three full runs; the next 8 full runs and a 3x repeat were all green.
+
+
+## Slice 9c: Verify remediation - COMPLETE (4/4)
+
+Tasks 9c.1-9c.4 are marked `[x]`. Worktree `slice-9c` (branch `feat/anglecraft-v1-slice-9c`, base slice 9b + verify-report). Closes verify findings C1, C2, W1, W2 (and S1: ui sounds are now mapped). Gameplay rules and levels untouched.
+
+### TDD Cycle Evidence
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| 9c.1 C1 | `tests/unit/package.spec.js` | Unit | full suite 437 green | Characterization: behavior already held (passed first run); with `dependencies: {left}` injected the test failed, then package.json restored | 2/2 | 2 tests (no runtime deps; exact devDependencies) | None |
+| 9c.2 C2 | `tests/unit/damage.spec.js` > overkill | Unit | damage.spec 8 green | Characterization: passed first run; with both the `hp <= 0` guard and the cell-freeing line removed it failed (`DESTROY` count 2 vs 1), then GameSession.js restored | 1/1 | Two balls set up by hand in the pool at the same x/y so both hit in one substep; asserts DESTROY count, damage, block hp 0, block gone | None |
+| 9c.3 W2 | `tests/unit/volley-cap.spec.js` > pause excluded | Unit | volley-cap 4 green | Characterization: passed first run; with paused steps advancing `volleySimTime` it failed (45.008 vs < 40.017), then restored | 1/1 | Asserts no VOLLEY_CAPPED while paused, volley time frozen, cap fires in [45, 45+2 steps) after resume | None |
+| 9c.4 W1 | `tests/unit/modal-click.spec.js`, `tests/unit/input.spec.js`, `tests/e2e/modal-click.spec.js` | Unit + E2E | input/hud/session specs green | Unit: module export `hitModalButton` missing, input table PRESS rows failing; e2e: 3/3 failed with main.js reverted | Unit 7/7 + input green; e2e 15/15 with `--repeat-each=5` | Victory 3 buttons, defeat 1 button, miss clicks, locked NEXT emits only UI_CLICK, PRESS ignored outside modals | Button geometry extracted to `modalButtonRects`, shared by drawing and hit testing |
+
+### Work Unit Evidence
+
+| Evidence | Value |
+|---|---|
+| Focused test command and exact result | `npx playwright test tests/e2e/modal-click.spec.js --project=e2e --repeat-each=5`: 15 passed; unit specs 7 + input green |
+| Runtime harness | Real Chromium mouse clicks at the drawn button centers (logical = client x 1.5), fresh context per test, audio asserted through `audioLog` |
+| Full suite | 3 consecutive runs of `npx playwright test`: 451 passed each, exit 0 |
+| Rollback boundary | New: `tests/unit/package.spec.js`, `tests/unit/modal-click.spec.js`, `tests/e2e/modal-click.spec.js`. Edits: `src/js/main.js`, `GameSession.js`, `Input.js`, `HudView.js`, `AudioSinks.js`, `damage.spec.js`, `volley-cap.spec.js`, `input.spec.js` |
+
+### Design notes / deviations
+- Clicks reach the session as a new `PRESS {target}` action (allowed only in Victory/GameOver) built by main.js after a logical-coordinate hit test, instead of widening pointer `FIRE`; Loading/Title/Aiming gating is unchanged. `PRESS` emits `UI_CLICK`, then `UI_CONFIRM` only when the action changed the state (a locked NEXT only clicks).
+- C2 note: the cell is freed at once, so a second ball in the same substep finds no block and `onHit` is not even called; the `hp <= 0` guard is a second layer.
