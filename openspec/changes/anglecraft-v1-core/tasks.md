@@ -132,3 +132,10 @@ Notes: slices 5, 6, 7, 9 are pre-split (each estimated at or above ~900 lines co
 - [x] 9b.1 GREEN `tests/fixtures/solutions.json`: seeded angle sequences L1-L6 found via hook.
 - [x] 9b.2 RED `tests/e2e/playthrough.spec.js`: Title start, L1 -> L6 Victory in order, records written, NEXT gating, end-of-content notice -> GREEN tune levels if any fails. (Completability, Chain and end)
 - [x] 9b.3 Final run of `npx playwright test` green; confirm `package.json` has no `dependencies`.
+
+## Slice 9c: Verify remediation (verify-report FAIL: C1, C2, W1, W2)
+
+- [x] 9c.1 C1 `tests/unit/package.spec.js`: no `dependencies`, only devDependency `@playwright/test` pinned 1.63.0. (test-harness: No runtime dependency)
+- [x] 9c.2 C2 `tests/unit/damage.spec.js` "overkill": two balls hit an HP 1 block in the same substep -> destroyed once, damage 1, single DESTROY, no negative HP. (volley-economy: Overkill)
+- [x] 9c.3 W2 `tests/unit/volley-cap.spec.js` "pause excluded": 600 paused steps at 40 s do not cap; cap fires at 45 s of sim time after resume. (game-state: Pause excluded)
+- [x] 9c.4 W1 clickable modal buttons: `PRESS` action (Input.allows Victory/GameOver), `modalButtonRects`/`hitModalButton` in `HudView.js`, main.js hit test in logical coordinates, `UI_CLICK`/`UI_CONFIRM` events mapped to `sfx_ui_click`/`sfx_ui_confirm`; unit `tests/unit/modal-click.spec.js`, e2e `tests/e2e/modal-click.spec.js`. (hud: Next; audio: UI sounds, resolves S1)

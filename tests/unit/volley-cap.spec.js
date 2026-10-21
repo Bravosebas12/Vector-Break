@@ -57,3 +57,24 @@ test.describe('stress configuration', () => {
     expect(events(s)).not.toContain('VOLLEY_CAPPED');
   });
 });
+
+test.describe('pause excluded from the cap', () => {
+  test('600 paused steps at 40 s do not trigger the cap; it fires at 45 s of sim time after resuming', () => {
+    const s = openField(boot({ sealedFloor: true }));
+    fire(s);
+    while (s.snapshot().volleySimTime < 40) s.step(STEP);
+    expect(s.snapshot().volleySimTime).toBeGreaterThanOrEqual(40);
+    s.dispatch({ type: 'PAUSE' });
+    events(s);
+    for (let i = 0; i < 600; i++) s.step(STEP);
+    expect(events(s)).not.toContain('VOLLEY_CAPPED');
+    expect(s.snapshot().state).toBe('Simulating');
+    expect(s.snapshot().volleySimTime).toBeLessThan(40 + 2 * STEP);
+    s.dispatch({ type: 'PAUSE' });
+    while (s.snapshot().state === 'Simulating') s.step(STEP);
+    const snap = s.snapshot();
+    expect(events(s)).toContain('VOLLEY_CAPPED');
+    expect(snap.volleySimTime).toBeGreaterThanOrEqual(45);
+    expect(snap.volleySimTime).toBeLessThan(45 + 2 * STEP);
+  });
+});

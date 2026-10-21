@@ -70,6 +70,22 @@ export function drawHud(ctx, hud) {
   }
 }
 
+const BUTTON = { w: 220, h: 64, gap: 24 };
+
+// Logical-canvas rectangles of the modal buttons, left to right (shared by drawing and hit testing).
+export function modalButtonRects(count) {
+  const left = (LOGICAL_W - (count * BUTTON.w + (count - 1) * BUTTON.gap)) / 2;
+  const y = (LOGICAL_H - MODAL.h) / 2 + MODAL.h - 110;
+  return Array.from({ length: count }, (_, i) => ({ x: left + i * (BUTTON.w + BUTTON.gap), y, w: BUTTON.w, h: BUTTON.h }));
+}
+
+// Action of the modal button under logical point (x, y), or null.
+export function hitModalButton(modal, x, y) {
+  const rects = modalButtonRects(modal.buttons.length);
+  const i = rects.findIndex((r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h);
+  return i < 0 ? null : modal.buttons[i].action;
+}
+
 export function drawModal(ctx, modal) {
   const x = (LOGICAL_W - MODAL.w) / 2;
   const y = (LOGICAL_H - MODAL.h) / 2;
@@ -96,14 +112,11 @@ export function drawModal(ctx, modal) {
     line += 40;
   }
   if (modal.notice) text(ctx, modal.notice, cx, line, { size: 26, color: CYAN, align: 'center' });
-  const bw = 220;
-  const gap = 24;
-  const left = cx - (modal.buttons.length * bw + (modal.buttons.length - 1) * gap) / 2;
+  const rects = modalButtonRects(modal.buttons.length);
   modal.buttons.forEach((b, i) => {
-    const bx = left + i * (bw + gap);
-    const by = y + MODAL.h - 110;
+    const { x: bx, y: by, w: bw, h: bh } = rects[i];
     ctx.fillStyle = b.primary ? CYAN : '#1B2140';
-    ctx.fillRect(bx, by, bw, 64);
-    text(ctx, b.label, bx + bw / 2, by + 32, { size: 24, color: b.primary ? '#0B0F24' : '#FFFFFF', align: 'center', bold: true });
+    ctx.fillRect(bx, by, bw, bh);
+    text(ctx, b.label, bx + bw / 2, by + bh / 2, { size: 24, color: b.primary ? '#0B0F24' : '#FFFFFF', align: 'center', bold: true });
   });
 }

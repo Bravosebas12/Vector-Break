@@ -14,6 +14,8 @@ import { createRenderer, BOARD_ORIGIN } from './system/Renderer.js';
 import { createProgression } from './system/Progression.js';
 import { AssetLoader } from './system/AssetLoader.js';
 import { mapEvent } from './system/Input.js';
+import { modalModel } from './system/Hud.js';
+import { hitModalButton } from './system/HudView.js';
 import { RecordingSink, createSoundMapper, teeSink } from './system/AudioSinks.js';
 import { createWebAudio } from './system/WebAudio.js';
 
@@ -69,7 +71,18 @@ window.addEventListener('mousemove', (e) => {
   const p = mapClientToLogical(e.clientX, e.clientY, canvas.getBoundingClientRect());
   send({ type: 'mousemove', x: p.x - BOARD_ORIGIN.x, y: p.y - BOARD_ORIGIN.y }); // AIM works in board coordinates
 });
-window.addEventListener('mousedown', (e) => send({ type: 'mousedown', button: e.button })); // same gesture handler unlocks audio
+// Result modals: a left press is hit-tested against the drawn buttons in logical coordinates (same space as HudView).
+const pressModal = (e) => {
+  if (e.button !== 0 || !['Victory', 'GameOver'].includes(session.fsm.state)) return;
+  const modal = modalModel(session.snapshot());
+  const p = mapClientToLogical(e.clientX, e.clientY, canvas.getBoundingClientRect());
+  const target = modal && hitModalButton(modal, p.x, p.y);
+  if (target) session.dispatch({ type: 'PRESS', target });
+};
+window.addEventListener('mousedown', (e) => {
+  pressModal(e);
+  send({ type: 'mousedown', button: e.button }); // same gesture handler unlocks audio
+});
 window.addEventListener('keydown', (e) => {
   if (e.key === ' ') e.preventDefault();
   send({ type: 'keydown', key: e.key, repeat: e.repeat });

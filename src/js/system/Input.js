@@ -49,6 +49,7 @@ export function allows(state, paused, action) {
     case 'NEXT':
       return state === 'Victory';
     case 'CONFIRM':
+    case 'PRESS': // modal button click, hit-tested by the adapter in logical coordinates
       return state === 'Victory' || state === 'GameOver';
     default:
       return false;
