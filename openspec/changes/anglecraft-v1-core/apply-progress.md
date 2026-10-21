@@ -379,3 +379,28 @@ Tasks 8b.1-8b.3 are marked `[x]`. Branch `feat/anglecraft-v1-slice-8b` (base sli
 - Newly mapped sounds: stars on Victory (`STARS` event), turns warning (<=3) / critical (<=1) on each new turn (`TURNS` event). Already mapped earlier: pause in/out, speed x1/x2/x4, victory, defeat.
 - REMAINING unmapped: `sfx_ui_click`/`sfx_ui_confirm` (modal buttons are not mouse-clickable yet, no button events exist).
 - Level 1/2 reachability `test.fail()` markers untouched.
+
+
+## Slice 9a: Levels 4-6 - COMPLETE (2/2)
+
+Tasks 9a.1-9a.2 are marked `[x]`. Branch `feat/anglecraft-v1-slice-9a` (base slice 8b). Slice 9b NOT started.
+
+### TDD Cycle Evidence
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| 9a.1 | `tests/unit/level-content.spec.js`, `tests/unit/reachability.spec.js` | Unit | 22 reachability/catalog tests green | `test.fail()` markers removed: L1 and L2 reachability tests failed (no 1-side-wall path / no path at all under preview geometry) | 22/22 after retuning `level1.json` and `level2.json` | L1 and L2 each asserted on data, entry (`isTrapEntry`), no direct line and wall-bounce path; L2 obtuse + `wall-left` only + >= 20 angles | None needed |
+| 9a.2 | `tests/unit/level-content.spec.js` | Unit | 9a.1 green | Spec failed at load: `level4.json`..`level6.json` missing | 22/22 after authoring L4-L6 and registering them in `main.js` | per-level ranges, mechanics (>= 2 incl. forced wall bounce), preview reachability of every core entry, `T4<=T5<=T6` | Level layouts found by random search over titanium shields, then checked with `Raycaster.sweep` (throwaway scripts deleted) |
+
+### Work Unit Evidence
+
+| Evidence | Value |
+|---|---|
+| Focused test command and exact result | `npx playwright test --project=unit tests/unit/level-content.spec.js tests/unit/reachability.spec.js`: 22 passed |
+| Runtime harness | N/A: JSON + pure tests; `main.js` level list extended to six files (HUD total comes from the catalog) |
+| Rollback boundary | `src/levels/level{1,2,4,5,6}.json`, `main.js` `LEVEL_FILES`, `level-content.spec.js`, `reachability.spec.js` marker removal, tasks.md/apply-progress.md |
+
+### Design notes / deviations
+- L1: standard (1,5 hp4) moved to (1,9) (it blocked the only left-wall bounce lane). L2: titanium (5,2) moved to (4,7) and standard (0,9) moved to (0,7); authored entry `(6,2)` unchanged and still a valid trap entry. Window 42 angles of 3600, all `wall-left`, all obtuse.
+- L4 "Bank Shot" (shots 12, balls 4, core 200 at (7,1), entry (7,2), right-wall bank, titanium diagonal shield, orb +2). L5 "Hard Corner" (13, 5, core 300 at (1,1), entry (1,2), titanium shields + reinforced, orb +2). L6 "Twin Traps" (15, 6, two cores 250+250 at (1,1) and (7,1), mirrored traps: one aims left, one right, five titanium shields, two orbs +3).
+- L1/L2 `test.fail()` markers removed from `reachability.spec.js`.

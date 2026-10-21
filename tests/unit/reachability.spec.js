@@ -63,18 +63,13 @@ test.describe('Raycaster.sweep', () => {
 });
 
 test.describe('authored levels (preview geometry, authored entry)', () => {
-  // Authored L1/L2 do not satisfy the spec under preview geometry yet (L1 is reachable only via
-  // standard-block bounces, L2 not at all). Level tuning belongs to slice 9a; test.fail() turns
-  // into a failure once the levels are retuned, which is the cue to remove it.
   test('level 1: (3,2) reachable with exactly one side-wall bounce', () => {
-    test.fail(true, 'level 1 needs retuning in slice 9a (see apply-progress)');
     const res = sweep(fixture(1), [{ col: 3, row: 2 }], 'preview');
     const one = res.filter((r) => r.bounces === 1 && r.surfaces.length === 1 && /^wall-/.test(r.surfaces[0].surface));
     expect(one.length).toBeGreaterThan(0);
   });
 
   test('level 2: (6,2) has no direct path but a wall-bounce path exists', () => {
-    test.fail(true, 'level 2 needs retuning in slice 9a (see apply-progress)');
     const res = sweep(fixture(2), [{ col: 6, row: 2 }], 'preview');
     expect(res.filter((r) => r.bounces === 0)).toEqual([]);
     expect(res.filter((r) => r.bounces === 1 && /^wall-/.test(r.surfaces[0].surface)).length).toBeGreaterThan(0);

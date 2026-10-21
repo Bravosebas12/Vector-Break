@@ -1,0 +1,22 @@
+{
+  "id": "level-05",
+  "name": "Hard Corner",
+  "grid": { "cols": 9, "rows": 12 },
+  "launcher": { "x": 0.5 },
+  "shots": 13,
+  "startBalls": 5,
+  "blocks": [
+    { "type": "indestructible", "col": 2, "row": 0 },
+    { "type": "core", "col": 1, "row": 1, "hp": 300 },
+    { "type": "indestructible", "col": 2, "row": 1 },
+    { "type": "indestructible", "col": 0, "row": 2 },
+    { "type": "indestructible", "col": 8, "row": 3 },
+    { "type": "reinforced", "col": 4, "row": 4, "hp": 30 },
+    { "type": "standard", "col": 7, "row": 5, "hp": 6 },
+    { "type": "multiplier", "col": 2, "row": 6, "value": 2 },
+    { "type": "indestructible", "col": 8, "row": 7 },
+    { "type": "indestructible", "col": 2, "row": 8 },
+    { "type": "indestructible", "col": 3, "row": 8 },
+    { "type": "standard", "col": 5, "row": 10, "hp": 9 }
+  ]
+}

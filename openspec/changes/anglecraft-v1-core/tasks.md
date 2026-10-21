@@ -124,8 +124,8 @@ Notes: slices 5, 6, 7, 9 are pre-split (each estimated at or above ~900 lines co
 
 ## Slice 9a: Levels 4-6 (level-content; HU-06, HU-08 s2/s4)
 
-- [ ] 9a.1 RED `tests/unit/level-content.spec.js`: L1-L3 authored cells and `isTrapEntry` entries (L1 `(4,1)`/`[(3,2)]`, L2 `(7,1)`/`[(6,2)]`, L3 `(4,4)`/`[(4,6)]`), L1 bounce path, L2 no direct line -> GREEN adjust `src/levels/level{1,2,3}.json` only if needed. (Levels 1-3)
-- [ ] 9a.2 RED L4-L6 constraints (`shots` 10-15, `startBalls` 3-10, HP 100-500 with `T4<=T5<=T6`, >= 2 mechanics, validate + reachability) -> GREEN `src/levels/level{4,5,6}.json`. (Challenge levels, Structural rules)
+- [x] 9a.1 RED `tests/unit/level-content.spec.js`: L1-L3 authored cells and `isTrapEntry` entries (L1 `(4,1)`/`[(3,2)]`, L2 `(7,1)`/`[(6,2)]`, L3 `(4,4)`/`[(4,6)]`), L1 bounce path, L2 no direct line -> GREEN adjust `src/levels/level{1,2,3}.json` only if needed. (Levels 1-3)
+- [x] 9a.2 RED L4-L6 constraints (`shots` 10-15, `startBalls` 3-10, HP 100-500 with `T4<=T5<=T6`, >= 2 mechanics, validate + reachability) -> GREEN `src/levels/level{4,5,6}.json`. (Challenge levels, Structural rules)
 
 ## Slice 9b: Solutions + playthrough (level-content; Completability)
 

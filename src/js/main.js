@@ -17,7 +17,7 @@ import { mapEvent } from './system/Input.js';
 import { RecordingSink, createSoundMapper, teeSink } from './system/AudioSinks.js';
 import { createWebAudio } from './system/WebAudio.js';
 
-const LEVEL_FILES = ['level1', 'level2', 'level3'];
+const LEVEL_FILES = ['level1', 'level2', 'level3', 'level4', 'level5', 'level6'];
 const IMPACTS = Array.from({ length: 12 }, (_, i) => `sfx_impact_std_b${String(i).padStart(2, '0')}`);
 const SAMPLE_NAMES = ['sfx_block_destroy', 'sfx_burst_launch', 'sfx_orb_split', 'sfx_impact_steel', 'sfx_ui_click', 'sfx_ui_confirm', ...IMPACTS];
 const SAMPLES = SAMPLE_NAMES.map((name) => ({ name, url: `assets/audio/${name}.wav` }));
