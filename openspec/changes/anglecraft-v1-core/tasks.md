@@ -107,9 +107,9 @@ Notes: slices 5, 6, 7, 9 are pre-split (each estimated at or above ~900 lines co
 
 ## Slice 7b: Progression + modals (progression; HU-03, HU-08 s1/s3)
 
-- [ ] 7b.1 RED `tests/unit/progression.spec.js`: stars (A1: 1 shot = 3, <= floor(50%) = 2), score = damage + 100 x unused (P1), best-record replace rule, unlock derived from records, `NEXT` gating, end of content -> GREEN `src/js/system/Progression.js`. (Star rating, Score, Unlock, Chain and end)
-- [ ] 7b.2 RED `tests/browser/storage.spec.js`: `anglecraft.v1.records`, try/catch + memory fallback, restart never touches records -> GREEN storage in `Progression.js`. (Record persistence, Session start)
-- [ ] 7b.3 Wire Victory/GameOver modals and `Progression` into `GameSession.js` + `Renderer.js`; RED e2e win flow via hook. (Victory modal)
+- [x] 7b.1 RED `tests/unit/progression.spec.js`: stars (A1: 1 shot = 3, <= floor(50%) = 2), score = damage + 100 x unused (P1), best-record replace rule, unlock derived from records, `NEXT` gating, end of content -> GREEN `src/js/system/Progression.js`. (Star rating, Score, Unlock, Chain and end)
+- [x] 7b.2 RED `tests/browser/storage.spec.js`: `anglecraft.v1.records`, try/catch + memory fallback, restart never touches records -> GREEN storage in `Progression.js`. (Record persistence, Session start)
+- [x] 7b.3 Wire Victory/GameOver modals and `Progression` into `GameSession.js` + `Renderer.js`; RED e2e win flow via hook. (Victory modal)
 
 ## Slice 8a: Audio (audio; HU-02, HU-04)
 

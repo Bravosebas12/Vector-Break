@@ -22,7 +22,7 @@ test.describe('Input.mapEvent (DOM-free event -> action)', () => {
     ['P', { type: 'PAUSE' }],
     ['r', { type: 'RESTART' }],
     ['R', { type: 'RESTART' }],
-    ['Enter', { type: 'NEXT' }],
+    ['Enter', { type: 'CONFIRM' }],
   ];
   for (const [k, action] of keys) {
     test(`key ${k} -> ${action.type}`, () => expect(mapEvent(key(k))).toEqual(action));
@@ -51,6 +51,7 @@ const ACTIONS = {
   PAUSE: { type: 'PAUSE' },
   RESTART: { type: 'RESTART' },
   NEXT: { type: 'NEXT' },
+  CONFIRM: { type: 'CONFIRM' },
 };
 const accepted = (state, paused = false) =>
   Object.keys(ACTIONS).filter((name) => allows(state, paused, ACTIONS[name]));
@@ -67,8 +68,8 @@ test.describe('Input.allows (state gating)', () => {
     Firing: ['SPEED', 'PAUSE', 'RESTART'],
     Simulating: ['SPEED', 'PAUSE', 'RESTART'],
     Resolving: ['RESTART'],
-    Victory: ['RESTART', 'NEXT'],
-    GameOver: ['RESTART'],
+    Victory: ['RESTART', 'NEXT', 'CONFIRM'],
+    GameOver: ['RESTART', 'CONFIRM'],
   };
   for (const [state, expected] of Object.entries(table)) {
     test(`${state} accepts exactly ${expected.join(', ')}`, () => {

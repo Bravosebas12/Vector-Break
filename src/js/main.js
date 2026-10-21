@@ -9,6 +9,7 @@ import { applyViewport } from './system/Viewport.js';
 import { loadAtlas } from './system/Atlas.js';
 import { Particles } from './system/Particles.js';
 import { createRenderer } from './system/Renderer.js';
+import { createProgression } from './system/Progression.js';
 
 const LEVEL_FILES = ['level1', 'level2', 'level3'];
 
@@ -17,8 +18,10 @@ const testMode = params.get('test') === '1';
 // Stress flags are honored only together with ?test=1.
 const stress = testMode && params.get('stress') === '1';
 
+const progression = createProgression();
 const session = createSession({
   rng: new Rng(1),
+  progression,
   sealedFloor: stress,
   volleyCapS: stress ? Infinity : 45,
 });
@@ -28,7 +31,7 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const resize = () => applyViewport(canvas, ctx);
 const { atlasScale } = resize();
-const renderer = createRenderer({ session, ctx, particles: new Particles() });
+const renderer = createRenderer({ session, ctx, particles: new Particles(), progression });
 // Sprites are optional: a failed sheet falls back to procedural drawing (loadAtlas never rejects).
 loadAtlas(atlasScale).then((atlas) => renderer.setAtlas(atlas));
 if (testMode) window.__ANGLECRAFT_RENDER__ = renderer.stats;

@@ -6,6 +6,8 @@
 import { createCanvas } from './Atlas.js';
 import { LOGICAL_W, LOGICAL_H } from './Viewport.js';
 import { Raycaster } from './Raycaster.js';
+import { hudModel, modalModel } from './Hud.js';
+import { drawHud, drawModal } from './HudView.js';
 import { BLOCK_TYPES } from '../entities/Block.js';
 import {
   BOARD_W,
@@ -28,6 +30,7 @@ export const BOARD_ORIGIN = Object.freeze({ x: (LOGICAL_W - BOARD_W) / 2, y: (LO
 
 const FLASH_S = 0.06; // design E5: white, alpha 0.6, 60 ms
 const MAX_DT = 0.1;
+const HUD_REFRESH_MS = 100; // the models allocate: refresh them at 10 Hz and on every state change
 const TWO_PI = Math.PI * 2;
 const DASH = [10, 10];
 const NO_DASH = [];
@@ -52,7 +55,7 @@ export const crackFor = (hp, maxHp) => {
   return damage >= 0.9 ? 'crack_90' : damage >= 0.6 ? 'crack_60' : damage >= 0.3 ? 'crack_30' : null;
 };
 
-export function createRenderer({ session, ctx, particles, atlas = null }) {
+export function createRenderer({ session, ctx, particles, atlas = null, progression = null }) {
   const layer = createCanvas(BOARD_W, BOARD_H);
   const lctx = layer.getContext('2d');
   const stats = { frames: 0, layerRedraws: 0, blocksDrawn: 0 };
@@ -63,6 +66,10 @@ export function createRenderer({ session, ctx, particles, atlas = null }) {
   let lastCount = 0;
   let dirty = true;
   let lastNow = null;
+  let hud = null;
+  let modal = null;
+  let hudAt = -Infinity;
+  let hudState = null;
   const aimCache = { lx: NaN, ax: NaN, ay: NaN, version: -1, result: null };
   const origin = { x: 0, y: LAUNCHER_Y };
 
@@ -234,6 +241,15 @@ export function createRenderer({ session, ctx, particles, atlas = null }) {
     ctx.globalAlpha = 1;
   }
 
+  function refreshHud(state, nowMs) {
+    if (state === hudState && nowMs - hudAt < HUD_REFRESH_MS) return;
+    const snap = session.snapshot();
+    hud = hudModel(snap);
+    modal = modalModel(snap, { record: snap.level.index === null ? null : progression?.record(snap.level.index) ?? null });
+    hudState = state;
+    hudAt = nowMs;
+  }
+
   function draw(alpha, nowMs) {
     stats.frames++;
     const dt = lastNow === null ? 0 : Math.min(Math.max((nowMs - lastNow) / 1000, 0), MAX_DT);
@@ -252,6 +268,9 @@ export function createRenderer({ session, ctx, particles, atlas = null }) {
     ctx.drawImage(layer, 0, 0);
     drawDynamic(state, session.run, dt, alpha);
     ctx.restore();
+    refreshHud(state, nowMs);
+    drawHud(ctx, hud);
+    if (modal) drawModal(ctx, modal);
   }
 
   return {

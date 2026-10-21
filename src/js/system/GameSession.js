@@ -6,6 +6,7 @@ import { Fsm } from './Fsm.js';
 import { EventRing } from './EventRing.js';
 import { LevelCatalog } from './LevelCatalog.js';
 import { allows } from './Input.js';
+import { starRating, scoreOf } from './Progression.js';
 import { Physics } from '../engine/Physics.js';
 import { Ball } from '../entities/Ball.js';
 import { BLOCK_TYPES } from '../entities/Block.js';
@@ -24,7 +25,8 @@ export function createSession({
   rng,
   audio = null,
   strict = true,
-  canAccess = () => false, // Progression.canAccess (slice 7b): is level `index` unlocked?
+  progression = null, // Progression (7b): canAccess(index) gates NEXT, submit(index, result) records wins
+  canAccess = progression ? (i) => progression.canAccess(i) : () => false,
   sealedFloor = false,
   volleyCapS = 45,
 } = {}) {
@@ -183,6 +185,8 @@ export function createSession({
         return events.push('RESTART');
       case 'NEXT':
         return next();
+      case 'CONFIRM':
+        return confirm();
       default:
     }
   }
@@ -192,6 +196,12 @@ export function createSession({
     const target = index + 1;
     if (index === null || target >= catalog.length || !canAccess(target)) return;
     loadLevel(target);
+  }
+
+  // Enter: the modal primary action (next level when offered, otherwise restart).
+  function confirm() {
+    if (fsm.state === 'Victory' && index !== null && index + 1 < catalog.length && canAccess(index + 1)) return next();
+    dispatch({ type: 'RESTART' });
   }
 
   // Fixed step. `dt` is STEP; simulation time scales with the speed multiplier, play time does not.
@@ -226,9 +236,10 @@ export function createSession({
     const { shots } = run.board;
     const won = run.board.cores.every((c) => c.hp <= 0);
     if (won || run.shotsUsed >= shots) {
-      run.score = run.damage + (won ? 100 * (shots - run.shotsUsed) : 0);
-      const stars = !won ? 0 : run.shotsUsed === 1 ? 3 : run.shotsUsed <= Math.floor(shots / 2) ? 2 : 1;
+      run.score = scoreOf(run.damage, won ? shots - run.shotsUsed : 0);
+      const stars = won ? starRating(run.shotsUsed, shots) : 0;
       run.result = { stars, score: run.score, shots: run.shotsUsed };
+      if (won && index !== null) progression?.submit(index, run.result);
     }
     enter(won ? 'Victory' : run.result ? 'GameOver' : 'Aiming');
   }

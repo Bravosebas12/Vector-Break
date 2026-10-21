@@ -307,3 +307,30 @@ Tasks 7a.1-7a.3 are marked `[x]`. Branch `feat/anglecraft-v1-slice-7a` (base sli
 - `hudModel(snap, {levelCount})` returns `{telemetry, control, pause}`; `modalModel(snap, {levelCount, record})` returns `null | victory | defeat` with `buttons[{label, action, primary}]` and `primaryAction` (Enter). `record` is injected by the caller because the session snapshot has no `result.record` until Progression (7b).
 - Victory primary is Siguiente nivel, or Repetir on the last level. Speed labels use `1X/2X/4X` per the spec.
 - Renderer not touched; drawing of HUD/modals is wired in 7b.3.
+
+## Slice 7b: Progression + modals - COMPLETE (3/3)
+
+Tasks 7b.1-7b.3 are marked `[x]`. Branch `feat/anglecraft-v1-slice-7b` (base slice 7a). Slice 8a NOT started.
+
+### TDD Cycle Evidence
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| 7b.1 | `tests/unit/progression.spec.js` (+ `input.spec.js` Enter -> CONFIRM) | Unit | 318 unit green | `Progression.js` missing (no tests found) | 11/11 progression; 325 unit green | stars 1/2/3 + odd limit, score zero/non-zero unused, isBetter on each key, worse run keeps record, session win/defeat/last level/CONFIRM | Session rating/score now call `starRating`/`scoreOf` |
+| 7b.2 | `tests/browser/storage.spec.js` | Browser | 325 green | 3 failed (throwing storage, corrupt JSON, null storage), 2 passed | 5/5, x5 repeat 25/25 | persist+reload, throwing storage, corrupt value, null storage, restart leaves records | Added `defaultStorage()` guard (SecurityError on access) |
+| 7b.3 | `tests/e2e/progression-flow.spec.js` | E2E | 330 green | 3 failed (no text drawn: renderer had no HUD/modal) | 3/3, x5 repeat 15/15 | win (RESUELTO, Siguiente nivel, record stored, CONFIRM -> level 2), defeat (FALLIDO, no record, CONFIRM restarts), HUD panels | None needed |
+
+### Work Unit Evidence
+
+| Evidence | Value |
+|---|---|
+| Focused test command and exact result | `npx playwright test tests/unit/progression.spec.js tests/browser/storage.spec.js tests/e2e/progression-flow.spec.js`: passed (browser/e2e --repeat-each=5) |
+| Runtime harness | `progression-flow.spec.js` drives `main.js` (`?test=1&loop=1`, real rAF, no page.clock) and spies canvas `fillText`; level 1 served via `page.route` with a cleared column |
+| Rollback boundary | `src/js/system/{Progression,HudView}.js`, `GameSession.js`, `Input.js`, `Renderer.js`, `main.js`, the three new specs, `input.spec.js`, tasks.md/apply-progress.md |
+| Full suite | `npx playwright test` x3: 366 passed each |
+
+### Design notes / deviations
+- `createSession({ progression })` wires `canAccess` and records on every win; the plain `canAccess` option remains for existing tests. Unlock lives in the session (D1); records persist under `anglecraft.v1.records`, keyed by level index (`{"0": {stars, score, shots}}`) instead of the design's `"level-01"` keys.
+- Enter now maps to a new `CONFIRM` action (Victory/GameOver): next level when offered, else restart (the modal primary action). Input table and spec updated accordingly; `NEXT` is unchanged.
+- HUD/modals are drawn by `HudView.js` (called from `Renderer.draw`); models refresh at 10 Hz and on state change. Modal buttons are NOT mouse-clickable yet: `main.js` has no DOM input listeners until the start-screen slice (8b); keyboard actions work through the hook/session.
+- Level 1/2 reachability `test.fail()` markers untouched.

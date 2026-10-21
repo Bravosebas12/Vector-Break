@@ -23,7 +23,7 @@ export function mapEvent(e) {
 function mapKey({ key, repeat = false }) {
   if (key === ' ' || key === 'Space') return { type: 'FIRE' };
   if (key in SPEED_KEYS) return { type: 'SET_SPEED', v: SPEED_KEYS[key] };
-  if (key === 'Enter') return { type: 'NEXT' };
+  if (key === 'Enter') return { type: 'CONFIRM' }; // modal primary action
   const k = key.length === 1 ? key.toLowerCase() : key;
   if (repeat) return null; // R and P ignore auto-repeat
   if (k === 'p') return { type: 'PAUSE' };
@@ -48,6 +48,8 @@ export function allows(state, paused, action) {
       return GAMEPLAY.includes(state);
     case 'NEXT':
       return state === 'Victory';
+    case 'CONFIRM':
+      return state === 'Victory' || state === 'GameOver';
     default:
       return false;
   }
