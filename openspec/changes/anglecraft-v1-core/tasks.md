@@ -89,9 +89,9 @@ Notes: slices 5, 6, 7, 9 are pre-split (each estimated at or above ~900 lines co
 
 ## Slice 6a: Loop, viewport, atlas (rendering; HU-02, HU-01 s1)
 
-- [ ] 6a.1 RED `tests/browser/viewport.spec.js`: `mapClientToLogical`, fit scale, DPR -> GREEN `src/js/system/Viewport.js`. (DPR and mouse mapping)
-- [ ] 6a.2 RED `tests/browser/atlas.spec.js`: 128x64 -> 112x56 pre-scale once, OffscreenCanvas fallback, missing image -> placeholder -> GREEN `src/js/system/Atlas.js`. (Atlas and sprite scale, Assets missing)
-- [ ] 6a.3 RED `tests/e2e/loop-clock.spec.js` (clamp 0.25, fixed STEP count under `page.clock`; skip per S1 fallback) -> GREEN `src/js/system/Loop.js`; wire `&loop=1`. (Fixed-timestep loop)
+- [x] 6a.1 RED `tests/browser/viewport.spec.js`: `mapClientToLogical`, fit scale, DPR -> GREEN `src/js/system/Viewport.js`. (DPR and mouse mapping)
+- [x] 6a.2 RED `tests/browser/atlas.spec.js`: 128x64 -> 112x56 pre-scale once, OffscreenCanvas fallback, missing image -> placeholder -> GREEN `src/js/system/Atlas.js`. (Atlas and sprite scale, Assets missing)
+- [x] 6a.3 RED `tests/e2e/loop-clock.spec.js` (clamp 0.25, fixed STEP count under `page.clock`; skip per S1 fallback) -> GREEN `src/js/system/Loop.js`; wire `&loop=1`. (Fixed-timestep loop)
 
 ## Slice 6b: Renderer, particles, stress (rendering; HU-02, NFR Performance)
 

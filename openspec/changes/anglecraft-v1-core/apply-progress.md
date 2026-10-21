@@ -224,3 +224,34 @@ Tasks 5b.1-5b.5 are marked `[x]` in `tasks.md`. Slice 6a is NOT started. Branch 
 - Hook `fire(angle)`: radians from +x, upward positive (Raycaster.sweep convention).
 - Overkill in the same substep is guarded by the cleared cell and `hp <= 0` early return; there is no dedicated two-balls-one-substep test (not reproducible through emission spacing).
 - Size: ~640 changed lines including tests and openspec edits (budget 800).
+
+## Slice 6a: Loop, viewport, atlas (PR 7 of 14) - COMPLETE (3/3)
+
+Tasks 6a.1-6a.3 are marked `[x]`. Slice 6b NOT started. Branch `feat/anglecraft-v1-slice-6a` (base slice 5b).
+
+### TDD Cycle Evidence
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| 6a.1 | `tests/browser/viewport.spec.js` | Browser | N/A (new) | 6 failed (module missing) | 6/6 | 4 mapping cases (letterbox, pillarbox, offset rect), fit scale, 6 DPR/backing/atlas-scale rows, round trip | None needed |
+| 6a.2 | `tests/browser/atlas.spec.js` | Browser | N/A (new) | 7 failed (module missing) | 7/7 | 3 scales (1x/2x/3x), prescale once (count 7, same source), OffscreenCanvas on/off, failed sheet, missing frame | Removed unused export |
+| 6a.3 | `tests/e2e/loop-clock.spec.js` | E2E | 311 green | 5 failed (no Loop, no wiring) | 5/5 | 60/144/240 Hz, stall clamp (pure and under `page.clock.fastForward`), 1000 ms run, no-flag control | None needed |
+
+Smoke safety net: `tests/e2e/smoke.spec.js` canvas attribute assertion changed 1920x1080 -> 1280x720 because Viewport now resizes the backing store to fitted size x DPR (1280x720 default viewport).
+
+### Test Summary
+- New tests: 13 browser (6 viewport, 7 atlas), 5 e2e loop; full `npx playwright test`: 316 passed, exit 0.
+
+### Work Unit Evidence
+
+| Evidence | Value |
+|---|---|
+| Focused test command and exact result | `npx playwright test tests/browser tests/e2e/loop-clock.spec.js`: all passed; full suite 316 passed |
+| Runtime harness | `tests/e2e/loop-clock.spec.js` against `main.js` with `?test=1&loop=1` under `page.clock` (pauseAt before measuring) |
+| Rollback boundary | `src/js/system/{Loop,Viewport,Atlas}.js`, `src/js/main.js`, `tests/browser/{viewport,atlas}.spec.js`, `tests/e2e/loop-clock.spec.js`, `tests/e2e/smoke.spec.js`, tasks.md/apply-progress.md |
+
+### Design notes / deviations
+- `main.js` starts the loop when not in test mode, or with `?test=1&loop=1`; render is a no-op until the Renderer (6b). Viewport applied on boot and window resize.
+- Loop step counts are measured through `snapshot().playTime / STEP` in Aiming (no extra hook method); tolerance-based, no exact frame counts.
+- Atlas is not yet loaded by `main.js` (sprite settle joins `setLoadProgress` in slice 8b); `loadAtlas(scale)` never rejects and falls back to magenta placeholders.
+- `applyViewport` sets the backing store to `1920*s*dpr` and a logical->backing transform; `atlasScale = clamp(ceil(s*dpr),1,3)`.

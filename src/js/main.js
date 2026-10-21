@@ -4,6 +4,8 @@
 import { createSession } from './system/GameSession.js';
 import { createTestHook } from './system/TestHook.js';
 import { Rng } from './system/Rng.js';
+import { createLoop } from './system/Loop.js';
+import { applyViewport } from './system/Viewport.js';
 
 const LEVEL_FILES = ['level1', 'level2', 'level3'];
 
@@ -18,6 +20,17 @@ const session = createSession({
   volleyCapS: stress ? Infinity : 45,
 });
 if (testMode) window.__ANGLECRAFT__ = createTestHook(session);
+
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const resize = () => applyViewport(canvas, ctx);
+resize();
+window.addEventListener('resize', resize);
+
+// Real-time loop. Tests keep the session under their own control unless ?loop=1 is set (with ?test=1).
+if (!testMode || params.get('loop') === '1') {
+  createLoop({ step: (dt) => session.step(dt), render: () => {} /* Renderer joins in slice 6b */ }).start();
+}
 
 async function boot() {
   let done = 0;

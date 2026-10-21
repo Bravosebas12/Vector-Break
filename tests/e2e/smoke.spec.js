@@ -12,7 +12,9 @@ test('smoke: / loads with the game canvas and no console or page errors', async 
   });
 
   await page.goto('/');
-  await expect(page.locator('canvas#game')).toHaveAttribute('width', '1920');
+  // Viewport resizes the backing store to the fitted size x DPR: 16:9 at the 1280x720 default.
+  await expect(page.locator('canvas#game')).toHaveAttribute('width', '1280');
+  await expect(page.locator('canvas#game')).toHaveAttribute('height', '720');
   await page.waitForLoadState('networkidle');
 
   expect(failed).toEqual([]);
