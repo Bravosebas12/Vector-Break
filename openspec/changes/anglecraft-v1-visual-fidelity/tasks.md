@@ -37,10 +37,10 @@ Strict TDD: in every task write or update the failing test first, then the code.
 
 ## 4. Slice 4 - DOM result modals (hud)
 
-- [ ] 4.1 Test (unit): `modalModel` victory fields (stars, perfect, record/new record, time, turns used, margin, buttons Repetir + Siguiente nivel / last level) and defeat sentence with singular/plural.
-- [ ] 4.2 Test (e2e): victory modal with 2 stars and with 3 stars (`TIRO PERFECTO`); last level shows notice and no Siguiente nivel.
-- [ ] 4.3 Test (e2e): defeat modal copy, `R` and button restart within 500 ms; `Enter` triggers the primary button.
-- [ ] 4.4 Rewrite `tests/unit/modal-click.spec.js` and `tests/e2e/modal-click.spec.js` for DOM buttons (replace `waitForTimeout(200)` with a state wait). Implement modals in `HudDom.js`; delete `HudView.js` and modal hit testing in `main.js`.
+- [x] 4.1 Test (unit): `modalModel` victory fields (stars, perfect, record/new record, time, turns used, margin, buttons Repetir + Siguiente nivel / last level) and defeat sentence with singular/plural.
+- [x] 4.2 Test (e2e): victory modal with 2 stars and with 3 stars (`TIRO PERFECTO`); last level shows notice and no Siguiente nivel.
+- [x] 4.3 Test (e2e): defeat modal copy, `R` and button restart within 500 ms; `Enter` triggers the primary button.
+- [x] 4.4 Rewrite `tests/unit/modal-click.spec.js` and `tests/e2e/modal-click.spec.js` for DOM buttons (replace `waitForTimeout(200)` with a state wait). Implement modals in `HudDom.js`; delete `HudView.js` and modal hit testing in `main.js`.
 
 ## 5. Slice 5 - Title screen with Key Art (start-screen)
 

@@ -128,3 +128,67 @@ test('idle updates add or remove no nodes; hide() hides the whole HUD', async ({
   await page.evaluate(() => window.hudView.update(null));
   expect(await page.locator('[data-hud="telemetry"]').isVisible()).toBe(false);
 });
+
+// Result modals (hud delta "Victory modal", "Defeat modal", "Button actions").
+const modal = (page, over = {}, opts = {}) =>
+  page.evaluate(
+    async ([o, opt]) => {
+      const { hudModel, modalModel } = await import('/src/js/system/Hud.js');
+      const s = window.snap(o);
+      window.hudView.update(hudModel(s), modalModel(s, opt));
+    },
+    [over, opts],
+  );
+const won = (stars, shots, extra = {}) => ({ state: 'Victory', result: { stars, score: 18420, shots }, playTime: 102.6, ...extra });
+
+test('victory modal: 680 px over a full-stage scrim, kicker, title, 2 of 3 stars, metrics and buttons', async ({ page }) => {
+  await setup(page);
+  await modal(page, won(2, 9), { record: { stars: 3, score: 20100, shots: 1 } });
+  const box = await page.locator('.result.victory .card').boundingBox();
+  expect(box.width).toBe(680);
+  expect(await page.locator('.result.victory').boundingBox()).toEqual({ x: 0, y: 0, width: 1920, height: 1080 });
+  const text = await page.locator('.result.victory').innerText();
+  for (const t of ['STAGE 01 · RESUELTO', 'Puzzle completado', 'PUNTOS', '18 420', 'récord 20 100 pts', 'TIEMPO', '01:42.6', 'TURNOS', '09', '/ 12', '3 de margen', 'Repetir', 'Siguiente nivel', 'Enter'])
+    expect(text).toContain(t);
+  expect(await page.locator('.result.victory .star.on').count()).toBe(2);
+  expect(await page.locator('.result.victory .star').count()).toBe(3);
+  await expect(page.locator('.result.victory .perfect')).toBeHidden();
+  await expect(page.locator('.result.defeat')).toBeHidden();
+});
+
+test('three stars show TIRO PERFECTO; the last level drops Siguiente nivel and shows the notice', async ({ page }) => {
+  await setup(page);
+  await modal(page, won(3, 1));
+  await expect(page.locator('.result.victory .perfect')).toHaveText('TIRO PERFECTO');
+  await modal(page, won(1, 5, { level: { index: 5, id: 'level-06' } }));
+  await expect(page.locator('[data-act="modal-NEXT"]')).toBeHidden();
+  await expect(page.locator('.result.victory .notice')).toHaveText('Último nivel completado');
+  expect(await page.evaluate(() => document.querySelector('[data-act="modal-RESTART"]').classList.contains('primary'))).toBe(true);
+});
+
+test('defeat modal: 520 px, SIN TURNOS, sentence and Reiniciar puzzle', async ({ page }) => {
+  await setup(page);
+  await modal(page, {
+    state: 'GameOver',
+    result: { stars: 0, score: 7960, shots: 12 },
+    shots: { used: 12, left: 0, max: 12 },
+    cores: 2,
+    blocks: [{ type: 'core', hp: 320 }, { type: 'core', hp: 320 }],
+  });
+  expect((await page.locator('.result.defeat .card').boundingBox()).width).toBe(520);
+  const text = await page.locator('.result.defeat').innerText();
+  for (const t of ['SIN TURNOS', 'Puzzle no resuelto', 'Se agotaron los 12 turnos. Quedan 2 núcleos activos con 640 HP combinados.', 'Reiniciar puzzle'])
+    expect(text).toContain(t);
+  await page.click('[data-act="modal-RESTART-defeat"]');
+  expect(await page.evaluate(() => window.actions)).toEqual([{ type: 'PRESS', target: 'RESTART' }]);
+});
+
+test('modal buttons dispatch PRESS with their action and the modal hides when the model is null', async ({ page }) => {
+  await setup(page);
+  await modal(page, won(2, 3));
+  await page.click('[data-act="modal-RESTART"]');
+  await page.click('[data-act="modal-NEXT"]');
+  expect(await page.evaluate(() => window.actions)).toEqual([{ type: 'PRESS', target: 'RESTART' }, { type: 'PRESS', target: 'NEXT' }]);
+  await show(page);
+  await expect(page.locator('.result.victory')).toBeHidden();
+});

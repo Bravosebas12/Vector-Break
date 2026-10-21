@@ -32,29 +32,37 @@ function status(snap) {
   return { label: strings.playing, tone: 'cyan' };
 }
 
-// Result modal for Victory/GameOver; `record` is the best stored record (Progression, 7b) or null.
+const plural = (n, one, many) => (n === 1 ? one : many.replace('{n}', n));
+
+// Result modal for Victory/GameOver (mockup screens 02-03); `record` is the best stored record or null.
 export function modalModel(snap, { levelCount = 6, record = null } = {}) {
   const won = snap.state === 'Victory';
   if (!won && snap.state !== 'GameOver') return null;
-  const { stars, score } = snap.result;
+  const { stars, score, shots } = snap.result;
+  const max = snap.shots.max;
   if (!won) {
-    const buttons = [{ label: strings.restartPuzzle, action: 'RESTART', primary: true }];
-    return { kind: 'defeat', title: strings.failed, points: score, buttons, primaryAction: 'RESTART' };
+    const cores = snap.blocks.filter((b) => b.type === 'core' && b.hp > 0);
+    const hp = cores.reduce((sum, b) => sum + b.hp, 0);
+    const message = `${plural(max, strings.noShotsOne, strings.noShotsMany)} ${plural(cores.length, strings.coresOne, strings.coresMany).replace('{hp}', hp)}`;
+    const buttons = [{ label: strings.restartPuzzle, key: 'R', action: 'RESTART', primary: true }];
+    return { kind: 'defeat', kicker: strings.noShots, title: strings.puzzleFailed, message, buttons, primaryAction: 'RESTART' };
   }
   const hasNext = snap.level.index + 1 < levelCount;
-  const buttons = [
-    { label: strings.retry, action: 'RESTART', primary: !hasNext },
-    { label: strings.restart, action: 'RESTART', primary: false },
-  ];
-  if (hasNext) buttons.push({ label: strings.nextLevel, action: 'NEXT', primary: true });
+  const buttons = [{ label: strings.retry, key: 'R', action: 'RESTART', primary: !hasNext }];
+  if (hasNext) buttons.push({ label: strings.nextLevel, key: 'Enter', action: 'NEXT', primary: true });
+  const recordSub = snap.newRecord ? strings.newRecord : record ? strings.recordPoints.replace('{pts}', formatPoints(record.score)) : '';
   return {
     kind: 'victory',
-    title: strings.solved,
-    points: score,
+    kicker: `${strings.stage} ${pad2(snap.level.index + 1)} · ${strings.solved}`,
+    title: strings.puzzleSolved,
     stars,
     perfect: stars === 3,
     perfectLabel: stars === 3 ? strings.perfectShot : null,
-    record,
+    metrics: [
+      { label: strings.points, value: formatPoints(score), total: '', sub: recordSub },
+      { label: strings.time, value: formatTime(snap.playTime), total: '', sub: '' },
+      { label: strings.turns, value: pad2(shots), total: ` / ${pad2(max)}`, sub: strings.margin.replace('{n}', max - shots) },
+    ],
     notice: hasNext ? null : strings.lastLevel,
     buttons,
     primaryAction: hasNext ? 'NEXT' : 'RESTART',

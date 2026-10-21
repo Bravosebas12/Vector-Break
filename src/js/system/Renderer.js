@@ -8,7 +8,6 @@ import { createCanvas } from './Atlas.js';
 import { LOGICAL_W, LOGICAL_H } from './Viewport.js';
 import { Raycaster } from './Raycaster.js';
 import { hudModel, modalModel } from './Hud.js';
-import { drawModal } from './HudView.js';
 import { titleModel, drawTitle } from './TitleScreen.js';
 import { BLOCK_TYPES } from '../entities/Block.js';
 import { COLORS, FONT_MONO, BOARD_STYLE, BLOCK_FRAME, BLOCK_TEXT, BURST, FX } from './Theme.js';
@@ -354,8 +353,7 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
     drawDynamic(state, session.run, dt, alpha);
     ctx.restore();
     refreshHud(state, nowMs);
-    hudView?.update(hud);
-    if (modal) drawModal(ctx, modal);
+    hudView?.update(hud, modal);
   }
 
   return {

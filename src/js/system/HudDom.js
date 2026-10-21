@@ -1,4 +1,4 @@
-// DOM view of the HUD (design D5): TELEMETRÍA and CONTROL panels and the pause overlay, laid out on the
+// DOM view of the HUD (design D5): TELEMETRÍA and CONTROL panels, pause overlay and result modals, laid out on the
 // 1920x1080 stage as in Design/Game UI. Built once; update() patches only values that changed.
 // All data comes from hudModel (Hud.js); styling lives in styles.css (.hud-*), colors via tones.
 import { MAX_PIPS, SPEEDS } from './Hud.js';
@@ -46,6 +46,25 @@ const CONTROL = `
 
 const PAUSE = `<div class="pause-pill"><span>${strings.pause}</span>${kbd('P')}</div>`;
 
+const STAR = '<svg class="star" width="64" height="64" viewBox="0 0 48 48"><polygon points="24,3 30.2,16.6 45,18.2 33.9,28.2 37,43 24,35.4 11,43 14.1,28.2 3,18.2 17.8,16.6"/></svg>';
+const metric = (i) => `<div class="mcell"><span class="label sm" data-k="m${i}Label"></span>
+  <span class="mval"><span data-k="m${i}Value"></span><span class="total" data-k="m${i}Total"></span></span><span class="msub" data-k="m${i}Sub"></span></div>`;
+
+const VICTORY = `<div class="card">
+  <div class="card-top"><span class="kicker" data-k="vKicker"></span><span class="title">${strings.puzzleSolved}</span>
+    <div class="stars">${STAR.repeat(3)}</div><span class="perfect">${strings.perfectShot}</span></div>
+  <div class="metrics">${[0, 1, 2].map(metric).join('')}</div>
+  <span class="notice" data-k="vNotice"></span>
+  <div class="actions"><button class="btn mbtn" data-act="modal-RESTART">${strings.retry}${kbd('R')}</button>
+    <button class="btn mbtn primary" data-act="modal-NEXT">${strings.nextLevel}${kbd('Enter')}</button></div>
+</div>`;
+
+const DEFEAT = `<div class="card">
+  <span class="kicker">${strings.noShots}</span><span class="title">${strings.puzzleFailed}</span>
+  <span class="message" data-k="dMessage"></span>
+  <button class="btn light" data-act="modal-RESTART-defeat">${strings.restartPuzzle}${kbd('R')}</button>
+</div>`;
+
 function el(tag, className, html, attrs = {}) {
   const node = document.createElement(tag);
   node.className = className;
@@ -59,7 +78,9 @@ export function createHudDom(root, { dispatch }) {
   const left = el('aside', 'hud-panel left', TELEMETRY, { 'data-hud': 'telemetry' });
   const right = el('aside', 'hud-panel right', CONTROL, { 'data-hud': 'control' });
   const pause = el('div', 'pause-overlay', PAUSE);
-  root.append(left, right, pause);
+  const victory = el('div', 'result victory', VICTORY);
+  const defeat = el('div', 'result defeat', DEFEAT);
+  root.append(left, right, pause, victory, defeat);
 
   const k = {};
   for (const node of root.querySelectorAll('[data-k]')) k[node.dataset.k] = node;
@@ -70,6 +91,10 @@ export function createHudDom(root, { dispatch }) {
   for (const b of root.querySelectorAll('[data-act]')) buttons[b.dataset.act] = b;
   const ACTIONS = { launch: { type: 'FIRE' }, pause: { type: 'PAUSE' }, restart: { type: 'RESTART' } };
   for (const v of SPEEDS) ACTIONS[`speed-${v}`] = { type: 'SET_SPEED', v };
+  ACTIONS['modal-RESTART'] = ACTIONS['modal-RESTART-defeat'] = { type: 'PRESS', target: 'RESTART' };
+  ACTIONS['modal-NEXT'] = { type: 'PRESS', target: 'NEXT' };
+  const stars = [...victory.querySelectorAll('.star')];
+  const perfect = victory.querySelector('.perfect');
   for (const [act, b] of Object.entries(buttons)) {
     b.tabIndex = -1; // never keyboard-focused: Space stays the FIRE key, not a button press
     b.addEventListener('mousedown', (e) => e.preventDefault());
@@ -93,9 +118,31 @@ export function createHudDom(root, { dispatch }) {
     k.segs.replaceChildren(...Array.from({ length: total }, () => el('span', 'seg', '')));
   }
 
-  function update(hud) {
+  function updateModal(m) {
+    flag(victory, 'victory', m?.kind === 'victory', (v) => victory.classList.toggle('show', v));
+    flag(defeat, 'defeat', m?.kind === 'defeat', (v) => defeat.classList.toggle('show', v));
+    if (m?.kind === 'defeat') return void text('dMessage', m.message);
+    if (m?.kind !== 'victory') return;
+    text('vKicker', m.kicker);
+    stars.forEach((star, i) => flag(star, `star${i}`, i < m.stars, (v) => star.classList.toggle('on', v)));
+    flag(perfect, 'perfect', m.perfect, (v) => perfect.classList.toggle('show', v));
+    m.metrics.forEach((x, i) => {
+      text(`m${i}Label`, x.label);
+      text(`m${i}Value`, x.value);
+      text(`m${i}Total`, x.total);
+      text(`m${i}Sub`, x.sub);
+    });
+    text('vNotice', m.notice ?? '');
+    const hasNext = m.buttons.some((b) => b.action === 'NEXT');
+    flag(buttons['modal-NEXT'], 'hasNext', hasNext, (v) => (buttons['modal-NEXT'].hidden = !v));
+    flag(buttons['modal-RESTART'], 'retryPrimary', !hasNext, (v) => buttons['modal-RESTART'].classList.toggle('primary', v));
+  }
+
+  // hud: hudModel or null (title/loading: everything hidden); modal: modalModel or null.
+  function update(hud, modal = null) {
     flag(root, 'visible', hud !== null, (v) => (root.hidden = !v));
     if (hud === null) return;
+    updateModal(modal);
     const t = hud.telemetry;
     const c = hud.control;
     text('status', t.status.label);

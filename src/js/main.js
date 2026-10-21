@@ -16,8 +16,6 @@ import { createProgression } from './system/Progression.js';
 import { AssetLoader } from './system/AssetLoader.js';
 import { mapEvent } from './system/Input.js';
 import { BOARD_W, BOARD_H } from './system/Layout.js';
-import { modalModel } from './system/Hud.js';
-import { hitModalButton } from './system/HudView.js';
 import { createHudDom } from './system/HudDom.js';
 import { RecordingSink, createSoundMapper, teeSink } from './system/AudioSinks.js';
 import { createWebAudio } from './system/WebAudio.js';
@@ -86,18 +84,9 @@ window.addEventListener('mousemove', (e) => {
   pointer.inBoard = inBoard;
   send({ type: 'mousemove', x: pointer.x, y: pointer.y }); // AIM works in board coordinates
 });
-// Result modals: a left press is hit-tested against the drawn buttons in logical coordinates (same space as HudView).
-const pressModal = (e) => {
-  if (e.button !== 0 || !['Victory', 'GameOver'].includes(session.fsm.state)) return;
-  const modal = modalModel(session.snapshot());
-  const p = mapClientToLogical(e.clientX, e.clientY, canvas.getBoundingClientRect());
-  const target = modal && hitModalButton(modal, p.x, p.y);
-  if (target) session.dispatch({ type: 'PRESS', target });
-};
 // Pointer presses come from the canvas only (HUD panels sit above it and catch their own clicks). While
 // playing, a press fires only inside the board; on the title any press on the canvas starts the game.
 canvas.addEventListener('mousedown', (e) => {
-  pressModal(e);
   const p = mapClientToLogical(e.clientX, e.clientY, canvas.getBoundingClientRect());
   const x = p.x - BOARD_ORIGIN.x;
   const y = p.y - BOARD_ORIGIN.y;

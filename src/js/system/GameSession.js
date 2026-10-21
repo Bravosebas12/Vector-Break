@@ -63,6 +63,7 @@ export function createSession({
     run.score = 0;
     run.damage = 0;
     run.result = null;
+    run.newRecord = false;
     run.simTime = 0;
     run.volleySimTime = 0;
     run.playTime = 0;
@@ -252,7 +253,7 @@ export function createSession({
       run.score = scoreOf(run.damage, won ? shots - run.shotsUsed : 0);
       const stars = won ? starRating(run.shotsUsed, shots) : 0;
       run.result = { stars, score: run.score, shots: run.shotsUsed };
-      if (won && index !== null) progression?.submit(index, run.result);
+      if (won && index !== null) run.newRecord = progression?.submit(index, run.result) === true;
     }
     enter(won ? 'Victory' : run.result ? 'GameOver' : 'Aiming');
     if (won) events.push('STARS', run.result.stars); // presentation only: sound
@@ -286,6 +287,7 @@ export function createSession({
       volleySimTime: run.volleySimTime,
       playTime: run.playTime,
       result: run.result && { ...run.result },
+      newRecord: run.newRecord,
     };
   }
 
