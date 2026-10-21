@@ -1,7 +1,7 @@
 # AngleCraft — HU-10 y HU-11: mover el lanzador y modo de disparo
 
 **Fecha:** 2026-10-21
-**Estado:** refinadas con PO y listas para desarrollo (decisiones D-10.1 a D-11.4)
+**Estado:** refinadas con PO y listas para desarrollo (decisiones D-10.1 a D-11.4, D-T.1)
 **Contexto actual (v1):** el lanzador se reubica solo, al final de cada turno, en la `x` donde aterrizó la primera bola (volley-economy). Cada turno emite **toda la tirada** en secuencia (una bola cada 1/12 s); la tirada empieza en `startBalls` del nivel (por ejemplo 5 en el nivel 2) y crece con los orbes hasta 50. El nivel tiene un límite de turnos (por ejemplo 12).
 **Teclas ya ocupadas:** `Espacio` (lanzar), `1` `2` `4` (velocidad), `P` (pausa), `R` (reiniciar), `Enter` (acción del modal). `A`, `D` y `M` están libres.
 
@@ -15,6 +15,8 @@
 | D-11.2 | El modo **no da ventaja ni tiene costo**: puntos, estrellas y récords se calculan igual que en v1. |
 | D-11.3 | El lanzador se reubica automáticamente **después de cada grupo** (no solo al final del turno), donde aterrizó la primera bola de ese grupo; el jugador puede reajustar con A/D antes del siguiente grupo. |
 | D-11.4 | Los orbes capturados en cualquier grupo se suman a la tirada de los **turnos siguientes** (como en v1, HU-04), no al turno en curso. |
+| D-10.3 | Velocidad de A/D: **480 px/s** mientras se mantiene la tecla y **8 px** por toque corto. |
+| D-T.1 | El tutorial (HU-06) **enseña ambas mecánicas** con indicaciones dentro del juego: A/D en el nivel 1 y el modo de disparo en el nivel 2. |
 
 ---
 
@@ -101,9 +103,15 @@ Escenario: AC11 - Mayúsculas y atajos visibles
   Cuando el jugador mantiene pulsada A
   Entonces el lanzador se mueve igual que con a minúscula
   Y el panel CONTROL lista el atajo "Mover lanzador" con las teclas A y D
+
+Escenario: AC12 - El tutorial enseña A/D en el nivel 1 (D-T.1)
+  Dado que el jugador entra por primera vez en la sesión al nivel 1 y el juego está en Aiming
+  Cuando se dibuja el tablero
+  Entonces aparece sobre el tablero la indicación "Mueve el lanzador con A / D" con las teclas A y D como keycaps
+  Y la indicación desaparece en cuanto el jugador mueve el lanzador o dispara, y no vuelve a mostrarse en la sesión
 ```
 
-**Valores propuestos (a confirmar):** velocidad 480 px/s mientras se mantiene la tecla; paso mínimo de 8 px por toque; límites `x = 50..1030` (los bordes del tablero, iguales a v1).
+**Valores confirmados (D-10.3):** velocidad 480 px/s mientras se mantiene la tecla; paso mínimo de 8 px por toque; límites `x = 50..1030` (los bordes del tablero, iguales a v1).
 
 ---
 
@@ -205,6 +213,12 @@ Escenario: AC14 - Modo y bolas restantes visibles en el HUD
   Cuando se dibuja el HUD
   Entonces el panel CONTROL muestra el selector MODO con 1, 2 y 3, el activo resaltado y el atajo M en ATAJOS
   Y el panel TELEMETRÍA muestra en BOLAS cuántas bolas quedan por disparar en el turno
+
+Escenario: AC15 - El tutorial enseña el modo de disparo en el nivel 2 (D-T.1)
+  Dado que el jugador entra por primera vez en la sesión al nivel 2 y el juego está en Aiming
+  Cuando se dibuja el tablero
+  Entonces aparece la indicación "Elige cuántas bolas lanzar por tiro con M (1, 2 o 3)" con la tecla M como keycap y el selector MODO resaltado
+  Y la indicación desaparece en cuanto el jugador cambia de modo o dispara, y no vuelve a mostrarse en la sesión
 ```
 
 **Teclas:** `M` alterna el modo (los números `1` `2` `4` ya son velocidad, HU-05).
@@ -213,8 +227,8 @@ Escenario: AC14 - Modo y bolas restantes visibles en el HUD
 
 ## Preguntas abiertas restantes
 
-1. **Valores:** ¿480 px/s y 8 px por toque se sienten bien, o se prefiere otra velocidad?
-2. **Tutorial (HU-06):** ¿los niveles 1 a 3 deben enseñar A/D y el modo de disparo?
+1. **Diseño de la indicación del tutorial:** no existe en la maqueta. Hay que pedir a diseño el componente (posición, estilo, animación de entrada y salida). Mientras tanto se propone una píldora como la de PAUSA, arriba del lanzador.
+2. **HU-06:** su texto dice "sin necesidad de instrucciones externas"; las indicaciones son internas al juego, pero conviene actualizar HU-06 para mencionarlas.
 
 ## Riesgos y casos borde
 
@@ -228,7 +242,7 @@ Escenario: AC14 - Modo y bolas restantes visibles en el HUD
 
 | Criterio | HU-10 | HU-11 |
 |---|---|---|
-| AC en Gherkin | Sí (11) | Sí (14) |
+| AC en Gherkin | Sí (12) | Sí (15) |
 | Reglas de negocio explícitas | Sí (D-10.1, D-10.2) | Sí (D-11.1 a D-11.4) |
 | Roles afectados | Jugador | Jugador |
 | Datos de prueba | Niveles 1 a 6 | Niveles 1 a 6 |
@@ -236,4 +250,4 @@ Escenario: AC14 - Modo y bolas restantes visibles en el HUD
 | Impacto en regresión | aiming, volley-economy, HUD | volley-economy, game-state, HUD, niveles |
 | Errores y mensajes | Teclas ignoradas fuera de Aiming; tope en bordes | Grupo limitado por bolas restantes; selector deshabilitado en vuelo |
 | No funcionales | Movimiento fluido a 60 FPS | Sin cambio de rendimiento |
-| **Lista para desarrollo** | **Sí** (valores a confirmar) | **Sí** |
+| **Lista para desarrollo** | **Sí** | **Sí** |
