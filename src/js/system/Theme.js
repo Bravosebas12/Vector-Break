@@ -37,3 +37,13 @@ export const FX = Object.freeze({
   launcherGlow: 'rgba(0,245,212,.35)',
   white: '#FFFFFF',
 });
+
+// Start screen over the Key Art: tagline gray (Key Art) and the dark band behind the wordmark.
+export const TITLE_STYLE = Object.freeze({
+  tagline: '#AEB4C2',
+  band: Object.freeze([
+    [0, 'rgba(14,17,23,0)'],
+    [0.45, 'rgba(14,17,23,.85)'],
+    [1, 'rgba(14,17,23,.95)'],
+  ]),
+});

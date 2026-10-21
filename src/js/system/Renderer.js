@@ -86,6 +86,7 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
   let modal = null;
   let hudAt = -Infinity;
   let hudState = null;
+  let titleArt = null;
   const aimCache = { lx: NaN, ax: NaN, ay: NaN, version: -1, result: null, dots: 0 };
   const aimPts = new Float32Array(6);
   const dots = new Float32Array(MAX_DOTS * 3);
@@ -339,7 +340,7 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
     const state = session.fsm.state;
     if (state === 'Loading' || state === 'Title') {
       hudView?.update(null);
-      drawTitle(ctx, titleModel({ state, loading: session.loading }, nowMs, ui.loadError === true));
+      drawTitle(ctx, titleModel({ state, loading: session.loading }, nowMs, ui.loadError === true), titleArt);
       return;
     }
     syncBoard();
@@ -363,6 +364,10 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
     setAtlas(next) {
       atlas = next;
       dirty = true;
+    },
+    // Key Art for the start screen (drawn as soon as it decodes, even while other assets load).
+    setTitleArt(image) {
+      titleArt = image;
     },
     // Webfonts arrived: canvas text in the static layer must be drawn again.
     invalidate() {

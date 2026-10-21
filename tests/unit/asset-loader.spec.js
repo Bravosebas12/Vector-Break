@@ -105,3 +105,13 @@ test('fonts settle as one asset and a failure does not reject', async () => {
   const failed = await AssetLoader.load({ ...spec, fonts: () => Promise.reject(new Error('404')) }, () => {}, okIo());
   expect(failed.fonts).toBe(false);
 });
+
+// start-screen delta "Blocking loading with progress": the Key Art is one asset; a failure settles as null.
+test('Key Art settles as one asset and a failure yields null without rejecting', async () => {
+  const { calls, onSettle } = collect();
+  const ok = await AssetLoader.load({ ...spec, art: async () => ({ img: true }) }, onSettle, okIo());
+  expect(calls.at(-1)).toEqual([7, 7]);
+  expect(ok.art).toEqual({ img: true });
+  const failed = await AssetLoader.load({ ...spec, art: () => Promise.reject(new Error('404')) }, () => {}, okIo());
+  expect(failed.art).toBeNull();
+});

@@ -22,12 +22,12 @@ const defaultIo = {
   decode: (bytes) => (offline ??= new OfflineAudioContext(2, 1, DECODE_RATE)).decodeAudioData(bytes),
 };
 
-// spec: { atlas?: () => Promise, fonts?: () => Promise, levels: url[], samples: [{name, url}], music?: {name, url} }
-// -> Promise<{ atlas, fonts: boolean, levels, buffers: {name: AudioBuffer}, failed: name[] }>
+// spec: { atlas?, fonts?, art?: () => Promise, levels: url[], samples: [{name, url}], music?: {name, url} }
+// -> Promise<{ atlas, fonts: boolean, art, levels, buffers: {name: AudioBuffer}, failed: name[] }>
 async function load(spec, onSettle = () => {}, io = {}) {
   const { fetchJson, fetchBytes, decode } = { ...defaultIo, ...io };
   const audio = [...spec.samples, ...(spec.music ? [spec.music] : [])];
-  const total = (spec.atlas ? 1 : 0) + (spec.fonts ? 1 : 0) + spec.levels.length + audio.length;
+  const total = (spec.atlas ? 1 : 0) + (spec.fonts ? 1 : 0) + (spec.art ? 1 : 0) + spec.levels.length + audio.length;
   let done = 0;
   const settle = (value) => {
     onSettle(++done, total);
@@ -38,6 +38,7 @@ async function load(spec, onSettle = () => {}, io = {}) {
 
   const atlas = spec.atlas ? spec.atlas().catch(() => null).then(settle) : null;
   const fonts = spec.fonts ? spec.fonts().then(() => true, () => false).then(settle) : false;
+  const art = spec.art ? spec.art().catch(() => null).then(settle) : null;
   const levels = spec.levels.map(async (url) => {
     const level = await fetchJson(url);
     const { valid, errors } = validateLevel(level);
@@ -53,8 +54,8 @@ async function load(spec, onSettle = () => {}, io = {}) {
     settle();
   });
 
-  const [loadedAtlas, loadedFonts, loadedLevels] = await Promise.all([atlas, fonts, Promise.all(levels), Promise.all(sounds)]);
-  return { atlas: loadedAtlas, fonts: loadedFonts, levels: loadedLevels, buffers, failed };
+  const [loadedAtlas, loadedFonts, loadedArt, loadedLevels] = await Promise.all([atlas, fonts, art, Promise.all(levels), Promise.all(sounds)]);
+  return { atlas: loadedAtlas, fonts: loadedFonts, art: loadedArt, levels: loadedLevels, buffers, failed };
 }
 
 export const AssetLoader = { load };

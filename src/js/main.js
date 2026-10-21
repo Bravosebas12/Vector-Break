@@ -26,6 +26,7 @@ const SAMPLE_NAMES = ['sfx_block_destroy', 'sfx_burst_launch', 'sfx_orb_split', 
 const SAMPLES = SAMPLE_NAMES.map((name) => ({ name, url: `assets/audio/${name}.wav` }));
 const MUSIC = { name: 'music_loop_95bpm_64bars', url: 'assets/audio/music_loop_95bpm_64bars.wav' };
 const PLAYING = ['Aiming', 'Firing', 'Simulating'];
+const KEY_ART = 'assets/art/key-art.webp';
 
 const params = new URLSearchParams(location.search);
 const testMode = params.get('test') === '1';
@@ -127,10 +128,20 @@ function probeRaf(sess, particles) {
     });
 }
 
+function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(`image failed: ${url}`));
+    image.src = url;
+  });
+}
+
 async function boot() {
   const spec = {
     atlas: () => loadAtlas(atlasScale),
     fonts: () => loadFonts(),
+    art: () => loadImage(KEY_ART).then((image) => (renderer.setTitleArt(image), image)),
     levels: LEVEL_FILES.map((name) => `src/levels/${name}.json`),
     samples: realAudio ? SAMPLES : [],
     music: realAudio ? MUSIC : null,

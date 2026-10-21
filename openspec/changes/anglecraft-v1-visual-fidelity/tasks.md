@@ -44,10 +44,10 @@ Strict TDD: in every task write or update the failing test first, then the code.
 
 ## 5. Slice 5 - Title screen with Key Art (start-screen)
 
-- [ ] 5.1 Write `scripts/export-key-art.mjs` (dev-only, Playwright) that renders the Key Art artifact HTML with `showTitle=false` at 1920x1080 DPR 2 and writes `assets/art/key-art.webp` (<= 600 KB). Run it and commit the image.
-- [ ] 5.2 Test (unit): `titleModel` keeps the wordmark centered at x 960 in `Loading` and `Title`; progress 12/30 -> 40%; prompt in `Title`.
-- [ ] 5.3 Test (e2e): Key Art counted as an asset; 404 Key Art still reaches `Title` and starts on click.
-- [ ] 5.4 Implement `drawTitle` (key art, band, two-color wordmark, tagline, bar, pulsing prompt); add `strings.tagline`.
+- [x] 5.1 Write `scripts/export-key-art.mjs` (dev-only, Playwright) that renders the Key Art artifact HTML with `showTitle=false` at 1920x1080 DPR 2 and writes `assets/art/key-art.webp` (<= 600 KB). Run it and commit the image.
+- [x] 5.2 Test (unit): `titleModel` keeps the wordmark centered at x 960 in `Loading` and `Title`; progress 12/30 -> 40%; prompt in `Title`.
+- [x] 5.3 Test (e2e): Key Art counted as an asset; 404 Key Art still reaches `Title` and starts on click.
+- [x] 5.4 Implement `drawTitle` (key art, band, two-color wordmark, tagline, bar, pulsing prompt); add `strings.tagline`.
 
 ## 6. Slice 6 - Visual baselines and sign-off (test-harness)
 
