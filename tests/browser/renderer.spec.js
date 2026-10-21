@@ -7,7 +7,7 @@ const run = async (page, body, arg) => {
   return page.evaluate(
     async ({ body, arg }) => {
       const { createSession } = await import('/src/js/system/GameSession.js');
-      const { createRenderer, hpStep, crackFor } = await import('/src/js/system/Renderer.js');
+      const { createRenderer, crackFor } = await import('/src/js/system/Renderer.js');
       const { Particles } = await import('/src/js/system/Particles.js');
       const { Rng } = await import('/src/js/system/Rng.js');
       const level = await (await fetch('/src/levels/level1.json')).json();
@@ -34,7 +34,7 @@ const run = async (page, body, arg) => {
           return fillText.call(this, t, ...rest);
         };
       }
-      const env = { session, ctx, make, find, destroy, texts, level, Particles, createRenderer, hpStep, crackFor };
+      const env = { session, ctx, make, find, destroy, texts, level, Particles, createRenderer, crackFor };
       return new Function('env', 'arg', `with (env) { return (async () => { ${body} })() }`)(env, arg);
     },
     { body, arg },
@@ -87,13 +87,8 @@ test('HP change redraws once and shows the new number; destruction redraws once 
   expect(r.blocks).toBe(r.expected);
 });
 
-test('colour and crack overlay follow remaining HP (4 steps, cracks at 30/60/90 % damage)', async ({ page }) => {
-  const r = await run(
-    page,
-    `return { steps: [100, 75, 74, 50, 49, 25, 24, 1].map((hp) => hpStep(hp, 100)),
-             cracks: [100, 80, 70, 40, 10, 5, 0].map((hp) => crackFor(hp, 100)) };`,
-  );
-  expect(r.steps).toEqual([0, 1, 1, 2, 2, 3, 3, 3]);
+test('crack overlay follows remaining HP (cracks at 30/60/90 % damage)', async ({ page }) => {
+  const r = await run(page, `return { cracks: [100, 80, 70, 40, 10, 5, 0].map((hp) => crackFor(hp, 100)) };`);
   expect(r.cracks).toEqual([null, null, 'crack_30', 'crack_60', 'crack_90', 'crack_90', 'crack_90']);
 });
 

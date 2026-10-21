@@ -1,7 +1,8 @@
 // Rules: .claude/skills/canvas-renderer-opt/SKILL.md
 // Canvas renderer. Layers: static board (offscreen, redrawn only when a block's HP or presence
-// changes) -> hit flashes -> orbs -> aim preview -> balls -> launcher -> particles.
-// All drawing is placeholder/procedural; atlas cracks are used only when a real sheet is loaded.
+// changes) -> hit flashes -> orbs -> aim preview -> balls -> launcher -> crosshair -> particles.
+// Every entity with an atlas frame is drawn with it (Design/Game UI mockup); primitives remain only for
+// assets not delivered yet (hit flash, particles) and as a fallback when no atlas is installed.
 // Nothing here allocates per frame, apart from the aim preview, which is cached until its inputs change.
 import { createCanvas } from './Atlas.js';
 import { LOGICAL_W, LOGICAL_H } from './Viewport.js';
@@ -10,21 +11,8 @@ import { hudModel, modalModel } from './Hud.js';
 import { drawHud, drawModal } from './HudView.js';
 import { titleModel, drawTitle } from './TitleScreen.js';
 import { BLOCK_TYPES } from '../entities/Block.js';
-import {
-  BOARD_W,
-  BOARD_H,
-  CELL_W,
-  CELL_H,
-  GRID_X,
-  GRID_W,
-  GRID_H,
-  BALL_RADIUS,
-  FLOOR_Y,
-  LAUNCHER_Y,
-  STEP,
-  cellMinX,
-  cellMinY,
-} from './Layout.js';
+import { COLORS, FONT_MONO, BOARD_STYLE, BLOCK_FRAME, BLOCK_TEXT, BURST, FX } from './Theme.js';
+import { BOARD_W, BOARD_H, CELL_W, CELL_H, BALL_RADIUS, FLOOR_Y, LAUNCHER_Y, STEP, cellMinX, cellMinY } from './Layout.js';
 
 // Render-only placement of the 1080x1000 board on the 1920x1080 canvas (centred).
 export const BOARD_ORIGIN = Object.freeze({ x: (LOGICAL_W - BOARD_W) / 2, y: (LOGICAL_H - BOARD_H) / 2 });
@@ -33,22 +21,20 @@ const FLASH_S = 0.06; // design E5: white, alpha 0.6, 60 ms
 const MAX_DT = 0.1;
 const HUD_REFRESH_MS = 100; // the models allocate: refresh them at 10 Hz and on every state change
 const TWO_PI = Math.PI * 2;
-const DASH = [10, 10];
 const NO_DASH = [];
-// Four HP steps per type (full -> nearly dead); indestructible and multiplier never change.
-const TINTS = {
-  standard: ['#2DE2E6', '#22B3C4', '#1A8499', '#14566E'],
-  reinforced: ['#8E6BFF', '#7152D6', '#5538A8', '#3B277A'],
-  core: ['#FF3D7F', '#D12E68', '#A32250', '#751738'],
-  indestructible: ['#5C6378', '#5C6378', '#5C6378', '#5C6378'],
-};
-const BURST_COLOR = { standard: '#2DE2E6', reinforced: '#8E6BFF', core: '#FF3D7F', indestructible: '#5C6378' };
-
-// 0 = healthy ... 3 = nearly destroyed.
-export const hpStep = (hp, maxHp) => {
-  const ratio = hp / maxHp;
-  return ratio > 0.75 ? 0 : ratio > 0.5 ? 1 : ratio > 0.25 ? 2 : 3;
-};
+const RING_DASH = [16.99, 5]; // Key Art launcher ring
+const GRID_STEP = 32; // mockup decorative board grid
+const LINE_INSET = 40; // launch line inset from both board sides
+const BALL_SPRITE = 64; // the sprite core is r7 at 32 px, so 64 px gives r14 = BALL_RADIUS
+const ORB_SPRITE = 64;
+const CROSS_SPRITE = 64;
+const DOT_SPRITE = 16;
+const BOUNCE_SPRITE = 32;
+const IMPACT_SPRITE = 48;
+const GLOW_R = 60;
+const HP_FONT = `700 20px ${FONT_MONO}`;
+const ORB_FONT = `700 16px ${FONT_MONO}`;
+const MAX_DOTS = 96;
 
 // Crack overlay by damage taken: 30 / 60 / 90 %.
 export const crackFor = (hp, maxHp) => {
@@ -56,12 +42,39 @@ export const crackFor = (hp, maxHp) => {
   return damage >= 0.9 ? 'crack_90' : damage >= 0.6 ? 'crack_60' : damage >= 0.3 ? 'crack_30' : null;
 };
 
+// Aim preview dots (mockup): one every 28 px from 36 px along the polyline `pts` ([x0, y0, x1, y1, ...],
+// `n` points), opacity 1 - 0.55 * s / total. Writes [x, y, alpha] triples into `out`; returns the count.
+export function aimDots(pts, n, out) {
+  let total = 0;
+  for (let i = 1; i < n; i++) total += Math.hypot(pts[i * 2] - pts[i * 2 - 2], pts[i * 2 + 1] - pts[i * 2 - 1]);
+  let count = 0;
+  let acc = 0;
+  let next = 36;
+  for (let i = 1; i < n && count * 3 < out.length; i++) {
+    const ax = pts[i * 2 - 2];
+    const ay = pts[i * 2 - 1];
+    const d = Math.hypot(pts[i * 2] - ax, pts[i * 2 + 1] - ay);
+    while (next <= acc + d && count * 3 < out.length) {
+      const t = (next - acc) / d;
+      out[count * 3] = ax + (pts[i * 2] - ax) * t;
+      out[count * 3 + 1] = ay + (pts[i * 2 + 1] - ay) * t;
+      out[count * 3 + 2] = 1 - (0.55 * next) / total;
+      count++;
+      next += 28;
+    }
+    acc += d;
+  }
+  return count;
+}
+
 // `onEvent(type, a, b)`: extra consumer (audio) fed from the renderer's single drain of the event ring.
 // `ui.loadError` is set by the boot code when a level fails to load (the start screen then shows loadError).
+// `ui.pointer` ({ x, y, inBoard } in board coordinates) is set by the DOM adapter for the crosshair.
 export function createRenderer({ session, ctx, particles, atlas = null, progression = null, onEvent: extra = null, ui = {} }) {
   const layer = createCanvas(BOARD_W, BOARD_H);
   const lctx = layer.getContext('2d');
-  const stats = { frames: 0, layerRedraws: 0, blocksDrawn: 0 };
+  const stats = { frames: 0, layerRedraws: 0, blocksDrawn: 0, launcherGlow: 0, glowSpritesBuilt: 0 };
+  const glow = buildGlow();
   let board = null;
   let lastHp = null;
   let maxHp = null;
@@ -73,10 +86,33 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
   let modal = null;
   let hudAt = -Infinity;
   let hudState = null;
-  const aimCache = { lx: NaN, ax: NaN, ay: NaN, version: -1, result: null };
+  const aimCache = { lx: NaN, ax: NaN, ay: NaN, version: -1, result: null, dots: 0 };
+  const aimPts = new Float32Array(6);
+  const dots = new Float32Array(MAX_DOTS * 3);
   const origin = { x: 0, y: LAUNCHER_Y };
 
   const cellOf = (b) => b.row * board.cols + b.col;
+
+  // Soft cyan launcher glow, built once (no per-frame gradient).
+  function buildGlow() {
+    const canvas = createCanvas(GLOW_R * 2, GLOW_R * 2);
+    const g = canvas.getContext('2d');
+    const grad = g.createRadialGradient(GLOW_R, GLOW_R, 0, GLOW_R, GLOW_R, GLOW_R);
+    grad.addColorStop(0, FX.launcherGlow);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, GLOW_R * 2, GLOW_R * 2);
+    stats.glowSpritesBuilt++;
+    return canvas;
+  }
+
+  // Draws atlas frame `name` centred on (cx, cy) at `size` px; false when no atlas is installed.
+  function sprite(c, name, cx, cy, size) {
+    if (!atlas) return false;
+    const e = atlas.get(name);
+    c.drawImage(e.source, e.sx, e.sy, e.sw, e.sh, cx - size / 2, cy - size / 2, size, size);
+    return true;
+  }
 
   function syncBoard() {
     if (board === session.board) return;
@@ -97,44 +133,55 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
     }
   }
 
-  function drawCracks(b, x, y, name, step) {
-    if (atlas && !atlas.placeholder) {
-      const e = atlas.get(name);
+  function drawSurface() {
+    lctx.clearRect(0, 0, BOARD_W, BOARD_H);
+    lctx.beginPath();
+    lctx.roundRect(0.5, 0.5, BOARD_W - 1, BOARD_H - 1, BOARD_STYLE.radius);
+    lctx.fillStyle = BOARD_STYLE.fill;
+    lctx.fill();
+    lctx.strokeStyle = COLORS.border;
+    lctx.lineWidth = 1;
+    lctx.stroke();
+    lctx.beginPath();
+    for (let x = GRID_STEP; x < BOARD_W; x += GRID_STEP) {
+      lctx.moveTo(x + 0.5, 1);
+      lctx.lineTo(x + 0.5, BOARD_H - 1);
+    }
+    for (let y = GRID_STEP; y < BOARD_H; y += GRID_STEP) {
+      lctx.moveTo(1, y + 0.5);
+      lctx.lineTo(BOARD_W - 1, y + 0.5);
+    }
+    lctx.strokeStyle = BOARD_STYLE.grid;
+    lctx.stroke();
+    const line = lctx.createLinearGradient(LINE_INSET, 0, BOARD_W - LINE_INSET, 0);
+    line.addColorStop(0, 'rgba(0,0,0,0)');
+    line.addColorStop(0.15, COLORS.border);
+    line.addColorStop(0.85, COLORS.border);
+    line.addColorStop(1, 'rgba(0,0,0,0)');
+    lctx.fillStyle = line;
+    lctx.fillRect(LINE_INSET, FLOOR_Y, BOARD_W - 2 * LINE_INSET, 1);
+  }
+
+  function drawBlock(b, x, y, crack) {
+    if (atlas) {
+      const e = atlas.get(BLOCK_FRAME[b.type]);
       lctx.drawImage(e.source, e.sx, e.sy, e.sw, e.sh, x, y, CELL_W, CELL_H);
+      if (crack) {
+        const c = atlas.get(crack);
+        lctx.drawImage(c.source, c.sx, c.sy, c.sw, c.sh, x, y, CELL_W, CELL_H);
+      }
       return;
     }
-    lctx.strokeStyle = 'rgba(0,0,0,0.55)';
+    lctx.strokeStyle = BURST[b.type];
     lctx.lineWidth = 2;
-    lctx.beginPath();
-    for (let k = 0; k <= step; k++) {
-      const sx = x + 20 + k * 30;
-      lctx.moveTo(sx, y + 4);
-      lctx.lineTo(sx + 8, y + 22);
-      lctx.lineTo(sx - 6, y + CELL_H - 4);
-    }
-    lctx.stroke();
+    lctx.strokeRect(x + 2, y + 2, CELL_W - 4, CELL_H - 4);
   }
 
   function drawLayer() {
     stats.layerRedraws++;
-    lctx.fillStyle = '#0B0F24';
-    lctx.fillRect(0, 0, BOARD_W, BOARD_H);
-    lctx.strokeStyle = 'rgba(255,255,255,0.06)';
-    lctx.lineWidth = 1;
-    lctx.beginPath();
-    for (let c = 0; c <= board.cols; c++) {
-      lctx.moveTo(GRID_X + c * CELL_W, 0);
-      lctx.lineTo(GRID_X + c * CELL_W, GRID_H);
-    }
-    for (let r = 0; r <= board.rows; r++) {
-      lctx.moveTo(GRID_X, r * CELL_H);
-      lctx.lineTo(GRID_X + GRID_W, r * CELL_H);
-    }
-    lctx.moveTo(GRID_X, FLOOR_Y);
-    lctx.lineTo(GRID_X + GRID_W, FLOOR_Y);
-    lctx.stroke();
+    drawSurface();
     lastHp.fill(0);
-    lctx.font = 'bold 22px system-ui, sans-serif';
+    lctx.font = HP_FONT;
     lctx.textAlign = 'center';
     lctx.textBaseline = 'middle';
     for (let i = 0; i < board.blocks.length; i++) {
@@ -143,14 +190,11 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
       lastHp[cell] = b.hp;
       const x = cellMinX(b.col);
       const y = cellMinY(b.row);
-      const step = b.type === 'indestructible' ? 0 : hpStep(b.hp, maxHp[cell]);
-      lctx.fillStyle = TINTS[b.type][step];
-      lctx.fillRect(x + 1, y + 1, CELL_W - 2, CELL_H - 2);
-      const crack = b.type === 'indestructible' ? null : crackFor(b.hp, maxHp[cell]);
-      if (crack) drawCracks(b, x, y, crack, step);
-      if (b.type !== 'indestructible') {
-        lctx.fillStyle = '#FFFFFF';
-        lctx.fillText(String(b.hp), x + CELL_W / 2, y + CELL_H / 2);
+      const steel = b.type === 'indestructible';
+      drawBlock(b, x, y, steel ? null : crackFor(b.hp, maxHp[cell]));
+      if (!steel) {
+        lctx.fillStyle = BLOCK_TEXT[b.type];
+        lctx.fillText(String(b.hp), x + CELL_W / 2, y + CELL_H / 2 + 1);
       }
     }
     stats.blocksDrawn = board.blocks.length;
@@ -166,81 +210,114 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
       const col = a % board.cols;
       const row = (a / board.cols) | 0;
       const name = BLOCK_TYPES[b];
-      particles.burst(cellMinX(col) + CELL_W / 2, cellMinY(row) + CELL_H / 2, name === 'core' ? 32 : 12, BURST_COLOR[name]);
+      particles.burst(cellMinX(col) + CELL_W / 2, cellMinY(row) + CELL_H / 2, name === 'core' ? 32 : 12, BURST[name]);
     }
   };
 
-  function drawAim(run) {
+  function refreshAim(run) {
     const c = aimCache;
-    if (c.lx !== run.launcherX || c.ax !== run.aim.x || c.ay !== run.aim.y || c.version !== stats.layerRedraws) {
-      origin.x = run.launcherX;
-      c.result = Raycaster.cast(origin, run.aim, board);
-      c.lx = run.launcherX;
-      c.ax = run.aim.x;
-      c.ay = run.aim.y;
-      c.version = stats.layerRedraws;
-    }
+    if (c.lx === run.launcherX && c.ax === run.aim.x && c.ay === run.aim.y && c.version === stats.layerRedraws) return;
+    origin.x = run.launcherX;
+    c.result = Raycaster.cast(origin, run.aim, board);
+    c.lx = run.launcherX;
+    c.ax = run.aim.x;
+    c.ay = run.aim.y;
+    c.version = stats.layerRedraws;
     const { contact, reflected } = c.result;
+    if (contact === null) return void (c.dots = 0);
+    aimPts[0] = run.launcherX;
+    aimPts[1] = LAUNCHER_Y;
+    aimPts[2] = contact.x;
+    aimPts[3] = contact.y;
+    aimPts[4] = reflected ? reflected.x1 : contact.x;
+    aimPts[5] = reflected ? reflected.y1 : contact.y;
+    c.dots = aimDots(aimPts, reflected ? 3 : 2, dots);
+  }
+
+  function drawAim(run) {
+    refreshAim(run);
+    const { contact } = aimCache.result;
     if (contact === null) return;
-    ctx.strokeStyle = 'rgba(45,226,230,0.8)';
-    ctx.lineWidth = 3;
-    ctx.setLineDash(DASH);
+    for (let i = 0; i < aimCache.dots; i++) {
+      ctx.globalAlpha = dots[i * 3 + 2];
+      if (!sprite(ctx, 'traj_dot', dots[i * 3], dots[i * 3 + 1], DOT_SPRITE)) {
+        ctx.fillStyle = FX.white;
+        ctx.fillRect(dots[i * 3] - 2, dots[i * 3 + 1] - 2, 4, 4);
+      }
+    }
+    ctx.globalAlpha = 1;
+    if (contact.surface === 'block') sprite(ctx, 'traj_impact', contact.x, contact.y, IMPACT_SPRITE);
+    else sprite(ctx, 'traj_bounce', contact.x, contact.y, BOUNCE_SPRITE);
+  }
+
+  function drawLauncher(x, enabled) {
+    if (enabled) {
+      ctx.drawImage(glow, x - GLOW_R, LAUNCHER_Y - GLOW_R);
+      stats.launcherGlow++;
+    }
+    ctx.strokeStyle = enabled ? COLORS.cyan : COLORS.textMuted;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash(RING_DASH);
     ctx.beginPath();
-    ctx.moveTo(run.launcherX, LAUNCHER_Y);
-    ctx.lineTo(contact.x, contact.y);
-    if (reflected) ctx.lineTo(reflected.x1, reflected.y1);
+    ctx.arc(x, LAUNCHER_Y, 16, 0, TWO_PI);
     ctx.stroke();
     ctx.setLineDash(NO_DASH);
+    ctx.fillStyle = FX.white;
+    ctx.beginPath();
+    ctx.arc(x, LAUNCHER_Y, 7, 0, TWO_PI);
+    ctx.fill();
   }
 
   function drawDynamic(state, run, dt, alpha) {
-    // hit flashes
-    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    // hit flashes (no sprite delivered yet: procedural, design E5)
+    ctx.fillStyle = FX.hitFlash;
     for (let i = 0; i < flash.length; i++) {
       if (flash[i] <= 0) continue;
       flash[i] -= dt;
       ctx.fillRect(cellMinX(i % board.cols) + 1, cellMinY((i / board.cols) | 0) + 1, CELL_W - 2, CELL_H - 2);
     }
-    // orbs
-    ctx.font = 'bold 20px system-ui, sans-serif';
+    // orbs with their +V value below (A11)
+    ctx.font = ORB_FONT;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (let i = 0; i < board.orbs.length; i++) {
       const o = board.orbs[i];
       if (o.captured) continue;
-      ctx.fillStyle = '#FFC857';
-      ctx.beginPath();
-      ctx.arc(o.x, o.y, o.radius, 0, TWO_PI);
-      ctx.fill();
-      ctx.fillStyle = '#0B0F24';
-      ctx.fillText(`+${o.value}`, o.x, o.y);
+      if (!sprite(ctx, 'orb_splitter', o.x, o.y, ORB_SPRITE)) {
+        ctx.strokeStyle = COLORS.cyan;
+        ctx.beginPath();
+        ctx.arc(o.x, o.y, o.radius, 0, TWO_PI);
+        ctx.stroke();
+      }
+      ctx.fillStyle = COLORS.cyan;
+      ctx.fillText(`+${o.value}`, o.x, o.y + ORB_SPRITE / 2 + 8);
     }
+    const aiming = state === 'Aiming' && !run.paused;
     if (state === 'Aiming' && run.aim) drawAim(run);
     // balls, interpolated while the simulation is running
     const flying = (state === 'Firing' || state === 'Simulating') && !run.paused;
     const k = flying ? alpha * STEP * run.speed : 0;
-    ctx.fillStyle = '#FFFFFF';
-    ctx.beginPath();
+    ctx.fillStyle = FX.white;
     for (let i = 0; i < session.balls.count; i++) {
       const b = session.balls.items[i];
       const x = b.x + b.dir.x * b.speed * k;
-      ctx.moveTo(x + BALL_RADIUS, b.y + b.dir.y * b.speed * k);
-      ctx.arc(x, b.y + b.dir.y * b.speed * k, BALL_RADIUS, 0, TWO_PI);
+      const y = b.y + b.dir.y * b.speed * k;
+      if (!sprite(ctx, 'ball', x, y, BALL_SPRITE)) {
+        ctx.beginPath();
+        ctx.arc(x, y, BALL_RADIUS, 0, TWO_PI);
+        ctx.fill();
+      }
     }
-    ctx.fill();
-    // launcher: cyan ring, grey when it cannot fire
-    ctx.strokeStyle = state === 'Aiming' ? '#2DE2E6' : '#6B7280';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(run.launcherX, LAUNCHER_Y, 18, 0, TWO_PI);
-    ctx.stroke();
+    drawLauncher(run.launcherX, aiming);
+    const p = ui.pointer;
+    if (aiming && p && p.inBoard) sprite(ctx, 'cursor_crosshair', p.x, p.y, CROSS_SPRITE);
     // particles
     const items = particles.pool.items;
     for (let i = 0; i < particles.pool.count; i++) {
-      const p = items[i];
-      ctx.globalAlpha = p.life / p.maxLife;
-      ctx.fillStyle = p.color;
-      ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+      const q = items[i];
+      ctx.globalAlpha = q.life / q.maxLife;
+      ctx.fillStyle = q.color;
+      ctx.fillRect(q.x - q.size / 2, q.y - q.size / 2, q.size, q.size);
     }
     ctx.globalAlpha = 1;
   }
