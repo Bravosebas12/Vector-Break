@@ -282,3 +282,28 @@ Tasks 6b.1-6b.3 are marked `[x]`. Branch `feat/anglecraft-v1-slice-6b` (base sli
 - Aim preview is cached (recomputed only when launcher, aim or layer version changes) because `Raycaster.cast` allocates.
 - Stress "CPU per frame" is measured by a test-only probe in `main.js` (`window.__ANGLECRAFT_PERF__`, only with `?test=1`): time inside each loop frame, counted from the first frame with 50 active balls. Fixture `level-99` is a trap-valid dense board with a clear column to the core.
 - No page.clock in any new test, so no fixed-time pause flakiness.
+
+## Slice 7a: strings + HudModel - COMPLETE (3/3)
+
+Tasks 7a.1-7a.3 are marked `[x]`. Branch `feat/anglecraft-v1-slice-7a` (base slice 6b). Slice 7b NOT started.
+
+### TDD Cycle Evidence
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| 7a.1 | covered by `tests/unit/hud-model.spec.js` | Unit | N/A (new) | n/a (copy constants) | used by 7a.2/7a.3 tests | Skipped: purely structural constants; no-PRECISION/no-Esc asserted against the copy | None needed |
+| 7a.2 | `tests/unit/hud-model.spec.js` | Unit | N/A (new) | module `Hud.js` missing (run errored, no tests found) | 11/11 | pips 8/12/20, colors 5/4/3/2/1/0, mm:ss 4 cases, speed 1X/4X, launch enabled/disabled, pause via real session | None needed |
+| 7a.3 | `tests/unit/hud-model.spec.js` | Unit | 11 green | 6 failed (`modalModel is not defined`) | 17/17 | victory 2-star with next, 3-star perfect, last level, defeat, no modal in other states | None needed |
+
+### Work Unit Evidence
+
+| Evidence | Value |
+|---|---|
+| Focused test command and exact result | `npx playwright test tests/unit/hud-model.spec.js --project=unit`: 17 passed; full suite 346 passed x3 |
+| Runtime harness | N/A: pure DOM-free model (Node unit); one test drives a real `createSession` for the pause toggle. Canvas drawing arrives in 7b.3 |
+| Rollback boundary | `src/js/system/{Hud,strings}.js`, `tests/unit/hud-model.spec.js`, tasks.md/apply-progress.md |
+
+### Design notes / deviations
+- `hudModel(snap, {levelCount})` returns `{telemetry, control, pause}`; `modalModel(snap, {levelCount, record})` returns `null | victory | defeat` with `buttons[{label, action, primary}]` and `primaryAction` (Enter). `record` is injected by the caller because the session snapshot has no `result.record` until Progression (7b).
+- Victory primary is Siguiente nivel, or Repetir on the last level. Speed labels use `1X/2X/4X` per the spec.
+- Renderer not touched; drawing of HUD/modals is wired in 7b.3.

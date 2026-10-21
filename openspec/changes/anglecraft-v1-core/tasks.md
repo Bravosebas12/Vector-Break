@@ -101,9 +101,9 @@ Notes: slices 5, 6, 7, 9 are pre-split (each estimated at or above ~900 lines co
 
 ## Slice 7a: strings + HudModel (hud; HU-03, HU-05 s1)
 
-- [ ] 7a.1 GREEN `src/js/system/strings.js` (Spanish copy, incl. start-screen keys). (P2, E9)
-- [ ] 7a.2 RED `tests/unit/hud-model.spec.js`: BOLAS/pips (A3), TURNOS colors (white, amber <=3, magenta <=1), TIEMPO `mm:ss`, control panel, pause overlay -> GREEN `src/js/system/Hud.js`. (Telemetry, Turns bar, Control panel, Pause overlay)
-- [ ] 7a.3 RED modal model tests (victory stars/score/record, defeat PUNTOS + "Reiniciar puzzle [R]", `Enter` primary) -> GREEN modal model in `Hud.js`. (Victory/Defeat modal, Button actions)
+- [x] 7a.1 GREEN `src/js/system/strings.js` (Spanish copy, incl. start-screen keys). (P2, E9)
+- [x] 7a.2 RED `tests/unit/hud-model.spec.js`: BOLAS/pips (A3), TURNOS colors (white, amber <=3, magenta <=1), TIEMPO `mm:ss`, control panel, pause overlay -> GREEN `src/js/system/Hud.js`. (Telemetry, Turns bar, Control panel, Pause overlay)
+- [x] 7a.3 RED modal model tests (victory stars/score/record, defeat PUNTOS + "Reiniciar puzzle [R]", `Enter` primary) -> GREEN modal model in `Hud.js`. (Victory/Defeat modal, Button actions)
 
 ## Slice 7b: Progression + modals (progression; HU-03, HU-08 s1/s3)
 
