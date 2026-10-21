@@ -129,6 +129,6 @@ Notes: slices 5, 6, 7, 9 are pre-split (each estimated at or above ~900 lines co
 
 ## Slice 9b: Solutions + playthrough (level-content; Completability)
 
-- [ ] 9b.1 GREEN `tests/fixtures/solutions.json`: seeded angle sequences L1-L6 found via hook.
-- [ ] 9b.2 RED `tests/e2e/playthrough.spec.js`: Title start, L1 -> L6 Victory in order, records written, NEXT gating, end-of-content notice -> GREEN tune levels if any fails. (Completability, Chain and end)
-- [ ] 9b.3 Final run of `npx playwright test` green; confirm `package.json` has no `dependencies`.
+- [x] 9b.1 GREEN `tests/fixtures/solutions.json`: seeded angle sequences L1-L6 found via hook.
+- [x] 9b.2 RED `tests/e2e/playthrough.spec.js`: Title start, L1 -> L6 Victory in order, records written, NEXT gating, end-of-content notice -> GREEN tune levels if any fails. (Completability, Chain and end)
+- [x] 9b.3 Final run of `npx playwright test` green; confirm `package.json` has no `dependencies`.
