@@ -74,6 +74,10 @@ Design/                    User stories, UI mockup and design requests
 .claude/skills/            Project skills used for AI-assisted development
 ```
 
+## Known gap and next steps
+
+The v1 visuals do not yet match the delivered design (sprites, colors, fonts, HUD layout, logo). The diagnosis and the plan to fix it are in [`docs/plan-fidelidad-visual.md`](docs/plan-fidelidad-visual.md).
+
 ## Specifications
 
 The behavior of the game is specified in [`openspec/specs/`](openspec/specs/) (12 capabilities). The full history of the first release (exploration, proposal, design, tasks and verification) is archived in [`openspec/changes/archive/2026-10-21-anglecraft-v1-core/`](openspec/changes/archive/2026-10-21-anglecraft-v1-core/).
