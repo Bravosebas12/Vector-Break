@@ -73,11 +73,11 @@ Notes: slices 5, 6, 7, 9 are pre-split (each estimated at or above ~900 lines co
 
 ## Slice 5a: FSM, input, session core (game-state; HU-01, HU-03, HU-05, HU-09 s1)
 
-- [ ] 5a.1 RED `tests/unit/fsm.spec.js`: table rows incl. `Loading -> Title`, `Loading -> Aiming` throws, no return to Loading/Title -> GREEN `src/js/system/Fsm.js`. (FSM states)
-- [ ] 5a.2 RED `tests/unit/input.spec.js`: `Loading` ignores all, `Title` only pointer FIRE, right-click/`Esc` inert, key map 1/2/4/P/R/Space -> GREEN `src/js/system/Input.js`. (Input mapping, Speed keys)
-- [ ] 5a.3 GREEN `src/js/system/EventRing.js` + test `tests/unit/session.spec.js` case: 1024 ring, overwrite oldest, `eventOverflow` counted, state unaffected. (D2)
-- [ ] 5a.4 RED session tests: `setLoadProgress` -> Title, `loadLevel` atomic, AIM only in Aiming, FIRE locks direction -> GREEN `src/js/system/GameSession.js` core (`createSession`, `dispatch`, `step`, `snapshot`). (Aim only in Aiming, Fire locks direction)
-- [ ] 5a.5 RED pause/restart/NEXT gating tests (paused only PAUSE/RESTART act; PAUSE ignored in Resolving/Victory/GameOver; RESTART clears paused) -> GREEN in `GameSession.js`. (Pause, Restart)
+- [x] 5a.1 RED `tests/unit/fsm.spec.js`: table rows incl. `Loading -> Title`, `Loading -> Aiming` throws, no return to Loading/Title -> GREEN `src/js/system/Fsm.js`. (FSM states)
+- [x] 5a.2 RED `tests/unit/input.spec.js`: `Loading` ignores all, `Title` only pointer FIRE, right-click/`Esc` inert, key map 1/2/4/P/R/Space -> GREEN `src/js/system/Input.js`. (Input mapping, Speed keys)
+- [x] 5a.3 GREEN `src/js/system/EventRing.js` + test `tests/unit/session.spec.js` case: 1024 ring, overwrite oldest, `eventOverflow` counted, state unaffected. (D2)
+- [x] 5a.4 RED session tests: `setLoadProgress` -> Title, `loadLevel` atomic, AIM only in Aiming, FIRE locks direction -> GREEN `src/js/system/GameSession.js` core (`createSession`, `dispatch`, `step`, `snapshot`). (Aim only in Aiming, Fire locks direction)
+- [x] 5a.5 RED pause/restart/NEXT gating tests (paused only PAUSE/RESTART act; PAUSE ignored in Resolving/Victory/GameOver; RESTART clears paused) -> GREEN in `GameSession.js`. (Pause, Restart)
 
 ## Slice 5b: Volley economy, hook, boot (volley-economy; HU-03, HU-04, HU-05)
 

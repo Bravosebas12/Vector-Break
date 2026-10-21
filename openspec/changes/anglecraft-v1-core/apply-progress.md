@@ -155,3 +155,36 @@ Tasks 4.1-4.3 are marked `[x]` in `tasks.md`. Slices 5a-9b are NOT started. Bran
 - Level 2 under `preview` geometry: entry (6,2) has NO reaching angle at all (no direct line holds). Under `static` it is reachable via wall-left.
 - Level 3 passes under both geometries.
 - The two failing content assertions are encoded as `test.fail()` in `reachability.spec.js`; remove the marker when slice 9a retunes the levels.
+
+## Slice 5a: FSM, input, session core (PR 5a of 14) - COMPLETE (5/5), size:exception recommended
+
+Tasks 5a.1-5a.5 are marked `[x]` in `tasks.md`. Slices 5b-9b are NOT started. Branch `feat/anglecraft-v1-slice-5a` (base slice 4).
+
+### TDD Cycle Evidence
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| 5a.1 | `tests/unit/fsm.spec.js` | Unit | N/A (new) | `Cannot find module Fsm.js`, no tests found | 26/26 | 13 legal rows, 8 illegal rows, no return to Loading/Title, non-strict, unknown state, onEnter | None needed |
+| 5a.2 | `tests/unit/input.spec.js` | Unit | N/A (new) | `Cannot find module Input.js`, no tests found | 22/22 | 8 key mappings, repeat, inert inputs, per-state accepted-action tables, paused, speed domain | None needed |
+| 5a.3 | `tests/unit/session.spec.js` (EventRing) | Unit | N/A (new) | Slip: `EventRing.js` was written in the same batch as its spec, before the spec was executed; the spec was authored first but no failing run was captured | 4/4 | order, exactly-full, overwrite + count, wrap after drain | None needed |
+| 5a.4 | `tests/unit/session.spec.js` | Unit | 18 session tests green after GREEN | `Cannot find module GameSession.js`, no tests found | 18/18 | boot, atomic load (bad JSON, bad index, bad setLevels), AIM, FIRE lock, step time, ring overflow vs state | `index`/`found` handling for ad-hoc level objects |
+| 5a.5 | `tests/unit/session.spec.js` | Unit | 18 green | 8 of 36 failed (pause x2, restart x5, NEXT x1) | 36/36 | pause freeze/resume, paused gating, 3 ignored states, 4 restart origins, restart level kept, NEXT unlocked/locked/last/outside Victory | None needed |
+
+### Test Summary
+- New tests: 26 fsm, 22 input, 36 session (incl. 4 EventRing) = 84; full `npx playwright test`: 264 passed, exit 0.
+
+### Work Unit Evidence
+
+| Evidence | Value |
+|---|---|
+| Focused test command and exact result | `npx playwright test --project=unit tests/unit/{fsm,input,session}.spec.js`: 84 passed |
+| Runtime harness | N/A: DOM-free session, no runtime boundary |
+| Rollback boundary | `src/js/system/{Fsm,Input,EventRing,GameSession}.js`, `tests/unit/{fsm,input,session}.spec.js`, tasks.md/apply-progress.md |
+
+### Design notes / deviations
+- Size: ~900 changed lines (budget 800); the three specs are table-driven but cover ~84 cases. Recommend `size:exception` or moving 5a.5 (pause/restart/NEXT) to a follow-up.
+- `Fsm` table also allows `Firing|Simulating|Aiming -> Aiming` (RESTART) and `Victory|GameOver -> Aiming` (RESTART/NEXT); the spec lists only RESTART as "reload -> Aiming".
+- `Input.js` exports `mapEvent` and `allows` (single gating table used by the session). `Enter` maps to NEXT (design 7a: Enter is the modal primary action); not in the 5a task key list.
+- `FIRE` without a valid prior `AIM` is ignored (skill: "valid angle"); keyboard Space before any mouse move does nothing.
+- `createSession` takes an injected `canAccess(index)` (default locked) until Progression (7b); `session.fsm`, `session.events`, `session.board` are exposed for tests. Volley emission, landing, Resolving and damage are slice 5b; `balls` is `[]` and Firing never advances by itself.
+- `step(dt)` counts `playTime` in Aiming/Firing/Simulating and `simTime`/`volleySimTime` (scaled by speed) in Firing/Simulating, skipped while paused.
