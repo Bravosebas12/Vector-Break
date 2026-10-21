@@ -6,10 +6,15 @@ export const strings = Object.freeze({
   loadError: 'No se pudieron cargar los niveles',
 
   telemetry: 'TELEMETRÍA',
+  playing: 'EN CURSO',
   stage: 'STAGE',
   puzzle: 'PUZZLE',
   balls: 'BOLAS',
   turns: 'TURNOS',
+  turnsCaption: 'LÍMITE DEL PUZZLE · {n} TURNOS',
+  inFlight: 'en vuelo',
+  available: 'disponible',
+  used: 'usada',
   points: 'PUNTOS',
   time: 'TIEMPO',
 
@@ -18,14 +23,16 @@ export const strings = Object.freeze({
   speed: 'VELOCIDAD',
   shortcuts: 'ATAJOS',
   pause: 'PAUSA',
+  pauseButton: 'Pausa',
+  resume: 'Seguir',
 
   // v1 controls only: no right-click cancel and no Esc.
   shortcutList: Object.freeze([
-    { keys: 'Mouse', action: 'Apuntar' },
-    { keys: 'Clic / Espacio', action: 'Lanzar' },
-    { keys: '1 / 2 / 4', action: 'Velocidad' },
-    { keys: 'P', action: 'Pausa' },
-    { keys: 'R', action: 'Reiniciar' },
+    Object.freeze({ label: 'Apuntar', keys: Object.freeze(['Ratón']) }),
+    Object.freeze({ label: 'Lanzar', keys: Object.freeze(['Clic', 'Space']) }),
+    Object.freeze({ label: 'Velocidad', keys: Object.freeze(['1', '2', '4']) }),
+    Object.freeze({ label: 'Pausa', keys: Object.freeze(['P']) }),
+    Object.freeze({ label: 'Reiniciar', keys: Object.freeze(['R']) }),
   ]),
 
   solved: 'RESUELTO',
