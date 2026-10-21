@@ -17,14 +17,14 @@ Strict TDD: in every task write or update the failing test first, then the code.
 
 ## 2. Slice 2 - Board sprites and aim preview (rendering)
 
-- [ ] 2.1 Test: static layer draws `brick_low/mid/high/steel` per type at 112x56 and no `fillRect` for block bodies (mock ctx). Replace the `TINTS` ramp with sprites; HP text font/colors from `Theme.js`; steel without number.
-- [ ] 2.2 Test: crack overlay sequence none/30/60/90 for HP 10/7/4/1 (existing `crackFor`, now drawn from the atlas only).
-- [ ] 2.3 Test: board surface (fill, 32 px grid, launch line gradient at y 956) is in the static layer; layer redraw count unchanged when idle.
-- [ ] 2.4 Test: balls drawn with `ball` at 64x64 centered on interpolated positions; orbs with `orb_splitter` 64x64 + `+V` label.
-- [ ] 2.5 Test: launcher enabled vs disabled styling (cyan dashed ring + glow vs muted, no glow); cached glow sprite created once.
-- [ ] 2.6 Test: aim preview dot positions/opacity (28 px spacing from 36 px, `1 - 0.55 s/total`) computed once per cache refresh into a preallocated buffer; `traj_bounce` and `traj_impact` placed at reflection/contact; crosshair at mouse; `cursor: none` over the board.
-- [ ] 2.7 Test: particle burst colors per block type from `Theme.js`.
-- [ ] 2.8 Re-run the stress spec: 60 FPS budget and zero pool growth still hold.
+- [x] 2.1 Test: static layer draws `brick_low/mid/high/steel` per type at 112x56 and no `fillRect` for block bodies (mock ctx). Replace the `TINTS` ramp with sprites; HP text font/colors from `Theme.js`; steel without number.
+- [x] 2.2 Test: crack overlay sequence none/30/60/90 for HP 10/7/4/1 (existing `crackFor`, now drawn from the atlas only).
+- [x] 2.3 Test: board surface (fill, 32 px grid, launch line gradient at y 956) is in the static layer; layer redraw count unchanged when idle.
+- [x] 2.4 Test: balls drawn with `ball` at 64x64 centered on interpolated positions; orbs with `orb_splitter` 64x64 + `+V` label.
+- [x] 2.5 Test: launcher enabled vs disabled styling (cyan dashed ring + glow vs muted, no glow); cached glow sprite created once.
+- [x] 2.6 Test: aim preview dot positions/opacity (28 px spacing from 36 px, `1 - 0.55 s/total`) computed once per cache refresh into a preallocated buffer; `traj_bounce` and `traj_impact` placed at reflection/contact; crosshair at mouse; `cursor: none` over the board.
+- [x] 2.7 Test: particle burst colors per block type from `Theme.js`.
+- [x] 2.8 Re-run the stress spec: 60 FPS budget and zero pool growth still hold.
 
 ## 3. Slice 3 - DOM HUD panels and pause (hud)
 

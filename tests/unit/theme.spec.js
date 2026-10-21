@@ -33,3 +33,9 @@ test('every Theme.js token has the same value as its --c-* custom property in st
   for (const [name, value] of Object.entries(COLORS)) expect(tokens[kebab(name)], name).toBe(value);
   expect(Object.keys(tokens).sort()).toEqual(Object.keys(COLORS).map(kebab).sort());
 });
+
+// visual-theme spec "No stray colors": drawing modules take colors from Theme.js only.
+test('Renderer.js has no hex color literals', () => {
+  const src = readFileSync(new URL('../../src/js/system/Renderer.js', import.meta.url), 'utf8');
+  expect(src.match(/#[0-9a-fA-F]{3,8}\b/g)).toBeNull();
+});

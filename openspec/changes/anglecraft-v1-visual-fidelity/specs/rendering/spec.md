@@ -71,7 +71,7 @@ The board MUST be drawn as in the mockup: panel fill `rgba(10,13,18,.78)`, a 32 
 
 ### Requirement: Aim preview styling (HU-01)
 
-While `Aiming`, the preview MUST be drawn with `traj_dot` sprites every 28 px along the predicted path starting 36 px from the launcher, with opacity `1 - 0.55 * s / total` (s = distance along the path). A `traj_bounce` sprite MUST mark the bounce point and a `traj_impact` sprite MUST mark the predicted contact. The `cursor_crosshair` sprite MUST follow the mouse over the board and the system cursor MUST be hidden there. Path geometry is unchanged (raycaster, 1 bounce).
+While `Aiming`, the preview MUST be drawn with `traj_dot` sprites every 28 px along the predicted path starting 36 px from the launcher, with opacity `1 - 0.55 * s / total` (s = distance along the path). The first predicted contact MUST be marked with `traj_impact` when it is a block and with `traj_bounce` when it is a wall or the ceiling; dots continue along the reflected segment. The `cursor_crosshair` sprite MUST follow the mouse over the board and the system cursor MUST be hidden there. Path geometry is unchanged (raycaster, 1 bounce).
 
 #### Scenario: Dot spacing
 - GIVEN a straight preview segment 280 px long

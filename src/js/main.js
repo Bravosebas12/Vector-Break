@@ -15,6 +15,7 @@ import { createRenderer, BOARD_ORIGIN } from './system/Renderer.js';
 import { createProgression } from './system/Progression.js';
 import { AssetLoader } from './system/AssetLoader.js';
 import { mapEvent } from './system/Input.js';
+import { BOARD_W, BOARD_H } from './system/Layout.js';
 import { modalModel } from './system/Hud.js';
 import { hitModalButton } from './system/HudView.js';
 import { RecordingSink, createSoundMapper, teeSink } from './system/AudioSinks.js';
@@ -72,9 +73,16 @@ const send = (record) => {
   const action = mapEvent(record);
   if (action) session.dispatch(action);
 };
+// The crosshair sprite (Renderer) replaces the system cursor while the pointer is over the board.
+const pointer = (ui.pointer = { x: 0, y: 0, inBoard: false });
 window.addEventListener('mousemove', (e) => {
   const p = mapClientToLogical(e.clientX, e.clientY, canvas.getBoundingClientRect());
-  send({ type: 'mousemove', x: p.x - BOARD_ORIGIN.x, y: p.y - BOARD_ORIGIN.y }); // AIM works in board coordinates
+  pointer.x = p.x - BOARD_ORIGIN.x;
+  pointer.y = p.y - BOARD_ORIGIN.y;
+  const inBoard = pointer.x >= 0 && pointer.x <= BOARD_W && pointer.y >= 0 && pointer.y <= BOARD_H;
+  if (inBoard !== pointer.inBoard) canvas.style.cursor = inBoard ? 'none' : '';
+  pointer.inBoard = inBoard;
+  send({ type: 'mousemove', x: pointer.x, y: pointer.y }); // AIM works in board coordinates
 });
 // Result modals: a left press is hit-tested against the drawn buttons in logical coordinates (same space as HudView).
 const pressModal = (e) => {
