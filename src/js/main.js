@@ -46,6 +46,8 @@ const session = createSession({
   audio,
   sealedFloor: stress,
   volleyCapS: stress ? Infinity : 45,
+  // ?test=1 pins the test-only 'turn' mode (v1 emission) for the existing suite; tests opt in to 1..3.
+  fireMode: testMode ? 'turn' : 1,
 });
 // Event ring -> sounds. Combo clock is the play time in ms (read from the live run, no snapshot).
 const onSound = createSoundMapper({ audio, now: () => session.run.playTime * 1000 });

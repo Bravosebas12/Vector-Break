@@ -1,7 +1,7 @@
 // Flag-gated test hook and determinism: openspec test-harness spec
 import { test, expect } from '@playwright/test';
 
-const METHODS = ['step', 'snapshot', 'loadLevel', 'fire', 'aim', 'action', 'setSeed', 'setVolley', 'start', 'audioLog', 'render'];
+const METHODS = ['step', 'snapshot', 'loadLevel', 'fire', 'aim', 'action', 'setSeed', 'setVolley', 'start', 'audioLog', 'render', 'setFireMode'];
 const state = (page) => page.evaluate(() => window.__ANGLECRAFT__.snapshot().state);
 const ready = async (page, url = '/?test=1') => {
   await page.goto(url);

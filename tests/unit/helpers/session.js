@@ -11,7 +11,7 @@ export const LEVELS = [level(1), level(2), level(3)];
 export const UP = { type: 'AIM', x: 540, y: 300 };
 
 export function boot(opts = {}) {
-  const s = createSession({ rng: new Rng(7), ...opts });
+  const s = createSession({ rng: new Rng(7), fireMode: 'turn', ...opts });
   s.setLevels(LEVELS);
   s.setLoadProgress(1, 1);
   s.dispatch({ type: 'FIRE', pointer: true });

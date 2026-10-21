@@ -58,7 +58,7 @@ test('restart never touches the stored records', async ({ page }) => {
      const storage = { getItem: (k) => real.getItem(k), setItem: (k, v) => (writes.push(k), real.setItem(k, v)) };
      const progression = createProgression({ storage });
      progression.submit(0, ${R});
-     const s = createSession({ rng: new Rng(1), progression });
+     const s = createSession({ rng: new Rng(1), progression, fireMode: 'turn' });
      s.setLevels([level]);
      s.setLoadProgress(1, 1);
      s.dispatch({ type: 'FIRE', pointer: true });
