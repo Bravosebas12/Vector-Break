@@ -4,7 +4,7 @@ Mode: Strict TDD. Delivery: auto-chain / feature-branch-chain (tracker `feature/
 
 ## Slice 1: Test harness + spikes (PR 1 of 14) - COMPLETE (9/9)
 
-Tasks 1.1-1.9 are marked `[x]` in `tasks.md`. Slice 2 is COMPLETE (see below). Slices 3-9b are NOT started.
+Tasks 1.1-1.9 are marked `[x]` in `tasks.md`. Slice 2 is COMPLETE (see below). Slices 4-9b are NOT started.
 
 ### Spike results
 
@@ -51,7 +51,7 @@ Honest note on RED for 1.5/1.6/1.8: these are spike/boot probes against pre-exis
 
 ## Slice 2: Physics (PR 2 of 14) - COMPLETE (5/5)
 
-Tasks 2.1-2.5 are marked `[x]` in `tasks.md`. Slices 3-9b are NOT started. Branch `feat/anglecraft-v1-slice-2` (base `feat/anglecraft-v1-slice-1`).
+Tasks 2.1-2.5 are marked `[x]` in `tasks.md`. Slices 4-9b are NOT started. Branch `feat/anglecraft-v1-slice-2` (base `feat/anglecraft-v1-slice-1`).
 
 ### TDD Cycle Evidence
 
@@ -86,3 +86,36 @@ Note on 2.3: tasks.md lists it as GREEN-only; under Strict TDD two small specs (
 - Ball direction is `ball.dir` (a `Vector2D`), `ball.speed` is the scalar. `ObjectPool` exposes `items`, `count`, `size`, `created`; active objects occupy `items[0..count-1]`.
 - `Vector2D.js` and `ObjectPool.js` export only their class (keeps the slice-1 esm spike valid).
 - Size: ~1,300 changed lines (about 470 source, 830 tests), above the 800 review budget; cannot shrink without deleting tests. Recommend `size:exception` for PR 2.
+
+## Slice 3: Level loading (PR 3 of 14) - COMPLETE (5/5)
+
+Tasks 3.1-3.5 are marked `[x]` in `tasks.md`. Slices 4-9b are NOT started. Branch `feat/anglecraft-v1-slice-3` (base slice 2b).
+
+### TDD Cycle Evidence
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| 3.1 | covered by `level-catalog.spec.js` (Board entities) and validator specs | Unit | N/A (stubs only) | Entities written GREEN-only per task; exercised by RED specs below | passes via 3.2/3.4 | HP table per type, orb vs solid | None needed |
+| 3.2 | `tests/unit/level-validator.spec.js` | Unit | N/A (new) | `Cannot find module LevelValidator.js` | passed | 3 levels, 7 missing fields, 8 bad values, 8 HP boundaries, core HP, hp on titanium/multiplier, bounds x4, duplicate, no core, launcher edges, non-object | None needed |
+| 3.3 | `tests/unit/trap.spec.js` | Unit | N/A (new) | `Cannot find module Board.js` | 13/13 after one test fix | L1/L2/L3 authored entries, wrong entry, 1-cell, 2-cell, closed (I and R), 3-wide, open core, standard not wall, orb entry, pocket > 12, per-core errors | Test fix: 3-row band so no 2-cell vertical cut exists (legitimate entry found by the analysis) |
+| 3.4 | `tests/unit/level-catalog.spec.js` | Unit | N/A (new) | `Cannot find module` (Board/LevelCatalog) | passed | index/JSON load, bad shots/99/-1 keep board, atomic setLevels, cell mapping, launcher 0.5/0.25 | `Multiplier.type` added so `Board.typeAt` is uniform |
+| 3.5 | `tests/unit/level-validator.spec.js` | Unit | N/A | injected-reachability test written first | passed | trap error via validate, injected check, default stub | None needed |
+
+### Test Summary
+- New tests: 59 (validator 37, trap 13, catalog/board 9); full run `npx playwright test`: 154 passed (11.2 s), exit 0.
+
+### Work Unit Evidence
+
+| Evidence | Value |
+|---|---|
+| Focused test command and exact result | `npx playwright test --project=unit tests/unit/{level-validator,trap,level-catalog}.spec.js`: 59 passed |
+| Runtime harness | N/A: pure modules, no runtime boundary |
+| Rollback boundary | `src/js/entities/{Block,Multiplier}.js`, `src/js/system/{Board,LevelValidator,TrapAnalysis,LevelCatalog}.js`, `tests/unit/{level-validator,trap,level-catalog}.spec.js`, tasks.md/apply-progress.md |
+
+### Design notes / deviations
+- `LevelCatalog` owns atomic `loadLevel` (validate, build, then swap `board`); `GameSession` will delegate in slice 5a.
+- `validateLevel(level, { reachability })`: static reachability is an injectable stub returning `[]`, replaced by `Reachability.sweep` in task 4.3.
+- Errors are `{code, field?, message}`; codes: MISSING_FIELD, INVALID_FIELD, INVALID_LEVEL, BAD_TYPE, BAD_HP, UNEXPECTED_FIELD, OUT_OF_BOUNDS, DUPLICATE_CELL, NO_CORE, LAUNCHER_OUT_OF_RANGE, TRAP_CLOSED, TRAP_ENTRY_TOO_WIDE (trap errors carry col,row).
+- Trap analysis: a valid entry may be 2 vertically adjacent cells too (design says 4-adjacent); pocket excludes the entry cells. LAUNCH joins row `rows-1`.
+- Separate spec `level-catalog.spec.js` added (tasks.md names only two spec files) for Board and atomic load.
+- Trap-wall predicate: indestructible, reinforced, core; spec OI-1 "high-HP" resolved as `reinforced` only (no HP threshold).

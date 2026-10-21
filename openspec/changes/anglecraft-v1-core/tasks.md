@@ -59,11 +59,11 @@ Notes: slices 5, 6, 7, 9 are pre-split (each estimated at or above ~900 lines co
 
 ## Slice 3: Level loading (level-loading; HU-06 s4, HU-08 s4)
 
-- [ ] 3.1 GREEN `src/js/entities/Block.js`, `src/js/entities/Multiplier.js` (types, HP ranges, orb radius 24). (Entities, Block types)
-- [ ] 3.2 RED `tests/unit/level-validator.spec.js`: schema fields, HP ranges, grid integrity, `LAUNCHER_OUT_OF_RANGE`, hard failure -> GREEN `src/js/system/LevelValidator.js`. (Schema, Grid, Hard failure)
-- [ ] 3.3 RED `tests/unit/trap.spec.js`: `TRAP_CLOSED`, `TRAP_ENTRY_TOO_WIDE`, 1-2 cell entry, pocket 1..12, standard never a wall -> GREEN `src/js/system/TrapAnalysis.js`. (Core and loop-trap, P4)
-- [ ] 3.4 RED atomic-load test (failed `loadLevel` keeps old state) -> GREEN `src/js/system/Board.js`, `src/js/system/LevelCatalog.js`. (Board B1, No partial state)
-- [ ] 3.5 Wire `validateLevel` to call `TrapAnalysis` and static reachability stub (completed in 4.4). (Core reachability)
+- [x] 3.1 GREEN `src/js/entities/Block.js`, `src/js/entities/Multiplier.js` (types, HP ranges, orb radius 24). (Entities, Block types)
+- [x] 3.2 RED `tests/unit/level-validator.spec.js`: schema fields, HP ranges, grid integrity, `LAUNCHER_OUT_OF_RANGE`, hard failure -> GREEN `src/js/system/LevelValidator.js`. (Schema, Grid, Hard failure)
+- [x] 3.3 RED `tests/unit/trap.spec.js`: `TRAP_CLOSED`, `TRAP_ENTRY_TOO_WIDE`, 1-2 cell entry, pocket 1..12, standard never a wall -> GREEN `src/js/system/TrapAnalysis.js`. (Core and loop-trap, P4)
+- [x] 3.4 RED atomic-load test (failed `loadLevel` keeps old state) -> GREEN `src/js/system/Board.js`, `src/js/system/LevelCatalog.js`. (Board B1, No partial state)
+- [x] 3.5 Wire `validateLevel` to call `TrapAnalysis` and static reachability stub (completed in 4.4). (Core reachability)
 
 ## Slice 4: Aiming (aiming; HU-01)
 
