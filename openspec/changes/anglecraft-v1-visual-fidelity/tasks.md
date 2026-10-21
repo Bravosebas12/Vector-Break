@@ -51,7 +51,7 @@ Strict TDD: in every task write or update the failing test first, then the code.
 
 ## 6. Slice 6 - Visual baselines and sign-off (test-harness)
 
-- [ ] 6.1 Visual tests: title, aiming (fixed aim), paused, victory (2 stars), defeat; deterministic via seed + `render(0)` + `document.fonts.ready`.
-- [ ] 6.2 Generate baselines; run `--repeat-each=5` green.
-- [ ] 6.3 Write `docs/visual-fidelity-comparison.md` (baseline vs mockup/Key Art, deviations with rule IDs); request design approval.
-- [ ] 6.4 Full suite 3 runs green; update `README.md` (visual tests, fonts, Key Art export).
+- [x] 6.1 Visual tests: title, aiming (fixed aim), paused, victory (2 stars), defeat; deterministic via seed + `render(0)` + `document.fonts.ready`.
+- [x] 6.2 Generate baselines; run `--repeat-each=5` green.
+- [x] 6.3 Write `docs/visual-fidelity-comparison.md` (baseline vs mockup/Key Art, deviations with rule IDs). Design approval: pending.
+- [x] 6.4 Full suite 3 runs green; update `README.md` (visual tests, fonts, Key Art export).

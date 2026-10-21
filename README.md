@@ -43,7 +43,7 @@ Tests use [Playwright](https://playwright.dev/) `@playwright/test` 1.63.0, the p
 ```bash
 npm ci                            # install dev dependencies
 npx playwright install chromium   # one-time browser download
-npx playwright test               # full suite (unit, browser and e2e projects)
+npx playwright test               # full suite (unit, browser, e2e and visual projects)
 ```
 
 Playwright starts the static server automatically. Useful variants:
@@ -51,32 +51,37 @@ Playwright starts the static server automatically. Useful variants:
 ```bash
 npx playwright test --project=unit        # Node-side pure-module tests only
 npx playwright test tests/e2e             # end-to-end tests only
+npx playwright test --project=visual      # screenshot comparisons against the approved baselines
 ```
+
+Visual baselines live in `tests/visual/*-snapshots/` (generated on Windows, suffix `-win32`). Regenerate them only after design approval with `--update-snapshots`; see [`docs/visual-fidelity-comparison.md`](docs/visual-fidelity-comparison.md).
 
 ### Test hooks
 
-Adding `?test=1` to the URL exposes a deterministic hook on `window.__ANGLECRAFT__` (`step`, `snapshot`, `loadLevel`, `fire`, `setSeed`, ...). Extra flags: `&loop=1` (real animation loop), `&audio=1` (real Web Audio) and `&stress=1` (sealed-floor stress mode).
+Adding `?test=1` to the URL exposes a deterministic hook on `window.__ANGLECRAFT__` (`step`, `snapshot`, `loadLevel`, `fire`, `setSeed`, `render`, ...). Extra flags: `&loop=1` (real animation loop), `&audio=1` (real Web Audio) and `&stress=1` (sealed-floor stress mode).
 
 ## Project structure
 
 ```
-index.html, styles.css     Entry page and UI design tokens
+index.html, styles.css     Entry page, 1920x1080 stage, design tokens and DOM HUD styles
 src/js/main.js             Boot: assets, input, audio and render wiring
 src/js/engine/             Vector math, collision, physics
 src/js/entities/           Ball, Block, Multiplier, Particle
-src/js/system/             Game session/FSM, levels, raycaster, renderer, HUD, audio, progression
+src/js/system/             Game session/FSM, levels, raycaster, renderer, HUD (Hud.js model, HudDom.js view),
+                           theme tokens (Theme.js), audio, progression
 src/levels/                Level JSON files (level1-level6)
-assets/                    Sprite atlas, audio and video
+assets/                    Sprite atlas, fonts (self-hosted woff2), Key Art, audio and video
 scripts/static-server.mjs  Zero-dependency local server
-tests/                     unit, browser, e2e, spikes and fixtures
+scripts/export-key-art.mjs Dev-only: exports the Key Art (Design/Logo) to assets/art/key-art.webp
+tests/                     unit, browser, e2e, visual, spikes and fixtures
 openspec/                  Specs (source of truth) and archived changes
 Design/                    User stories, UI mockup and design requests
 .claude/skills/            Project skills used for AI-assisted development
 ```
 
-## Known gap and next steps
+## Visual design
 
-The v1 visuals do not yet match the delivered design (sprites, colors, fonts, HUD layout, logo). The diagnosis and the plan to fix it are in [`docs/plan-fidelidad-visual.md`](docs/plan-fidelidad-visual.md).
+The game follows the delivered design (Game UI mockup, Sprite Kit and Key Art in `Design/`): atlas sprites, mockup colors and fonts, DOM HUD panels and modals, and a Key Art title screen. The side-by-side comparison with every intentional deviation is in [`docs/visual-fidelity-comparison.md`](docs/visual-fidelity-comparison.md); the original diagnosis and plan are in [`docs/plan-fidelidad-visual.md`](docs/plan-fidelidad-visual.md).
 
 ## Specifications
 

@@ -6,7 +6,7 @@ phases:
   design: done
   spec: done
   tasks: done
-  apply: in_progress  # slices 1-5 done
+  apply: done  # slices 1-6 merged into the tracker; design sign-off pending
   verify: pending
   archive: pending
 blocked_reason: none
