@@ -52,6 +52,15 @@ const CONTROL = `
 
 const PAUSE = `<div class="pause-pill"><span>${strings.pause}</span>${kbd('P')}</div>`;
 
+// Tutorial hints (tutorial-hints capability; Claude Design canvas, section A). The caret points to the target.
+const CARET_LEFT = '<svg class="caret left" aria-hidden="true" width="12" height="20" viewBox="0 0 12 20"><path d="M12 0L1 10L12 20Z"/></svg>';
+const CARET_RIGHT = '<svg class="caret right" aria-hidden="true" width="12" height="20" viewBox="0 0 12 20"><path d="M0 0L11 10L0 20Z"/></svg>';
+const HINT_MOVE = `${CARET_LEFT}<div class="hint-box"><div class="hint-text"><span class="hint-kicker">${strings.tutorial}</span><span class="hint-msg">${strings.hintMove}</span></div><span class="hint-keys">${kbd('A')}${kbd('D')}</span></div>${CARET_RIGHT}`;
+const HINT_MODE = `<div class="hint-box"><div class="hint-text"><span class="hint-kicker">${strings.tutorial}</span><span class="hint-msg">${strings.hintMode}</span><span class="hint-sub">${strings.hintModeKeys}</span></div><span class="hint-keys">${kbd('M')}</span></div>${CARET_RIGHT}`;
+const BOARD_X = 420; // stage x of the board (Renderer BOARD_ORIGIN)
+const HINT_GAP = 62; // from the launcher centre to the hint caret (canvas artboard 01)
+const HINT_FLIP_X = 640; // beyond this launcher x the move hint sits on the left so it stays on the board
+
 const STAR = '<svg class="star" width="64" height="64" viewBox="0 0 48 48"><polygon points="24,3 30.2,16.6 45,18.2 33.9,28.2 37,43 24,35.4 11,43 14.1,28.2 3,18.2 17.8,16.6"/></svg>';
 const metric = (i) => `<div class="mcell"><span class="label sm" data-k="m${i}Label"></span>
   <span class="mval"><span data-k="m${i}Value"></span><span class="total" data-k="m${i}Total"></span></span><span class="msub" data-k="m${i}Sub"></span></div>`;
@@ -86,7 +95,9 @@ export function createHudDom(root, { dispatch }) {
   const pause = el('div', 'pause-overlay', PAUSE);
   const victory = el('div', 'result victory', VICTORY);
   const defeat = el('div', 'result defeat', DEFEAT);
-  root.append(left, right, pause, victory, defeat);
+  const hintMove = el('div', 'hint', HINT_MOVE, { 'data-hint': 'move' });
+  const hintMode = el('div', 'hint flip', HINT_MODE, { 'data-hint': 'mode' });
+  root.append(left, right, pause, victory, defeat, hintMove, hintMode);
 
   const k = {};
   for (const node of root.querySelectorAll('[data-k]')) k[node.dataset.k] = node;
@@ -195,5 +206,21 @@ export function createHudDom(root, { dispatch }) {
     flag(pause, 'paused', hud.pause.visible, (v) => pause.classList.toggle('show', v));
   }
 
-  return { update };
+  // hint: Tutorial.view() result ({ kind, x }) or null. Patches only what changed.
+  function updateHint(hint) {
+    const kind = hint?.kind ?? null;
+    flag(hintMove, 'hintMove', kind === 'move', (v) => hintMove.classList.toggle('show', v));
+    flag(hintMode, 'hintMode', kind === 'mode', (v) => hintMode.classList.toggle('show', v));
+    flag(k.modeSection, 'modeHighlight', kind === 'mode', (v) => k.modeSection.classList.toggle('highlight', v));
+    if (kind !== 'move') return;
+    const flip = hint.x > HINT_FLIP_X;
+    flag(hintMove, 'hintFlip', flip, (v) => hintMove.classList.toggle('flip', v));
+    const pos = flip ? `${1920 - (BOARD_X + hint.x - HINT_GAP)}px` : `${BOARD_X + hint.x + HINT_GAP}px`;
+    if (changed('hintPos', pos)) {
+      hintMove.style.left = flip ? '' : pos;
+      hintMove.style.right = flip ? pos : '';
+    }
+  }
+
+  return { update, updateHint };
 }

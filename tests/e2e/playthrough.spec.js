@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 const SOLUTIONS = JSON.parse(readFileSync(new URL('../fixtures/solutions.json', import.meta.url), 'utf8'));
 const KEY = 'anglecraft.v1.records';
 const CENTER = { x: 640, y: 360 };
-const snap = (page) => page.evaluate(() => window.__ANGLECRAFT__.snapshot());
+const snap = (page) => page.evaluate(() => window.__ANGLECRAFT__?.snapshot());
 
 // Fires one angle and steps until the turn resolves; returns the resulting state.
 async function shoot(page, deg) {
@@ -23,7 +23,7 @@ async function begin(page, url = '/?test=1') {
   await page.goto(url);
   await page.waitForFunction(() => window.__ANGLECRAFT__?.snapshot().state === 'Title');
   await page.mouse.click(CENTER.x, CENTER.y);
-  await page.waitForFunction(() => window.__ANGLECRAFT__.snapshot().state === 'Aiming');
+  await page.waitForFunction(() => window.__ANGLECRAFT__?.snapshot().state === 'Aiming');
 }
 
 test('title click then seeded solutions win levels 1-6 in order with records and NEXT gating', async ({ page }) => {
@@ -65,7 +65,7 @@ test('level 6 victory shows the last-level notice and no Siguiente nivel button'
   const angles = SOLUTIONS.levels[5].angles;
   for (const deg of angles.slice(0, -1)) await shoot(page, deg); // hook-stepped; the real loop only draws
   await page.evaluate((d) => window.__ANGLECRAFT__.fire((d * Math.PI) / 180), angles.at(-1)); // real-time final shot
-  await page.waitForFunction(() => window.__ANGLECRAFT__.snapshot().state === 'Victory');
+  await page.waitForFunction(() => window.__ANGLECRAFT__?.snapshot().state === 'Victory');
   await expect(page.locator('.result.victory .notice')).toHaveText('Último nivel completado');
   await expect(page.locator('[data-act="modal-NEXT"]')).toBeHidden();
 });

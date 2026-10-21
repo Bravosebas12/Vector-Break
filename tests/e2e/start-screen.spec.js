@@ -4,9 +4,9 @@
 // Each test runs in a fresh browser context (clean storage); no timing assertions.
 import { test, expect } from '@playwright/test';
 
-const snap = (page) => page.evaluate(() => window.__ANGLECRAFT__.snapshot());
+const snap = (page) => page.evaluate(() => window.__ANGLECRAFT__?.snapshot());
 const state = async (page) => (await snap(page)).state;
-const toTitle = (page) => page.waitForFunction(() => window.__ANGLECRAFT__.snapshot().state === 'Title');
+const toTitle = (page) => page.waitForFunction(() => window.__ANGLECRAFT__?.snapshot().state === 'Title');
 const plays = (page, type) =>
   page.evaluate((t) => window.__ANGLECRAFT__.audioLog().filter((c) => c.call === 'play' && c.type === t).length, type);
 const spyTexts = (page) =>
@@ -187,7 +187,7 @@ test('audio=1: a 404 sample and music still reach Title; the click unlocks; a de
 test('audio=1: real samples decode during Loading and play as samples after the click', async ({ page }) => {
   test.setTimeout(60_000);
   await page.goto('/?test=1&audio=1');
-  await page.waitForFunction(() => window.__ANGLECRAFT__.snapshot().state === 'Title', null, { timeout: 45_000 });
+  await page.waitForFunction(() => window.__ANGLECRAFT__?.snapshot().state === 'Title', null, { timeout: 45_000 });
   expect(await page.evaluate(() => window.__ANGLECRAFT_AUDIO__.state)).toBe('none');
   await page.mouse.click(CENTER.x, CENTER.y);
   await shootUp(page);

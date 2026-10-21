@@ -22,6 +22,10 @@ export const strings = Object.freeze({
   used: 'recogida',
   fireMode: 'MODO DE DISPARO',
   fireModeCaption: 'BOLAS POR TIRO',
+  tutorial: 'TUTORIAL',
+  hintMove: 'Mueve el lanzador',
+  hintMode: 'Elige cuántas bolas lanzar por tiro',
+  hintModeKeys: '1, 2 o 3 · cambia con',
   points: 'PUNTOS',
   time: 'TIEMPO',
 

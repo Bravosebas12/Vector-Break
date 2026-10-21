@@ -376,6 +376,10 @@ export function createSession({
     get board() {
       return run.board;
     },
+    // Catalog index of the loaded level, or null (tutorial hints, no snapshot allocation per frame).
+    get levelIndex() {
+      return index;
+    },
     // Live progress counters for the start screen (no snapshot allocation per frame).
     get loading() {
       return loading;

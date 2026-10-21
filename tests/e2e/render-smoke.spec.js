@@ -15,7 +15,7 @@ test('renderer draws Title, Aiming and a fired volley without console or page er
     hook.loadLevel(0);
     hook.fire(Math.PI / 2);
   });
-  await page.waitForFunction(() => window.__ANGLECRAFT__.snapshot().volley.emitted > 1);
+  await page.waitForFunction(() => window.__ANGLECRAFT__?.snapshot().volley.emitted > 1);
   const before = await page.evaluate(() => window.__ANGLECRAFT_RENDER__.frames);
   await page.waitForFunction((n) => window.__ANGLECRAFT_RENDER__.frames > n + 5, before);
   const stats = await page.evaluate(() => ({ ...window.__ANGLECRAFT_RENDER__ }));
