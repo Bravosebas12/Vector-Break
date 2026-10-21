@@ -7,15 +7,16 @@ import { createSession } from './system/GameSession.js';
 import { createTestHook } from './system/TestHook.js';
 import { Rng } from './system/Rng.js';
 import { createLoop } from './system/Loop.js';
-import { applyViewport, mapClientToLogical } from './system/Viewport.js';
+import { applyStageScale, applyViewport, mapClientToLogical } from './system/Viewport.js';
+import { loadFonts } from './system/Fonts.js';
 import { loadAtlas } from './system/Atlas.js';
 import { Particles } from './system/Particles.js';
 import { createRenderer, BOARD_ORIGIN } from './system/Renderer.js';
 import { createProgression } from './system/Progression.js';
 import { AssetLoader } from './system/AssetLoader.js';
 import { mapEvent } from './system/Input.js';
-import { modalModel } from './system/Hud.js';
-import { hitModalButton } from './system/HudView.js';
+import { BOARD_W, BOARD_H } from './system/Layout.js';
+import { createHudDom } from './system/HudDom.js';
 import { RecordingSink, createSoundMapper, teeSink } from './system/AudioSinks.js';
 import { createWebAudio } from './system/WebAudio.js';
 
@@ -25,6 +26,7 @@ const SAMPLE_NAMES = ['sfx_block_destroy', 'sfx_burst_launch', 'sfx_orb_split', 
 const SAMPLES = SAMPLE_NAMES.map((name) => ({ name, url: `assets/audio/${name}.wav` }));
 const MUSIC = { name: 'music_loop_95bpm_64bars', url: 'assets/audio/music_loop_95bpm_64bars.wav' };
 const PLAYING = ['Aiming', 'Firing', 'Simulating'];
+const KEY_ART = 'assets/art/key-art.webp';
 
 const params = new URLSearchParams(location.search);
 const testMode = params.get('test') === '1';
@@ -47,18 +49,23 @@ const session = createSession({
 });
 // Event ring -> sounds. Combo clock is the play time in ms (read from the live run, no snapshot).
 const onSound = createSoundMapper({ audio, now: () => session.run.playTime * 1000 });
-if (testMode) {
-  window.__ANGLECRAFT__ = createTestHook(session, recorder.log, loopOn ? null : () => session.drainEvents(onSound));
-  window.__ANGLECRAFT_AUDIO__ = webAudio;
-}
-
+const stage = document.getElementById('stage');
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-const resize = () => applyViewport(canvas, ctx);
+const resize = () => {
+  applyStageScale(stage);
+  return applyViewport(canvas, ctx);
+};
 const { atlasScale } = resize();
 const ui = { loadError: false };
-const renderer = createRenderer({ session, ctx, particles: new Particles(), progression, onEvent: onSound, ui });
-if (testMode) window.__ANGLECRAFT_RENDER__ = renderer.stats;
+const hudView = createHudDom(document.getElementById('hud'), { dispatch: (action) => session.dispatch(action) });
+const renderer = createRenderer({ session, ctx, particles: new Particles(), progression, onEvent: onSound, ui, hudView });
+if (testMode) {
+  const drain = loopOn ? null : () => session.drainEvents(onSound);
+  window.__ANGLECRAFT__ = createTestHook(session, recorder.log, drain, (alpha, nowMs) => renderer.draw(alpha, nowMs));
+  window.__ANGLECRAFT_AUDIO__ = webAudio;
+  window.__ANGLECRAFT_RENDER__ = renderer.stats;
+}
 window.addEventListener('resize', resize);
 
 // DOM input: listeners are registered once and forward plain records to Input.mapEvent. The session
@@ -67,21 +74,25 @@ const send = (record) => {
   const action = mapEvent(record);
   if (action) session.dispatch(action);
 };
+// The crosshair sprite (Renderer) replaces the system cursor while the pointer is over the board.
+const pointer = (ui.pointer = { x: 0, y: 0, inBoard: false });
 window.addEventListener('mousemove', (e) => {
   const p = mapClientToLogical(e.clientX, e.clientY, canvas.getBoundingClientRect());
-  send({ type: 'mousemove', x: p.x - BOARD_ORIGIN.x, y: p.y - BOARD_ORIGIN.y }); // AIM works in board coordinates
+  pointer.x = p.x - BOARD_ORIGIN.x;
+  pointer.y = p.y - BOARD_ORIGIN.y;
+  const inBoard = pointer.x >= 0 && pointer.x <= BOARD_W && pointer.y >= 0 && pointer.y <= BOARD_H;
+  if (inBoard !== pointer.inBoard) canvas.style.cursor = inBoard ? 'none' : '';
+  pointer.inBoard = inBoard;
+  send({ type: 'mousemove', x: pointer.x, y: pointer.y }); // AIM works in board coordinates
 });
-// Result modals: a left press is hit-tested against the drawn buttons in logical coordinates (same space as HudView).
-const pressModal = (e) => {
-  if (e.button !== 0 || !['Victory', 'GameOver'].includes(session.fsm.state)) return;
-  const modal = modalModel(session.snapshot());
+// Pointer presses come from the canvas only (HUD panels sit above it and catch their own clicks). While
+// playing, a press fires only inside the board; on the title any press on the canvas starts the game.
+canvas.addEventListener('mousedown', (e) => {
   const p = mapClientToLogical(e.clientX, e.clientY, canvas.getBoundingClientRect());
-  const target = modal && hitModalButton(modal, p.x, p.y);
-  if (target) session.dispatch({ type: 'PRESS', target });
-};
-window.addEventListener('mousedown', (e) => {
-  pressModal(e);
-  send({ type: 'mousedown', button: e.button }); // same gesture handler unlocks audio
+  const x = p.x - BOARD_ORIGIN.x;
+  const y = p.y - BOARD_ORIGIN.y;
+  const inBoard = x >= 0 && x <= BOARD_W && y >= 0 && y <= BOARD_H;
+  if (inBoard || session.fsm.state === 'Title') send({ type: 'mousedown', button: e.button }); // same gesture unlocks audio
 });
 window.addEventListener('keydown', (e) => {
   if (e.key === ' ') e.preventDefault();
@@ -117,9 +128,20 @@ function probeRaf(sess, particles) {
     });
 }
 
+function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(`image failed: ${url}`));
+    image.src = url;
+  });
+}
+
 async function boot() {
   const spec = {
     atlas: () => loadAtlas(atlasScale),
+    fonts: () => loadFonts(),
+    art: () => loadImage(KEY_ART).then((image) => (renderer.setTitleArt(image), image)),
     levels: LEVEL_FILES.map((name) => `src/levels/${name}.json`),
     samples: realAudio ? SAMPLES : [],
     music: realAudio ? MUSIC : null,
@@ -129,6 +151,7 @@ async function boot() {
   webAudio.setBuffers(loaded.buffers);
   loaded.failed.forEach((name) => webAudio.markFailed(name));
   if (loaded.atlas) renderer.setAtlas(loaded.atlas);
+  if (loaded.fonts) renderer.invalidate();
   session.setLevels(loaded.levels);
   const { total } = session.loading;
   session.setLoadProgress(total, total);

@@ -152,7 +152,7 @@ test('the real loop draws the title, the loading label and then the prompt', asy
   await spyTexts(page);
   const release = await holdLevels(page, '**/src/levels/level3.json');
   await page.goto('/?test=1&loop=1');
-  await drawn(page, 'AngleCraft');
+  await drawn(page, 'Angle'); // wordmark: 'Angle' + 'Craft' in two colors
   await page.waitForFunction(() => [...window.__TEXTS__].some((t) => t.startsWith('Cargando...')));
   expect(await page.evaluate(() => window.__TEXTS__.has('Haz clic para comenzar'))).toBe(false);
   release();

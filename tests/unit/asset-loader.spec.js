@@ -95,3 +95,23 @@ test('a level that fails validation rejects with the validation reason', async (
   const io = okIo({ fetchJson: async () => ({ id: 'bad' }) });
   await expect(AssetLoader.load(spec, () => {}, io)).rejects.toThrow(/level l1.json is invalid/);
 });
+
+// visual-theme spec "Self-hosted fonts": fonts count as one asset and never block loading.
+test('fonts settle as one asset and a failure does not reject', async () => {
+  const { calls, onSettle } = collect();
+  const ok = await AssetLoader.load({ ...spec, fonts: async () => true }, onSettle, okIo());
+  expect(calls.at(-1)).toEqual([7, 7]);
+  expect(ok.fonts).toBe(true);
+  const failed = await AssetLoader.load({ ...spec, fonts: () => Promise.reject(new Error('404')) }, () => {}, okIo());
+  expect(failed.fonts).toBe(false);
+});
+
+// start-screen delta "Blocking loading with progress": the Key Art is one asset; a failure settles as null.
+test('Key Art settles as one asset and a failure yields null without rejecting', async () => {
+  const { calls, onSettle } = collect();
+  const ok = await AssetLoader.load({ ...spec, art: async () => ({ img: true }) }, onSettle, okIo());
+  expect(calls.at(-1)).toEqual([7, 7]);
+  expect(ok.art).toEqual({ img: true });
+  const failed = await AssetLoader.load({ ...spec, art: () => Promise.reject(new Error('404')) }, () => {}, okIo());
+  expect(failed.art).toBeNull();
+});
