@@ -55,7 +55,8 @@ export const crackFor = (hp, maxHp) => {
   return damage >= 0.9 ? 'crack_90' : damage >= 0.6 ? 'crack_60' : damage >= 0.3 ? 'crack_30' : null;
 };
 
-export function createRenderer({ session, ctx, particles, atlas = null, progression = null }) {
+// `onEvent(type, a, b)`: extra consumer (audio) fed from the renderer's single drain of the event ring.
+export function createRenderer({ session, ctx, particles, atlas = null, progression = null, onEvent: extra = null }) {
   const layer = createCanvas(BOARD_W, BOARD_H);
   const lctx = layer.getContext('2d');
   const stats = { frames: 0, layerRedraws: 0, blocksDrawn: 0 };
@@ -157,6 +158,7 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
 
   // Events are presentation-only: flash on hit, burst on destruction. Preallocated, no capture per frame.
   const onEvent = (type, a, b) => {
+    extra?.(type, a, b);
     if (type === 'HIT') flash[a] = FLASH_S;
     else if (type === 'DESTROY') {
       const col = a % board.cols;

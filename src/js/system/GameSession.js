@@ -128,6 +128,7 @@ export function createSession({
         orb.captured = true;
         run.board.cells[orb.row * run.board.cols + orb.col] = null;
         run.pendingBonus += orb.value;
+        events.push('ORB', orb.row * run.board.cols + orb.col); // presentation only: sound
         break;
       }
     }
@@ -147,7 +148,9 @@ export function createSession({
       }
     },
     onHit(ball, surface, block) {
-      if (block === null || !block.destructible || block.hp <= 0) return;
+      if (block === null) return;
+      if (!block.destructible) return events.push('STEEL', block.row * run.board.cols + block.col); // sound only
+      if (block.hp <= 0) return;
       block.hp--;
       run.damage++;
       const cell = block.row * run.board.cols + block.col;

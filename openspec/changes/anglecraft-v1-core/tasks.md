@@ -113,8 +113,8 @@ Notes: slices 5, 6, 7, 9 are pre-split (each estimated at or above ~900 lines co
 
 ## Slice 8a: Audio (audio; HU-02, HU-04)
 
-- [ ] 8a.1 RED `tests/unit/audio-seam.spec.js`: Null/Recording sinks, `audioLog`, combo ladder, voice limits, event-to-sound mapping, synth recipes keyed by name -> GREEN `src/js/system/AudioSinks.js`. (Test seam, Combo ladder, Event sounds)
-- [ ] 8a.2 RED `tests/browser/webaudio.spec.js`: `unlock()` creates the realtime context, fixed chain, gapless music loop, synth fallback on failed sample, volume persistence -> GREEN `src/js/system/WebAudio.js`. (Gesture unlock, Fixed chain, Music loop, Fallback, Volume)
+- [x] 8a.1 RED `tests/unit/audio-seam.spec.js`: Null/Recording sinks, `audioLog`, combo ladder, voice limits, event-to-sound mapping, synth recipes keyed by name -> GREEN `src/js/system/AudioSinks.js`. (Test seam, Combo ladder, Event sounds)
+- [x] 8a.2 RED `tests/browser/webaudio.spec.js`: `unlock()` creates the realtime context, fixed chain, gapless music loop, synth fallback on failed sample, volume persistence -> GREEN `src/js/system/WebAudio.js`. (Gesture unlock, Fixed chain, Music loop, Fallback, Volume)
 
 ## Slice 8b: Start screen (start-screen; HU-09)
 

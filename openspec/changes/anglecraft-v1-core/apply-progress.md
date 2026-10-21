@@ -334,3 +334,16 @@ Tasks 7b.1-7b.3 are marked `[x]`. Branch `feat/anglecraft-v1-slice-7b` (base sli
 - Enter now maps to a new `CONFIRM` action (Victory/GameOver): next level when offered, else restart (the modal primary action). Input table and spec updated accordingly; `NEXT` is unchanged.
 - HUD/modals are drawn by `HudView.js` (called from `Renderer.draw`); models refresh at 10 Hz and on state change. Modal buttons are NOT mouse-clickable yet: `main.js` has no DOM input listeners until the start-screen slice (8b); keyboard actions work through the hook/session.
 - Level 1/2 reachability `test.fail()` markers untouched.
+
+## Slice 8a: Audio - COMPLETE (2/2)
+
+Tasks 8a.1-8a.2 are marked `[x]`. Branch `feat/anglecraft-v1-slice-8a` (base slice 7b). Slice 8b NOT started.
+
+| Task | Test File | Layer | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|-----|-------|-------------|----------|
+| 8a.1 | `tests/unit/audio-seam.spec.js` | Unit | `AudioSinks.js` missing (no tests found) | 23/23; orb/steel session test failed until `STEEL`/`ORB` events were added | ladder rise/gap/250 ms/cap/reset, limiter cap/same-type/expiry, mapper per event, real session turn | None needed |
+| 8a.2 | `tests/browser/webaudio.spec.js` | Browser | 7 failed (`createWebAudio` missing) | 7/7, `--repeat-each=5` 35/35 | before/after unlock, chain, loop, sample vs synth vs failed, limiter, volume incl. throwing storage, renderer fan-out | None needed |
+
+Work Unit Evidence: focused `npx playwright test tests/unit/audio-seam.spec.js --project=unit` 23 passed; `tests/browser/webaudio.spec.js --project=browser --repeat-each=5` 35 passed. Runtime harness: real Chromium AudioContext (suspended is fine; assertions read node params and adapter counters). Rollback: `AudioSinks.js`, `WebAudio.js`, the two specs, and the small `GameSession.js`/`Renderer.js` edits. Full suite x3: 396 passed each.
+
+Notes: session now pushes `STEEL` (indestructible hit) and `ORB` (capture) events; `createRenderer({ onEvent })` fans its single ring drain out to audio. Mapper takes `now()` ms (adapter passes `playTime`). Hook-only runs (no `loop=1`) never drain the ring; 8b must pump it for `audioLog`. Star/turns-warning sounds have recipes but no session events yet.
