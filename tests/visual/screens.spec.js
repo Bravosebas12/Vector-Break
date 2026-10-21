@@ -9,7 +9,7 @@ const SOLUTIONS = JSON.parse(readFileSync(new URL('../fixtures/solutions.json', 
 
 async function boot(page) {
   await page.goto('/?test=1');
-  await expect.poll(() => page.evaluate(() => window.__ANGLECRAFT__.snapshot().state)).toBe('Title');
+  await expect.poll(() => page.evaluate(() => window.__ANGLECRAFT__?.snapshot().state)).toBe('Title');
   await page.evaluate(() => document.fonts.ready);
 }
 
@@ -73,7 +73,7 @@ test('victory with 2 stars on level 1', async ({ page }) => {
   let state = 'Aiming';
   for (const deg of SOLUTIONS.levels[0].angles) state = await shoot(page, deg);
   expect(state).toBe('Victory');
-  expect(await page.evaluate(() => window.__ANGLECRAFT__.snapshot().result.stars)).toBe(2);
+  expect(await page.evaluate(() => window.__ANGLECRAFT__?.snapshot().result.stars)).toBe(2);
   await settle(page);
   await expect(page).toHaveScreenshot('victory.png');
 });

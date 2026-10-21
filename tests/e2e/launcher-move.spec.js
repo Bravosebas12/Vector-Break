@@ -4,11 +4,11 @@ import { test, expect } from '@playwright/test';
 
 test.use({ viewport: { width: 1920, height: 1080 } });
 
-const snap = (page) => page.evaluate(() => window.__ANGLECRAFT__.snapshot());
+const snap = (page) => page.evaluate(() => window.__ANGLECRAFT__?.snapshot());
 const step = (page, n) => page.evaluate((k) => window.__ANGLECRAFT__.step(k), n);
 async function level1(page) {
   await page.goto('/?test=1');
-  await expect.poll(async () => (await snap(page)).state).toBe('Title');
+  await expect.poll(async () => (await snap(page))?.state).toBe('Title');
   await page.evaluate(() => window.__ANGLECRAFT__.loadLevel(0));
 }
 

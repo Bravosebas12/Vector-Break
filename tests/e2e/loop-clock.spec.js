@@ -3,7 +3,7 @@
 import { test, expect } from '@playwright/test';
 
 const STEP = 1 / 120;
-const playTime = (page) => page.evaluate(() => window.__ANGLECRAFT__.snapshot().playTime);
+const playTime = (page) => page.evaluate(() => window.__ANGLECRAFT__?.snapshot().playTime);
 
 async function boot(page, query = '/?test=1&loop=1') {
   await page.clock.install({ time: 0 });

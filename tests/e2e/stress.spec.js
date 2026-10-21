@@ -17,7 +17,7 @@ test('50 balls at 4X in the sealed stress fixture: 600 frames average <= 16.7 ms
     hook.fire(Math.PI / 2 - 0.3);
   });
   await page.waitForFunction(() => window.__ANGLECRAFT_PERF__.frames >= 600, null, { timeout: 80_000 });
-  const perf = await page.evaluate(() => ({ ...window.__ANGLECRAFT_PERF__, active: window.__ANGLECRAFT__.snapshot().volley.active }));
+  const perf = await page.evaluate(() => ({ ...window.__ANGLECRAFT_PERF__, active: window.__ANGLECRAFT__?.snapshot().volley.active }));
 
   testInfo.annotations.push({ type: 'avg-cpu-ms', description: (perf.cpuMs / perf.frames).toFixed(3) });
   expect(perf.active).toBe(50);

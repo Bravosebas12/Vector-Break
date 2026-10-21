@@ -257,3 +257,31 @@ kbd {
 .mdot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .speed.on.limited { border-color: var(--c-amber); background: rgba(255, 158, 0, 0.12); color: var(--c-amber); }
 .mode.highlight { background: rgba(0, 245, 212, 0.06); box-shadow: inset 0 0 0 1px rgba(0, 245, 212, 0.55), 0 0 24px rgba(0, 245, 212, 0.18); }
+
+/* Tutorial hints (tutorial-hints capability; Claude Design canvas section A): not interactive, above the board. */
+.hint {
+  position: absolute;
+  top: 956px;
+  display: none;
+  align-items: center;
+  pointer-events: none;
+}
+.hint[data-hint="mode"] { top: 876px; right: 444px; }
+.hint.show { display: flex; animation: hint-in 200ms ease-out; }
+.hint .caret { fill: rgba(20, 24, 32, 0.92); stroke: rgba(0, 245, 212, 0.45); stroke-width: 1; }
+.hint .caret.left { margin-right: -1px; }
+.hint .caret.right { margin-left: -1px; display: none; }
+.hint.flip .caret.left { display: none; }
+.hint.flip .caret.right { display: block; }
+.hint-box { display: flex; align-items: center; gap: 16px; padding: 14px 20px; border: 1px solid rgba(0, 245, 212, 0.45); border-radius: 6px; background: rgba(20, 24, 32, 0.92); box-shadow: 0 0 24px rgba(0, 245, 212, 0.12), 0 12px 32px rgba(0, 0, 0, 0.45); }
+.hint-text { display: flex; flex-direction: column; gap: 4px; }
+.hint-kicker { font: 600 12px var(--font-mono); letter-spacing: 0.2em; color: var(--c-cyan); }
+.hint-msg { font: 500 19px var(--font-ui); color: var(--c-text-strong); white-space: nowrap; }
+.hint-sub { font: 400 14px var(--font-mono); color: var(--c-text-muted); }
+.hint-keys { display: flex; gap: 6px; }
+.hint kbd { min-width: 34px; height: 32px; font-size: 16px; color: var(--c-text); }
+@keyframes hint-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .hint.show { animation-name: hint-fade; }
+  @keyframes hint-fade { from { opacity: 0; } to { opacity: 1; } }
+}

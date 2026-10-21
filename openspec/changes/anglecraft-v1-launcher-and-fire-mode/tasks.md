@@ -31,9 +31,9 @@ Strict TDD: write or update the failing test first, then the code. One PR per sl
 
 ## 5. Slice 5 - Tutorial hints (tutorial-hints)
 
-- [ ] 5.1 Test (unit): `tutorialModel` shows move hint on level 1 and mode hint on level 2 only, once per session, hidden when paused or with a modal.
-- [ ] 5.2 Test (e2e): appear and dismiss on move / fire / mode change; not shown again after restart or replay; shown again after reload (CP-17, CP-18, CP-34, CP-35); clicks pass through.
-- [ ] 5.3 Implement D8 (model, DOM variants with caret, CSS animations, MODO highlight).
+- [x] 5.1 Test (unit): `tutorialModel` shows move hint on level 1 and mode hint on level 2 only, once per session, hidden when paused or with a modal.
+- [x] 5.2 Test (e2e): appear and dismiss on move / fire / mode change; not shown again after restart or replay; shown again after reload (CP-17, CP-18, CP-34, CP-35); clicks pass through.
+- [x] 5.3 Implement D8 (model, DOM variants with caret, CSS animations, MODO highlight).
 
 ## 6. Slice 6 - Levels, visuals and docs (test-harness)
 

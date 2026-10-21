@@ -75,7 +75,8 @@ export function aimDots(pts, n, out) {
 // `ui.loadError` is set by the boot code when a level fails to load (the start screen then shows loadError).
 // `ui.pointer` ({ x, y, inBoard } in board coordinates) is set by the DOM adapter for the crosshair.
 // `hudView` (HudDom) receives the HUD model; it is hidden on the Loading/Title screens.
-export function createRenderer({ session, ctx, particles, atlas = null, progression = null, onEvent: extra = null, ui = {}, hudView = null }) {
+// `tutorial` (Tutorial.js) receives the drained events and yields the hint to show each frame.
+export function createRenderer({ session, ctx, particles, atlas = null, progression = null, onEvent: extra = null, ui = {}, hudView = null, tutorial = null }) {
   const layer = createCanvas(BOARD_W, BOARD_H);
   const lctx = layer.getContext('2d');
   const stats = { frames: 0, layerRedraws: 0, blocksDrawn: 0, launcherGlow: 0, glowSpritesBuilt: 0 };
@@ -243,6 +244,7 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
   // Events are presentation-only: flash on hit, burst on destruction. Preallocated, no capture per frame.
   const onEvent = (type, a, b) => {
     extra?.(type, a, b);
+    tutorial?.onEvent(type);
     if (type === 'HIT') flash[a] = FLASH_S;
     else if (type === 'DESTROY') {
       const col = a % board.cols;
@@ -404,6 +406,7 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
     ctx.restore();
     refreshHud(state, nowMs);
     hudView?.update(hud, modal);
+    if (tutorial) hudView?.updateHint(tutorial.view(state, session.run.paused, session.levelIndex, session.run.launcherX));
   }
 
   return {

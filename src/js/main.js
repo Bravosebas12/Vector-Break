@@ -17,6 +17,7 @@ import { AssetLoader } from './system/AssetLoader.js';
 import { mapEvent } from './system/Input.js';
 import { BOARD_W, BOARD_H } from './system/Layout.js';
 import { createHudDom } from './system/HudDom.js';
+import { createTutorial } from './system/Tutorial.js';
 import { RecordingSink, createSoundMapper, teeSink } from './system/AudioSinks.js';
 import { createWebAudio } from './system/WebAudio.js';
 
@@ -61,7 +62,8 @@ const resize = () => {
 const { atlasScale } = resize();
 const ui = { loadError: false };
 const hudView = createHudDom(document.getElementById('hud'), { dispatch: (action) => session.dispatch(action) });
-const renderer = createRenderer({ session, ctx, particles: new Particles(), progression, onEvent: onSound, ui, hudView });
+const tutorial = createTutorial(); // session-scoped: a reload shows the hints again
+const renderer = createRenderer({ session, ctx, particles: new Particles(), progression, onEvent: onSound, ui, hudView, tutorial });
 if (testMode) {
   const drain = loopOn ? null : () => session.drainEvents(onSound);
   window.__ANGLECRAFT__ = createTestHook(session, recorder.log, drain, (alpha, nowMs) => renderer.draw(alpha, nowMs));
