@@ -32,6 +32,7 @@ export function createTestHook(session, audioLog = [], drain = null, render = nu
     action: guard((a) => session.dispatch(a)),
     setSeed: guard((seed) => session.rng.setSeed(seed)),
     setVolley: guard((n) => session.setVolley(n)),
+    setFireMode: guard((v) => session.setFireMode(v)),
     start: guard(() => session.dispatch({ type: 'FIRE', pointer: true })),
     audioLog: guard(() => audioLog.slice()),
     render: guard((nowMs = 0) => render?.(1, nowMs)),

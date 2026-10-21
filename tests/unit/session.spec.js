@@ -61,7 +61,7 @@ const AIM_UP = { type: 'AIM', x: 540, y: 300 };
 function makeSession(opts = {}) {
   const calls = [];
   const audio = { unlock: () => calls.push('unlock'), music: (on) => calls.push(`music:${on}`) };
-  const session = createSession({ rng: new Rng(7), audio, ...opts });
+  const session = createSession({ rng: new Rng(7), audio, fireMode: 'turn', ...opts });
   session.calls = calls;
   session.setLevels(LEVELS);
   return session;

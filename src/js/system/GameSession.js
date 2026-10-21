@@ -29,6 +29,9 @@ export function createSession({
   canAccess = progression ? (i) => progression.canAccess(i) : () => false,
   sealedFloor = false,
   volleyCapS = 45,
+  // Fire mode (HU-11): 1 | 2 | 3 balls per FIRE. 'turn' is test-only and pinned across loads: one FIRE
+  // emits every ball of the turn, as in v1 (until slice 3 it is also the only emission behavior).
+  fireMode = 'turn',
 } = {}) {
   const catalog = new LevelCatalog();
   const events = new EventRing();
@@ -37,6 +40,8 @@ export function createSession({
   const balls = Ball.createPool();
   let source = null; // level index or JSON currently loaded (RESTART reloads it)
   let index = null;
+  if (![1, 2, 3, 'turn'].includes(fireMode)) throw new Error(`invalid fire mode: ${fireMode}`);
+  let pinnedMode = fireMode === 'turn' ? 'turn' : null;
 
   const fsm = new Fsm({
     strict,
@@ -69,6 +74,7 @@ export function createSession({
     run.playTime = 0;
     run.aim = null;
     run.lockedDir = null;
+    run.fireMode = pinnedMode ?? 1;
   }
   resetRun({ startBalls: 0, shots: 0, launcher: { x: 0 }, blocks: [], cores: [] });
 
@@ -287,6 +293,7 @@ export function createSession({
       volleySimTime: run.volleySimTime,
       playTime: run.playTime,
       result: run.result && { ...run.result },
+      fireMode: run.fireMode,
       newRecord: run.newRecord,
     };
   }
@@ -318,6 +325,12 @@ export function createSession({
     loadLevel,
     setVolley(n) {
       run.volleySize = Math.max(1, Math.min(MAX_VOLLEY, n));
+    },
+    // Test seam (openspec test-harness): 'turn' pins v1 emission across loads; 1..3 unpin.
+    setFireMode(v) {
+      if (![1, 2, 3, 'turn'].includes(v)) throw new Error(`invalid fire mode: ${v}`);
+      pinnedMode = v === 'turn' ? 'turn' : null;
+      run.fireMode = v;
     },
     dispatch,
     step,

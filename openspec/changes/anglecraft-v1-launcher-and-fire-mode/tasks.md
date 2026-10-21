@@ -4,9 +4,9 @@ Strict TDD: write or update the failing test first, then the code. One PR per sl
 
 ## 1. Slice 1 - Test seam (test-harness)
 
-- [ ] 1.1 Test: `setFireMode('turn')` + `fire()` emits the whole volley and counts one shot (v1 behavior); `'turn'` not reachable from input.
-- [ ] 1.2 Add `run.fireMode` (only `'turn'` path active), `hook.setFireMode`, `hook.move` stub; pin `'turn'` in unit helpers (`tests/unit/helpers/session.js`) and in every e2e `begin()` / `reach()` helper.
-- [ ] 1.3 Full suite green with no expectation changes.
+- [x] 1.1 Test: `setFireMode('turn')` + `fire()` emits the whole volley and counts one shot (v1 behavior); `'turn'` not reachable from input.
+- [x] 1.2 Add `run.fireMode` (only `'turn'` path active) and `hook.setFireMode`; pin `'turn'` in the six test sessions (`createSession({ fireMode: 'turn' })`) and, for e2e, in `?test=1` (main.js). `hook.move` moves to slice 2 with the movement it drives.
+- [x] 1.3 Full suite green with no expectation changes.
 
 ## 2. Slice 2 - Launcher movement (game-state, aiming)
 
