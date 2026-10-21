@@ -53,7 +53,10 @@ export function allows(state, paused, action) {
     case 'AIM':
     case 'FIRE':
     case 'MOVE_START':
+    case 'CYCLE_MODE':
       return state === 'Aiming';
+    case 'SET_MODE':
+      return state === 'Aiming' && [1, 2, 3].includes(action.v);
     case 'SET_SPEED':
       return (state === 'Firing' || state === 'Simulating') && action.v in SPEED_KEYS;
     case 'PAUSE':

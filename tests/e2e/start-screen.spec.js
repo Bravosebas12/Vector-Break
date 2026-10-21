@@ -95,7 +95,7 @@ test('mouse move aims, left click fires, Space fires, Esc and right click are in
   );
   expect(menuPrevented).toBe(true);
   await page.mouse.click(right.x, right.y);
-  expect(await snap(page)).toMatchObject({ state: 'Firing', shots: { used: 1 } });
+  expect(await snap(page)).toMatchObject({ state: 'Firing', volley: { emitted: 1 } });
 });
 
 test('Space fires and is default-prevented', async ({ page }) => {
@@ -107,7 +107,7 @@ test('Space fires and is default-prevented', async ({ page }) => {
   await page.mouse.move(up.x, up.y);
   const prevented = await page.evaluate(() => !window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', cancelable: true })));
   expect(prevented).toBe(true);
-  expect(await snap(page)).toMatchObject({ state: 'Firing', shots: { used: 1 } });
+  expect(await snap(page)).toMatchObject({ state: 'Firing', volley: { emitted: 1 } });
 });
 
 test('hiding the page auto-pauses a playing state and showing it never resumes', async ({ page }) => {
