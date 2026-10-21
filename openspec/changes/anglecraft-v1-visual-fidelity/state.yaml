@@ -1,0 +1,36 @@
+change: anglecraft-v1-visual-fidelity
+phases:
+  explore: done
+  research: done
+  proposal: done
+  design: done
+  spec: done
+  tasks: done
+  apply: pending
+  verify: pending
+  archive: pending
+blocked_reason: none
+delivery:
+  delivery_strategy: auto-chain
+  chain_strategy: feature-branch-chain
+  tracker_branch: feature/anglecraft-v1-visual-fidelity
+  review_budget_lines: 800
+inputs:
+  plan: docs/plan-fidelidad-visual.md
+  design_sources:
+    - Design/Game UI/Game UI (standalone) (1).html
+    - Design/Game UI/pantallas-game-ui.pdf
+    - Design/Sprite Kit/especificacion-sprite-kit.pdf
+    - Design/Logo/Kit de sprites puzzle brick breaker.pdf
+    - https://claude.ai/artifact/YDDd14kwvRNSevPLUnEV9A
+confirmed_decisions:
+  V1: "HUD panels, pause overlay and result modals are DOM/CSS over the canvas; canvas draws background and board only"
+  V2: "Title screen uses the Key Art exported as a static image (no text overlay) with wordmark, progress and prompt on top"
+  V3: "Mockup elements removed by v1 rules stay out (PRECISION A6, Esc C2, right-click cancel C3); slots filled per design D6"
+  V4: "Board geometry stays B1 (9x12 cells of 112x56); sprites scaled from 128x64 until re-export"
+  V5: "Self-hosted woff2 fonts extracted from the mockup (IBM Plex Sans, JetBrains Mono, Latin subset)"
+pending_decisions:
+  OI-1: "Title tagline copy (Key Art mentions 72 balls; v1 cap is 50)"
+  OI-2: "Per-HP color variants (design pending item 2.5)"
+  OI-3: "Brick re-export at 112x56 (design pending item 2.2)"
+  OI-4: "Launcher sprite (design pending item 2.6)"
