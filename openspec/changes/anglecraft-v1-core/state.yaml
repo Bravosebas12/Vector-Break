@@ -1,0 +1,43 @@
+change: anglecraft-v1-core
+phases:
+  explore: done
+  research: done
+  proposal: done
+  design: done
+  spec: done
+  tasks: done
+blocked_reason: none
+delivery:
+  delivery_strategy: auto-chain
+  chain_strategy: feature-branch-chain
+  tracker_branch: feature/anglecraft-v1
+  review_budget_lines: 800
+confirmed_decisions:
+  A1: "3 stars = 1 shot; 2 stars <= floor(50% of shots); 1 star otherwise"
+  A2: "shot = volley = one Aiming-to-Resolving cycle; level.shots is the max"
+  A3: "BOLAS = balls in flight / current volley size; pips up to 12, number above"
+  A5: "score = total damage dealt + bonus per unused shot; record stores stars, score, shots used"
+  A6: "PRECISION removed from v1"
+  A10: "orb value adds to all following volleys in the level; cap 200 balls per volley; one count per orb per substep"
+  A11: "keep orb_splitter / sfx_orb_split file names; show +V on orb"
+  B1: "112x56 bricks, 9x12 grid 1008x672 centered at top of 1080x1000 board; launch line y=956; scale sprites until re-export"
+  C1: "P pause in v1"
+  C2: "Esc menu removed in v1; future menu user story HU-07"
+  C3: "right-click cancel removed in v1"
+  D1: "every session starts at level 1; no level select"
+  D3: "add normal levels beyond level 3 in v1"
+  E1: "Chrome, Edge, Firefox, Opera - last 2 desktop versions"
+  E2: "60 FPS with 200 balls at 4X on mid-range PC"
+  E4: "audio and music unlock on first click/key; use current WAV now, switch to OGG when delivered"
+  D3_count: "3 normal levels (levels 4-6), total 6"
+  E1_opera: "Opera supported via shared Chromium engine; automated tests on Chromium only, no manual Opera check"
+  P1_unused_shot_bonus: "100 points per unused shot"
+  P2_ui_language: "Spanish UI copy, centralized in strings.js"
+  P3_volley_cap: "45 s per volley; remaining balls count as landed, damage kept"
+  P4_trap_walls: "indestructible and reinforced blocks act as trap walls; standard blocks do not"
+  P5_ball_collisions: "balls never collide with each other; they pass through"
+  P6_level3_trailer: "trailer only identifies level numbers; level 3 need not replicate its layout"
+  P7_start_screen: "HU-09 title + blocking loading screen; input ignored while loading; click starts game, unlocks audio, loads level 1"
+  A10_v1_cap: "v1 volley cap 50 balls (supersedes 200); 200 reserved for levels 8-10 spec"
+  E2_v1: "60 FPS with 50 balls at 4X (supersedes 200)"
+pending_decisions: []

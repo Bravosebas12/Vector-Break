@@ -23,9 +23,9 @@ Use when creating, editing, validating, or loading AngleCraft puzzle levels.
 | `reinforced` | 20–80 | destroyed at 0 |
 | `core` | 100–500 | win condition: all cores destroyed |
 | `indestructible` | none | obstacle/reflector, never takes damage |
-| `multiplier` | none | orb; on first touch adds `value` balls to next volley, ball passes through, then removed |
+| `multiplier` | none | orb labeled `+value`; on first touch the ball passes through, the orb is removed and `value` balls are added to every following volley of the level (cap 50 balls per volley in v1, 200 reserved for levels 8-10; counted once per substep) |
 
-- Every level MUST contain ≥1 `core` and ≥1 **loop trap**: a cavity bounded by `indestructible`/high-HP blocks with one narrow entry (1–2 cells) where a core sits so balls bounce repeatedly inside it.
+- Every level MUST contain ≥1 `core` and ≥1 **loop trap**: a cavity bounded by `indestructible` or `reinforced` blocks (and board walls) with one narrow entry (1–2 cells) where a core sits so balls bounce repeatedly inside it. `standard` blocks never count as trap walls.
 - Every core must be reachable: at least one 1-bounce path from a valid launcher angle (verify with the aim raycaster).
 
 ## Decision Gates

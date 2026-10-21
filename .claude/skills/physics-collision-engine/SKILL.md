@@ -17,6 +17,7 @@ Use when writing or changing ball movement, ball-vs-block/wall collision, the ai
 - Guard normalization: if `len < 1e-6`, keep the previous direction.
 - Clamp launch angle so `|dir.y| >= 0.05` (no perfectly horizontal infinite loops).
 - Collisions are **perfectly elastic**: speed magnitude never changes on bounce.
+- Balls NEVER collide with each other; they pass through. Only walls, blocks and orbs interact with balls.
 - Reflection formula is mandatory: `R = D - 2(D·N)N` with `N` unit length.
 - Never allocate vectors in the hot path; mutate pooled `{x, y}` objects or scalar locals.
 - Physics runs only inside fixed-timestep updates (see `canvas-renderer-opt`), never in render.

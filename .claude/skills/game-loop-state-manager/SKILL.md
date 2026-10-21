@@ -13,7 +13,7 @@ Use when adding or changing game states, transitions, input handling, or turn-en
 
 ## Hard Rules
 
-- Single FSM owns flow. States: `Aiming`, `Firing`, `Simulating`, `Resolving`, `Victory`, `GameOver`.
+- Single FSM owns flow. States: `Loading`, `Title`, `Aiming`, `Firing`, `Simulating`, `Resolving`, `Victory`, `GameOver` (+ `Paused` overlay). `Loading` ignores all input; `Title` waits for a click that unlocks audio and loads level 1.
 - Each state implements `enter()`, `update(dt)`, `exit()`, `handleInput(action)`. No state logic outside its object.
 - Transitions only through `fsm.transition(next)`; illegal transitions throw in dev.
 - Input layer maps raw DOM events to **actions**; states never read DOM events directly.
@@ -30,6 +30,8 @@ Use when adding or changing game states, transitions, input handling, or turn-en
 | Resolving | shots left = 0 and cores remain | GameOver |
 | Resolving | otherwise | Aiming |
 | Any | `RESTART` (R) | reload level → Aiming |
+| Aiming / Firing / Simulating | `PAUSE` (P) | Paused overlay (freeze simulation, keep state) |
+| Paused | `PAUSE` (P) | resume previous state unchanged |
 
 ## Execution Steps
 
@@ -38,6 +40,7 @@ Use when adding or changing game states, transitions, input handling, or turn-en
    - `mousedown` button 0 / `keydown Space` → `FIRE` (`preventDefault` on Space).
    - `keydown 1|2|4` → `SET_SPEED(1|2|4)` (valid in Firing/Simulating; resets to 1 on Aiming enter).
    - `keydown R` → `RESTART` (debounced, no auto-repeat: ignore `e.repeat`).
+   - `keydown P` → `PAUSE` toggle (ignore `e.repeat`). No `Esc` or right-click actions in v1.
 2. Firing: emit balls from pool every N fixed steps (e.g. 0.08 s) along the locked direction.
 3. Turn-end sync: keep `activeBalls` counter. On floor contact: ball deactivated, released to pool, counter decremented, first landing x stored as next launcher x. Transition to Resolving only when `emitted === volleySize && activeBalls === 0`.
 4. Resolving: apply multipliers collected, update score, check win/lose in table order.
