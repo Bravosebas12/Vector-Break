@@ -258,8 +258,7 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
     stats.frames++;
     const dt = lastNow === null ? 0 : Math.min(Math.max((nowMs - lastNow) / 1000, 0), MAX_DT);
     lastNow = nowMs;
-    ctx.fillStyle = '#05060F';
-    ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+    ctx.clearRect(0, 0, LOGICAL_W, LOGICAL_H); // the CSS stage background shows through
     const state = session.fsm.state;
     if (state === 'Loading' || state === 'Title') {
       drawTitle(ctx, titleModel({ state, loading: session.loading }, nowMs, ui.loadError === true));
@@ -286,6 +285,10 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
     particles,
     setAtlas(next) {
       atlas = next;
+      dirty = true;
+    },
+    // Webfonts arrived: canvas text in the static layer must be drawn again.
+    invalidate() {
       dirty = true;
     },
   };

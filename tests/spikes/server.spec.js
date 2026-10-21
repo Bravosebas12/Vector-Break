@@ -85,6 +85,13 @@ test.describe('static server: MIME and serving', () => {
     expect(res.body.subarray(0, 4).toString('ascii')).toBe('RIFF');
   });
 
+  test('.woff2 is font/woff2', async () => {
+    const res = await raw('/assets/fonts/jetbrains-mono-latin.woff2');
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toBe('font/woff2');
+    expect(res.body.subarray(0, 4).toString('ascii')).toBe('wOF2');
+  });
+
   test('directories are not listed', async () => {
     const res = await raw('/src/js/');
     expect([403, 404]).toContain(res.status);

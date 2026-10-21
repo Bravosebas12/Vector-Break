@@ -1,32 +1,78 @@
-/* Tokens from Design/Game UI mockup */
+/* Tokens from Design/Game UI mockup. Mirrored in src/js/system/Theme.js (tests/unit/theme.spec.js). */
 :root {
-  --bg-base: #0E1117;
-  --bg-body: #080A0E;
-  --grid: #141923;
-  --border: #2A2E39;
-  --text: #E7EAF0;
-  --text-muted: #8A93A6;
-  --cyan: #00F5D4;
-  --amber: #FF9E00;
-  --magenta: #F72585;
-  --violet: #7209B7;
-  --steel: #2B2D42;
+  --c-body: #080A0E;
+  --c-stage: #0E1117;
+  --c-grid: #141923;
+  --c-border: #2A2E39;
+  --c-text: #E7EAF0;
+  --c-text-strong: #F4F7FB;
+  --c-text-muted: #8A93A6;
+  --c-text-dim: #5D6578;
+  --c-cyan: #00F5D4;
+  --c-amber: #FF9E00;
+  --c-magenta: #F72585;
+  --c-violet: #7209B7;
+  --c-steel: #2B2D42;
   --font-ui: "IBM Plex Sans", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Self-hosted Latin subsets extracted from the mockup (variable weight files). */
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: block;
+  src: url("assets/fonts/ibm-plex-sans-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: block;
+  src: url("assets/fonts/jetbrains-mono-latin.woff2") format("woff2");
 }
 
 html, body {
   margin: 0;
   height: 100%;
-  background: var(--bg-body);
-  color: var(--text);
+  overflow: hidden;
+  background: var(--c-body);
+  color: var(--c-text);
   font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 1920x1080 logical stage, scaled uniformly and centered (letterboxed). --stage-scale is set by Viewport.js. */
+#stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  transform: translate(-50%, -50%) scale(var(--stage-scale, 1));
+  background-color: var(--c-stage);
+  background-image:
+    radial-gradient(900px 520px at 50% 40%, rgba(0, 245, 212, 0.07), transparent 70%),
+    radial-gradient(600px 400px at 85% 90%, rgba(247, 37, 133, 0.05), transparent 70%),
+    linear-gradient(var(--c-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--c-grid) 1px, transparent 1px);
+  background-size: auto, auto, 40px 40px, 40px 40px;
 }
 
 #game {
+  position: absolute;
+  inset: 0;
   display: block;
-  width: 100vw;
-  height: 100vh;
-  object-fit: contain;
-  background: var(--bg-base);
+  width: 100%;
+  height: 100%;
+}
+
+/* DOM HUD layer: transparent to the pointer except where a panel or modal opts in. */
+#hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }

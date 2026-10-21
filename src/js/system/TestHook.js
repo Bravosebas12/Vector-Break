@@ -4,7 +4,8 @@ import { STEP, LAUNCHER_Y } from './Layout.js';
 
 // `drain()` pumps the event ring into the audio mapper after each step; main.js passes it only when the
 // real loop (renderer) is not running, so every event is consumed exactly once.
-export function createTestHook(session, audioLog = [], drain = null) {
+// `render(alpha, nowMs)` draws one frame (canvas + HUD) without the rAF loop; visual tests capture after it.
+export function createTestHook(session, audioLog = [], drain = null, render = null) {
   const guard =
     (fn) =>
     (...args) => {
@@ -33,5 +34,6 @@ export function createTestHook(session, audioLog = [], drain = null) {
     setVolley: guard((n) => session.setVolley(n)),
     start: guard(() => session.dispatch({ type: 'FIRE', pointer: true })),
     audioLog: guard(() => audioLog.slice()),
+    render: guard((nowMs = 0) => render?.(1, nowMs)),
   };
 }
