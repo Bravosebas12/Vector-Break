@@ -100,6 +100,9 @@ window.addEventListener('keydown', (e) => {
   if (e.key === ' ') e.preventDefault();
   send({ type: 'keydown', key: e.key, repeat: e.repeat });
 });
+window.addEventListener('keyup', (e) => send({ type: 'keyup', key: e.key }));
+// Losing focus releases A and D, so the launcher never keeps moving without a held key.
+window.addEventListener('blur', () => ['a', 'd'].forEach((key) => send({ type: 'keyup', key })));
 window.addEventListener('contextmenu', (e) => e.preventDefault());
 // Hiding the page pauses a running level; showing it never resumes (the player does).
 document.addEventListener('visibilitychange', () => {

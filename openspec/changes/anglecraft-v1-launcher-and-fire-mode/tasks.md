@@ -10,10 +10,10 @@ Strict TDD: write or update the failing test first, then the code. One PR per sl
 
 ## 2. Slice 2 - Launcher movement (game-state, aiming)
 
-- [ ] 2.1 Test (unit): `mapEvent` for `a`/`A`/`d`/`D` keydown/keyup, repeat ignored, `M` → CYCLE_MODE; `allows` gates MOVE_* to Aiming and not paused.
-- [ ] 2.2 Test (unit): hold 0.5 s = 240 px, tap = 8 px, 10 taps = 80 px, edges 50 / 1030 held, A+D = no move then resume, ignored in Firing/Simulating/paused/Victory/GameOver/Title, restart restores level x (CP-02, CP-03, CP-05..CP-11, CP-13..CP-15).
-- [ ] 2.3 Test (e2e): real keys move the launcher and the preview origin follows in the same frame (CP-04); blur releases keys; group fires from the moved x (CP-12).
-- [ ] 2.4 Implement Input (keyup, blur), session movement (D4), `LAUNCHER_MOVED` event.
+- [x] 2.1 Test (unit): `mapEvent` for `a`/`A`/`d`/`D` keydown/keyup, repeat ignored, `M` → CYCLE_MODE; `allows` gates MOVE_* to Aiming and not paused.
+- [x] 2.2 Test (unit): hold 0.5 s = 240 px, tap = 8 px, 10 taps = 80 px, edges 50 / 1030 held, A+D = no move then resume, ignored in Firing/Simulating/paused/Victory/GameOver/Title, restart restores level x (CP-02, CP-03, CP-05..CP-11, CP-13..CP-15).
+- [x] 2.3 Test (e2e): real keys move the launcher and the preview origin follows in the same frame (CP-04); blur releases keys; group fires from the moved x (CP-12).
+- [x] 2.4 Implement Input (keyup, blur), session movement (D4), `LAUNCHER_MOVED` event.
 
 ## 3. Slice 3 - Fire groups (game-state, volley-economy)
 

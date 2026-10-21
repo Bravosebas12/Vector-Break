@@ -20,6 +20,8 @@ import {
 } from './Layout.js';
 
 const PLAYING = ['Aiming', 'Firing', 'Simulating'];
+const MOVE_SPEED = 480; // px/s of play time while A or D is held (HU-10, D-10.3)
+const MOVE_TAP = 8; // px: a press released before moving this far moves exactly this far
 
 export function createSession({
   rng,
@@ -74,6 +76,9 @@ export function createSession({
     run.playTime = 0;
     run.aim = null;
     run.lockedDir = null;
+    run.aimTarget = null;
+    run.held = { [-1]: false, [1]: false };
+    run.tapFrom = { [-1]: 0, [1]: 0 };
     run.fireMode = pinnedMode ?? 1;
   }
   resetRun({ startBalls: 0, shots: 0, launcher: { x: 0 }, blocks: [], cores: [] });
@@ -94,14 +99,47 @@ export function createSession({
     enter('Aiming');
   }
 
+  // The pointer target is kept so moving the launcher re-aims at the same point (HU-10 AC2/AC3).
   function aim(action) {
-    const origin = { x: run.launcherX, y: LAUNCHER_Y };
-    const dir = Raycaster.aimDirection(origin, action);
+    run.aimTarget = { x: action.x, y: action.y };
+    reaim();
+  }
+
+  function reaim() {
+    if (!run.aimTarget) return;
+    const dir = Raycaster.aimDirection({ x: run.launcherX, y: LAUNCHER_Y }, run.aimTarget);
     run.aim = dir ? { x: dir.x, y: dir.y } : null;
+  }
+
+  function setLauncherX(x) {
+    const next = clampLauncherX(x);
+    if (next === run.launcherX) return;
+    run.launcherX = next;
+    reaim();
+  }
+
+  function moveStart(dir) {
+    run.held[dir] = true;
+    run.tapFrom[dir] = run.launcherX;
+    events.push('LAUNCHER_MOVED', dir);
+  }
+
+  // Tap rule (D4): released before moving MOVE_TAP px -> moved exactly MOVE_TAP px from the press point.
+  function moveStop(dir) {
+    if (!run.held[dir]) return;
+    run.held[dir] = false;
+    if (fsm.state !== 'Aiming' || run.paused || run.held[-dir]) return;
+    if (Math.abs(run.launcherX - run.tapFrom[dir]) < MOVE_TAP) setLauncherX(run.tapFrom[dir] + MOVE_TAP * dir);
+  }
+
+  function moveLauncher(dt) {
+    const dir = (run.held[1] ? 1 : 0) - (run.held[-1] ? 1 : 0);
+    if (dir !== 0) setLauncherX(run.launcherX + dir * MOVE_SPEED * dt);
   }
 
   function fire() {
     if (!run.aim) return; // no valid angle yet
+    run.held[-1] = run.held[1] = false; // keys held through FIRE never move the launcher later
     run.lockedDir = { ...run.aim };
     run.shotsUsed++;
     run.volleySimTime = 0;
@@ -182,6 +220,10 @@ export function createSession({
     switch (action.type) {
       case 'AIM':
         return aim(action);
+      case 'MOVE_START':
+        return moveStart(action.dir);
+      case 'MOVE_STOP':
+        return moveStop(action.dir);
       case 'FIRE':
         return fsm.state === 'Title' ? titleClick() : fire();
       case 'SET_SPEED':
@@ -228,7 +270,7 @@ export function createSession({
   function step(dt) {
     if (run.paused || !PLAYING.includes(fsm.state)) return;
     run.playTime += dt;
-    if (fsm.state === 'Aiming') return;
+    if (fsm.state === 'Aiming') return moveLauncher(dt);
     run.simTime += dt * run.speed;
     run.volleySimTime += dt * run.speed;
     if (Physics.step(balls, world, run.speed, dt) === 0 && run.emitted < run.volleySize) {
