@@ -8,7 +8,7 @@ import { createCanvas } from './Atlas.js';
 import { LOGICAL_W, LOGICAL_H } from './Viewport.js';
 import { Raycaster } from './Raycaster.js';
 import { hudModel, modalModel } from './Hud.js';
-import { drawHud, drawModal } from './HudView.js';
+import { drawModal } from './HudView.js';
 import { titleModel, drawTitle } from './TitleScreen.js';
 import { BLOCK_TYPES } from '../entities/Block.js';
 import { COLORS, FONT_MONO, BOARD_STYLE, BLOCK_FRAME, BLOCK_TEXT, BURST, FX } from './Theme.js';
@@ -33,7 +33,7 @@ const BOUNCE_SPRITE = 32;
 const IMPACT_SPRITE = 48;
 const GLOW_R = 60;
 const HP_FONT = `700 20px ${FONT_MONO}`;
-const ORB_FONT = `700 16px ${FONT_MONO}`;
+const ORB_FONT = `700 14px ${FONT_MONO}`;
 const MAX_DOTS = 96;
 
 // Crack overlay by damage taken: 30 / 60 / 90 %.
@@ -70,7 +70,8 @@ export function aimDots(pts, n, out) {
 // `onEvent(type, a, b)`: extra consumer (audio) fed from the renderer's single drain of the event ring.
 // `ui.loadError` is set by the boot code when a level fails to load (the start screen then shows loadError).
 // `ui.pointer` ({ x, y, inBoard } in board coordinates) is set by the DOM adapter for the crosshair.
-export function createRenderer({ session, ctx, particles, atlas = null, progression = null, onEvent: extra = null, ui = {} }) {
+// `hudView` (HudDom) receives the HUD model; it is hidden on the Loading/Title screens.
+export function createRenderer({ session, ctx, particles, atlas = null, progression = null, onEvent: extra = null, ui = {}, hudView = null }) {
   const layer = createCanvas(BOARD_W, BOARD_H);
   const lctx = layer.getContext('2d');
   const stats = { frames: 0, layerRedraws: 0, blocksDrawn: 0, launcherGlow: 0, glowSpritesBuilt: 0 };
@@ -276,9 +277,9 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
       flash[i] -= dt;
       ctx.fillRect(cellMinX(i % board.cols) + 1, cellMinY((i / board.cols) | 0) + 1, CELL_W - 2, CELL_H - 2);
     }
-    // orbs with their +V value below (A11)
+    // orbs with their +V value at the upper right, inside the orb's own cell (A11)
     ctx.font = ORB_FONT;
-    ctx.textAlign = 'center';
+    ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     for (let i = 0; i < board.orbs.length; i++) {
       const o = board.orbs[i];
@@ -290,7 +291,7 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
         ctx.stroke();
       }
       ctx.fillStyle = COLORS.cyan;
-      ctx.fillText(`+${o.value}`, o.x, o.y + ORB_SPRITE / 2 + 8);
+      ctx.fillText(`+${o.value}`, o.x + ORB_SPRITE / 2 - 6, o.y - ORB_SPRITE / 2 + 10);
     }
     const aiming = state === 'Aiming' && !run.paused;
     if (state === 'Aiming' && run.aim) drawAim(run);
@@ -338,6 +339,7 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
     ctx.clearRect(0, 0, LOGICAL_W, LOGICAL_H); // the CSS stage background shows through
     const state = session.fsm.state;
     if (state === 'Loading' || state === 'Title') {
+      hudView?.update(null);
       drawTitle(ctx, titleModel({ state, loading: session.loading }, nowMs, ui.loadError === true));
       return;
     }
@@ -352,7 +354,7 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
     drawDynamic(state, session.run, dt, alpha);
     ctx.restore();
     refreshHud(state, nowMs);
-    drawHud(ctx, hud);
+    hudView?.update(hud);
     if (modal) drawModal(ctx, modal);
   }
 

@@ -18,6 +18,7 @@ import { mapEvent } from './system/Input.js';
 import { BOARD_W, BOARD_H } from './system/Layout.js';
 import { modalModel } from './system/Hud.js';
 import { hitModalButton } from './system/HudView.js';
+import { createHudDom } from './system/HudDom.js';
 import { RecordingSink, createSoundMapper, teeSink } from './system/AudioSinks.js';
 import { createWebAudio } from './system/WebAudio.js';
 
@@ -58,7 +59,8 @@ const resize = () => {
 };
 const { atlasScale } = resize();
 const ui = { loadError: false };
-const renderer = createRenderer({ session, ctx, particles: new Particles(), progression, onEvent: onSound, ui });
+const hudView = createHudDom(document.getElementById('hud'), { dispatch: (action) => session.dispatch(action) });
+const renderer = createRenderer({ session, ctx, particles: new Particles(), progression, onEvent: onSound, ui, hudView });
 if (testMode) {
   const drain = loopOn ? null : () => session.drainEvents(onSound);
   window.__ANGLECRAFT__ = createTestHook(session, recorder.log, drain, (alpha, nowMs) => renderer.draw(alpha, nowMs));
@@ -92,9 +94,15 @@ const pressModal = (e) => {
   const target = modal && hitModalButton(modal, p.x, p.y);
   if (target) session.dispatch({ type: 'PRESS', target });
 };
-window.addEventListener('mousedown', (e) => {
+// Pointer presses come from the canvas only (HUD panels sit above it and catch their own clicks). While
+// playing, a press fires only inside the board; on the title any press on the canvas starts the game.
+canvas.addEventListener('mousedown', (e) => {
   pressModal(e);
-  send({ type: 'mousedown', button: e.button }); // same gesture handler unlocks audio
+  const p = mapClientToLogical(e.clientX, e.clientY, canvas.getBoundingClientRect());
+  const x = p.x - BOARD_ORIGIN.x;
+  const y = p.y - BOARD_ORIGIN.y;
+  const inBoard = x >= 0 && x <= BOARD_W && y >= 0 && y <= BOARD_H;
+  if (inBoard || session.fsm.state === 'Title') send({ type: 'mousedown', button: e.button }); // same gesture unlocks audio
 });
 window.addEventListener('keydown', (e) => {
   if (e.key === ' ') e.preventDefault();

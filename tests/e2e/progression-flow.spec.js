@@ -57,8 +57,8 @@ test('losing shows FALLIDO, stores no record and Enter restarts the level', asyn
   expect(await page.evaluate(() => window.__ANGLECRAFT__.snapshot())).toMatchObject({ state: 'Aiming', level: { index: 0 } });
 });
 
-test('the HUD panels are drawn during play', async ({ page }) => {
+test('the HUD panels are shown during play', async ({ page }) => {
   await serveLevel(page);
   await begin(page);
-  for (const label of ['TELEMETRÍA', 'CONTROL', 'ATAJOS']) await drawn(page, label);
+  for (const label of ['TELEMETRÍA', 'CONTROL', 'ATAJOS']) await expect(page.locator('#hud')).toContainText(label);
 });

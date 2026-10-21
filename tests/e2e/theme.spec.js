@@ -43,6 +43,10 @@ test('the 1920x1080 stage is scaled to fit and centered; canvas and stage stay a
 
   await page.setViewportSize({ width: 1000, height: 1000 });
   await expect.poll(async () => (await rect(page, '#stage')).width).toBeCloseTo(1000, 0);
+  await page.evaluate(() => {
+    window.__ANGLECRAFT__.loadLevel(0);
+    window.__ANGLECRAFT__.render(0); // the HUD layer is shown in a level
+  });
   const hud = await rect(page, '#hud');
   const moved = await rect(page, '#stage');
   for (const k of ['left', 'top', 'width', 'height']) expect(Math.abs(hud[k] - moved[k])).toBeLessThanOrEqual(1);

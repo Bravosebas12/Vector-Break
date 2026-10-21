@@ -1,21 +1,35 @@
-// DOM-free HUD projection (D3): pure functions from session snapshot to draw-ready models.
+// DOM-free HUD projection (D3): pure functions from session snapshot to view models (HudDom renders them).
+// Colors are tones ('strong' | 'cyan' | 'amber' | 'magenta'); the view maps them to Theme tokens.
 import { strings } from './strings.js';
 
 export const MAX_PIPS = 12;
 export const SPEEDS = Object.freeze([1, 2, 4]);
-export const TURN_COLORS = Object.freeze({ white: '#FFFFFF', amber: '#FFC857', magenta: '#F72585' });
+const PLAYING = ['Aiming', 'Firing', 'Simulating', 'Resolving'];
+const RUNNING = ['Firing', 'Simulating'];
 
 const pad2 = (n) => String(n).padStart(2, '0');
 
-export function turnsColor(left) {
-  if (left <= 1) return TURN_COLORS.magenta;
-  if (left <= 3) return TURN_COLORS.amber;
-  return TURN_COLORS.white;
+export function turnsTone(left) {
+  if (left <= 1) return 'magenta';
+  if (left <= 3) return 'amber';
+  return 'strong';
 }
 
+// mm:ss.d (tenths truncated).
 export function formatTime(seconds) {
-  const total = Math.floor(seconds);
-  return `${pad2(Math.floor(total / 60))}:${pad2(total % 60)}`;
+  const tenths = Math.floor(seconds * 10);
+  const total = Math.floor(tenths / 10);
+  return `${pad2(Math.floor(total / 60))}:${pad2(total % 60)}.${tenths % 10}`;
+}
+
+// 12480 -> "12 480"
+export const formatPoints = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+function status(snap) {
+  if (snap.state === 'Victory') return { label: strings.solved, tone: 'cyan' };
+  if (snap.state === 'GameOver') return { label: strings.failed, tone: 'magenta' };
+  if (snap.paused) return { label: strings.pause, tone: 'amber' };
+  return { label: strings.playing, tone: 'cyan' };
 }
 
 // Result modal for Victory/GameOver; `record` is the best stored record (Progression, 7b) or null.
@@ -48,33 +62,45 @@ export function modalModel(snap, { levelCount = 6, record = null } = {}) {
 }
 
 export function hudModel(snap, { levelCount = 6 } = {}) {
-  const { shots, volley } = snap;
+  const { shots, volley, paused } = snap;
   const stage = pad2(snap.level.index + 1);
+  const playing = PLAYING.includes(snap.state);
+  const speedOn = RUNNING.includes(snap.state) && !paused;
   return {
     telemetry: {
       title: strings.telemetry,
+      status: status(snap),
       stageLabel: strings.stage,
       stage,
-      puzzle: `${stage}/${pad2(levelCount)}`,
+      puzzle: `${strings.puzzle} ${stage} / ${pad2(levelCount)}`,
       balls: {
         mode: volley.size <= MAX_PIPS ? 'pips' : 'number',
-        count: volley.size,
-        active: volley.active,
+        active: pad2(volley.active),
+        size: pad2(volley.size),
+        pips: { flying: volley.active, used: volley.emitted - volley.active, available: volley.size - volley.emitted },
       },
-      turns: { left: shots.left, max: shots.max, color: turnsColor(shots.left) },
-      points: snap.score,
+      turns: {
+        left: pad2(shots.left),
+        max: pad2(shots.max),
+        tone: turnsTone(shots.left),
+        segments: { filled: shots.left, total: shots.max },
+        caption: strings.turnsCaption.replace('{n}', shots.max),
+      },
+      points: formatPoints(snap.score),
       time: formatTime(snap.playTime),
     },
     control: {
       title: strings.control,
-      launch: { label: strings.launch, key: 'Space', enabled: snap.state === 'Aiming' && !snap.paused },
+      launch: { label: strings.launch, key: 'Space', enabled: snap.state === 'Aiming' && !paused },
+      pause: { label: paused ? strings.resume : strings.pauseButton, key: 'P', active: paused, enabled: playing },
+      restart: { label: strings.restart, key: 'R', enabled: true },
       speed: {
         label: strings.speed,
-        current: `${snap.speed}X`,
-        options: SPEEDS.map((v) => ({ label: `${v}X`, key: String(v), active: snap.speed === v })),
+        current: `×${snap.speed}`,
+        options: SPEEDS.map((v) => ({ label: `${v}X`, key: String(v), v, active: snap.speed === v, enabled: speedOn })),
       },
       shortcuts: strings.shortcutList,
     },
-    pause: { visible: snap.paused, label: strings.pause },
+    pause: { visible: paused, label: strings.pause, key: 'P' },
   };
 }

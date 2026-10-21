@@ -39,3 +39,10 @@ test('Renderer.js has no hex color literals', () => {
   const src = readFileSync(new URL('../../src/js/system/Renderer.js', import.meta.url), 'utf8');
   expect(src.match(/#[0-9a-fA-F]{3,8}\b/g)).toBeNull();
 });
+
+test('HudDom.js and Hud.js have no hex color literals (tones map to CSS tokens)', () => {
+  for (const file of ['HudDom.js', 'Hud.js']) {
+    const src = readFileSync(new URL(`../../src/js/system/${file}`, import.meta.url), 'utf8');
+    expect(src.match(/#[0-9a-fA-F]{3,8}\b/g), file).toBeNull();
+  }
+});

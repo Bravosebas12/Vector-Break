@@ -1,13 +1,9 @@
-// Canvas drawing of the HUD panels and result modals from the DOM-free models in Hud.js (D3).
+// Canvas drawing of the result modals from the DOM-free models in Hud.js (D3). Panels are DOM (HudDom.js).
 // Pure drawing: every number and label arrives already formatted by `hudModel` / `modalModel`.
 import { LOGICAL_W, LOGICAL_H } from './Viewport.js';
-import { MAX_PIPS } from './Hud.js';
 import { strings } from './strings.js';
 
 const FONT = 'system-ui, sans-serif';
-const PANEL = { y: 40, w: 360, h: 1000 };
-export const LEFT_X = 40;
-export const RIGHT_X = LOGICAL_W - 40 - PANEL.w;
 const CYAN = '#2DE2E6';
 const MODAL = { w: 760, h: 520 };
 
@@ -17,57 +13,6 @@ function text(ctx, value, x, y, { size = 26, color = '#FFFFFF', align = 'left', 
   ctx.textAlign = align;
   ctx.textBaseline = 'middle';
   ctx.fillText(value, x, y);
-}
-
-function panel(ctx, x, title) {
-  ctx.fillStyle = 'rgba(11,15,36,0.9)';
-  ctx.fillRect(x, PANEL.y, PANEL.w, PANEL.h);
-  ctx.strokeStyle = CYAN;
-  ctx.lineWidth = 2;
-  ctx.strokeRect(x, PANEL.y, PANEL.w, PANEL.h);
-  text(ctx, title, x + 24, PANEL.y + 44, { size: 30, color: CYAN, bold: true });
-}
-
-function row(ctx, x, y, label, value, color) {
-  text(ctx, label, x + 24, y, { size: 22, color: '#8892B0' });
-  text(ctx, value, x + PANEL.w - 24, y, { size: 30, color, align: 'right', bold: true });
-}
-
-function drawBalls(ctx, x, y, balls) {
-  text(ctx, strings.balls, x + 24, y, { size: 22, color: '#8892B0' });
-  if (balls.mode === 'number') return text(ctx, String(balls.count), x + PANEL.w - 24, y, { size: 30, align: 'right', bold: true });
-  for (let i = 0; i < Math.min(balls.count, MAX_PIPS); i++) {
-    ctx.fillStyle = i < balls.count - balls.active ? '#FFFFFF' : 'rgba(255,255,255,0.3)';
-    ctx.beginPath();
-    ctx.arc(x + 160 + i * 14, y, 5, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
-
-export function drawHud(ctx, hud) {
-  const t = hud.telemetry;
-  panel(ctx, LEFT_X, t.title);
-  row(ctx, LEFT_X, 160, t.stageLabel, t.stage, '#FFFFFF');
-  row(ctx, LEFT_X, 230, strings.puzzle, t.puzzle, '#FFFFFF');
-  drawBalls(ctx, LEFT_X, 300, t.balls);
-  row(ctx, LEFT_X, 370, strings.turns, `${t.turns.left}/${t.turns.max}`, t.turns.color);
-  row(ctx, LEFT_X, 440, strings.points, String(t.points), '#FFFFFF');
-  row(ctx, LEFT_X, 510, strings.time, t.time, '#FFFFFF');
-
-  const c = hud.control;
-  panel(ctx, RIGHT_X, c.title);
-  text(ctx, `${c.launch.label} [${c.launch.key}]`, RIGHT_X + 24, 160, { color: c.launch.enabled ? CYAN : '#6B7280', bold: true });
-  row(ctx, RIGHT_X, 230, c.speed.label, c.speed.current, CYAN);
-  text(ctx, strings.shortcuts, RIGHT_X + 24, 330, { size: 24, color: CYAN, bold: true });
-  c.shortcuts.forEach((s, i) => {
-    text(ctx, s.keys, RIGHT_X + 24, 380 + i * 44, { size: 22, color: '#8892B0' });
-    text(ctx, s.action, RIGHT_X + PANEL.w - 24, 380 + i * 44, { size: 22, align: 'right' });
-  });
-  if (hud.pause.visible) {
-    ctx.fillStyle = 'rgba(5,6,15,0.6)';
-    ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
-    text(ctx, hud.pause.label, LOGICAL_W / 2, LOGICAL_H / 2, { size: 96, align: 'center', bold: true });
-  }
 }
 
 const BUTTON = { w: 220, h: 64, gap: 24 };

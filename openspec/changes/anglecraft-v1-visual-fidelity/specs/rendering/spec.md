@@ -94,12 +94,12 @@ The launcher MUST be drawn as in the Key Art: a cyan (`#00F5D4`) dashed ring of 
 
 ### Requirement: Orb label (A11)
 
-Each uncaptured orb MUST show its value as `+V` in JetBrains Mono 700 below the orb sprite, in cyan.
+Each uncaptured orb MUST show its value as `+V` in JetBrains Mono 700 at the upper right of the orb sprite (inside the orb's cell, so it never covers a neighbouring block), in cyan.
 
 #### Scenario: Orb value
 - GIVEN an orb with value 3
 - WHEN it renders
-- THEN the text `+3` is drawn below the `orb_splitter` sprite
+- THEN the text `+3` is drawn at the upper right of the `orb_splitter` sprite
 
 ### Requirement: Particle colors per block type (HU-02 s2)
 

@@ -28,12 +28,12 @@ Strict TDD: in every task write or update the failing test first, then the code.
 
 ## 3. Slice 3 - DOM HUD panels and pause (hud)
 
-- [ ] 3.1 Test (unit): `hudModel` adds `status` (label + color), pip counts (in flight / used / available), turn segments and colors (`#E7EAF0` / `#FF9E00` / `#F72585`), `formatTime` with tenths; ATAJOS without `Esc` / right click.
-- [ ] 3.2 Test (e2e): TELEMETRÍA content for a running level (STAGE, `PUZZLE 01 / 06`, BOLAS, TURNOS, PUNTOS, TIEMPO, no PRECISIÓN).
-- [ ] 3.3 Test (e2e): CONTROL buttons: LANZAR fires once in `Aiming` and is disabled otherwise; Pausa/Seguir toggles; Reiniciar restarts; speed options dispatch `SET_SPEED` and reflect the active speed; disabled when not allowed.
-- [ ] 3.4 Test (e2e): click inside a panel outside buttons does not fire; board clicks still fire. Move pointer listeners to the canvas board rect; `#hud` `pointer-events` rules.
-- [ ] 3.5 Test (e2e): pause overlay covers the board only, visible after `P`, hidden after second `P`.
-- [ ] 3.6 Test: idle HUD produces no node additions/removals over 120 frames (MutationObserver). Implement `HudDom.js` panels with keycaps; wire it in `Renderer.js`; remove `drawHud`.
+- [x] 3.1 Test (unit): `hudModel` adds `status` (label + color), pip counts (in flight / used / available), turn segments and colors (`#E7EAF0` / `#FF9E00` / `#F72585`), `formatTime` with tenths; ATAJOS without `Esc` / right click.
+- [x] 3.2 Test (e2e): TELEMETRÍA content for a running level (STAGE, `PUZZLE 01 / 06`, BOLAS, TURNOS, PUNTOS, TIEMPO, no PRECISIÓN).
+- [x] 3.3 Test (e2e): CONTROL buttons: LANZAR fires once in `Aiming` and is disabled otherwise; Pausa/Seguir toggles; Reiniciar restarts; speed options dispatch `SET_SPEED` and reflect the active speed; disabled when not allowed.
+- [x] 3.4 Test (e2e): click inside a panel outside buttons does not fire; board clicks still fire. Move pointer listeners to the canvas board rect; `#hud` `pointer-events` rules.
+- [x] 3.5 Test (e2e): pause overlay covers the board only, visible after `P`, hidden after second `P`.
+- [x] 3.6 Test: idle HUD produces no node additions/removals over 120 frames (MutationObserver). Implement `HudDom.js` panels with keycaps; wire it in `Renderer.js`; remove `drawHud`.
 
 ## 4. Slice 4 - DOM result modals (hud)
 
