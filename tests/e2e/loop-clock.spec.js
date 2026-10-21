@@ -9,7 +9,10 @@ async function boot(page, query = '/?test=1&loop=1') {
   await page.clock.install({ time: 0 });
   await page.goto(query);
   await page.waitForFunction(() => window.__ANGLECRAFT__?.snapshot().state === 'Title');
-  await page.clock.pauseAt(1000); // freeze before measuring (S1 gotcha)
+  // Freeze before measuring (S1 gotcha). Pause relative to the current fake time: a slow boot can
+  // already be past any fixed instant, and pauseAt cannot move the clock backwards.
+  const now = await page.evaluate(() => Date.now());
+  await page.clock.pauseAt(now + 50);
   await page.evaluate(() => window.__ANGLECRAFT__.loadLevel(0)); // Aiming: playTime accrues one STEP per loop step
 }
 
