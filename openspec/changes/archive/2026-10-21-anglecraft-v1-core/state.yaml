@@ -6,6 +6,8 @@ phases:
   design: done
   spec: done
   tasks: done
+  verify: done
+  archive: done
 blocked_reason: none
 delivery:
   delivery_strategy: auto-chain
