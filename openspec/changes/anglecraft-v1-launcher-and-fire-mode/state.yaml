@@ -6,7 +6,7 @@ phases:
   design: done
   spec: done
   tasks: done
-  apply: in_progress  # slices 1-3 done
+  apply: in_progress  # slices 1-4 done
   verify: pending
   archive: pending
 blocked_reason: none

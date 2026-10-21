@@ -24,10 +24,10 @@ Strict TDD: write or update the failing test first, then the code. One PR per sl
 
 ## 4. Slice 4 - HUD (hud)
 
-- [ ] 4.1 Test (unit): `hudModel` mode block (active, limited, enabled) and BOLAS of the turn; ATAJOS order.
-- [ ] 4.2 Test (browser): MODO section markup, dots, `M` keycap, amber limited state, disabled opacity; clicks dispatch SET_MODE (CP-29); ATAJOS rows (CP-16); BOLAS between groups and in flight (CP-33); panel fits 1000 px.
-- [ ] 4.3 Test (browser): launcher states ready / moving / edge / disabled from cached sprites.
-- [ ] 4.4 Implement D6 and D7.
+- [x] 4.1 Test (unit): `hudModel` mode block (active, limited, enabled) and BOLAS of the turn; ATAJOS order.
+- [x] 4.2 Test (browser): MODO section markup, dots, `M` keycap, amber limited state, disabled opacity; clicks dispatch SET_MODE (CP-29); ATAJOS rows (CP-16); BOLAS between groups and in flight (CP-33); panel fits 1000 px.
+- [x] 4.3 Test (browser): launcher states ready / moving / edge / disabled from cached sprites.
+- [x] 4.4 Implement D6 and D7.
 
 ## 5. Slice 5 - Tutorial hints (tutorial-hints)
 

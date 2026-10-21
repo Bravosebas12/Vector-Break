@@ -35,12 +35,14 @@ test.describe('HudModel telemetry (A3)', () => {
     expect(st({ state: 'GameOver' })).toEqual({ label: 'FALLIDO', tone: 'magenta' });
   });
 
-  test('BOLAS: counter in flight / size, pips in flight / used / available, number above 12', () => {
+  test('CP-33 BOLAS: counter left to fire / size, pips in flight / recogida / por disparar, number above 12', () => {
     const b8 = hudModel(snap({ volley: { size: 8, emitted: 5, active: 3 } })).telemetry.balls;
-    expect(b8).toMatchObject({ mode: 'pips', active: '03', size: '08', pips: { flying: 3, used: 2, available: 3 } });
+    expect(b8).toMatchObject({ mode: 'pips', left: '03', size: '08', pips: { flying: 3, used: 2, available: 3 } });
+    const between = hudModel(snap({ volley: { size: 5, emitted: 2, active: 0 } })).telemetry.balls;
+    expect(between).toMatchObject({ left: '03', size: '05', pips: { flying: 0, used: 2, available: 3 } });
     expect(hudModel(snap({ volley: { size: 12, emitted: 0, active: 0 } })).telemetry.balls.mode).toBe('pips');
     const b20 = hudModel(snap({ volley: { size: 20, emitted: 0, active: 4 } })).telemetry.balls;
-    expect(b20).toMatchObject({ mode: 'number', active: '04', size: '20' });
+    expect(b20).toMatchObject({ mode: 'number', left: '20', size: '20' });
   });
 
   test('no PRECISION label anywhere in the model or the copy', () => {
@@ -105,11 +107,13 @@ test.describe('Control panel', () => {
     expect(hudModel(snap({ state: 'Simulating', paused: true })).control.speed.options.every((o) => !o.enabled)).toBe(true);
   });
 
-  test('ATAJOS lists only valid v1 controls as keycaps', () => {
+  test('CP-16 ATAJOS lists the controls in order, with A / D and M, as keycaps', () => {
     const list = hudModel(snap()).control.shortcuts;
     expect(list).toEqual([
       { label: 'Apuntar', keys: ['Ratón'] },
+      { label: 'Mover lanzador', keys: ['A', 'D'] },
       { label: 'Lanzar', keys: ['Clic', 'Space'] },
+      { label: 'Modo', keys: ['M'] },
       { label: 'Velocidad', keys: ['1', '2', '4'] },
       { label: 'Pausa', keys: ['P'] },
       { label: 'Reiniciar', keys: ['R'] },

@@ -1,7 +1,7 @@
 // DOM view of the HUD (design D5): TELEMETRÍA and CONTROL panels, pause overlay and result modals, laid out on the
 // 1920x1080 stage as in Design/Game UI. Built once; update() patches only values that changed.
 // All data comes from hudModel (Hud.js); styling lives in styles.css (.hud-*), colors via tones.
-import { MAX_PIPS, SPEEDS } from './Hud.js';
+import { MAX_PIPS, SPEEDS, MODES } from './Hud.js';
 import { strings } from './strings.js';
 
 const kbd = (k) => `<kbd>${k}</kbd>`;
@@ -13,7 +13,8 @@ const TELEMETRY = `
     <span class="stage-num" data-k="stage"></span><span class="sub" data-k="puzzle"></span></section>
   <section class="sec gap16">
     <div class="row"><span class="label">${strings.balls}</span>
-      <span class="count"><span data-k="ballsActive"></span><span class="total" data-k="ballsSize"></span></span></div>
+      <span class="count"><span data-k="ballsLeft"></span><span class="total" data-k="ballsSize"></span></span></div>
+    <span class="sub small tight">${strings.ballsCaption}</span>
     <div class="pips">${'<span class="pip"></span>'.repeat(MAX_PIPS)}</div>
     <div class="legend"><span><i class="lg fly"></i>${strings.inFlight}</span><span><i class="lg avail"></i>${strings.available}</span><span><i class="lg used"></i>${strings.used}</span></div>
   </section>
@@ -35,6 +36,11 @@ const CONTROL = `
       <button class="btn" data-act="pause"><span data-k="pauseLabel"></span>${kbd('P')}</button>
       <button class="btn" data-act="restart">${strings.restart}${kbd('R')}</button>
     </div>
+  </section>
+  <section class="sec gap14 mode" data-k="modeSection">
+    <div class="row"><span class="label">${strings.fireMode}</span>${kbd('M')}</div>
+    <div class="speeds modes">${MODES.map((v) => `<button class="speed" data-act="mode-${v}">${v}<span class="mdots">${'<i class="mdot"></i>'.repeat(v)}</span></button>`).join('')}</div>
+    <span class="sub small tight">${strings.fireModeCaption}</span>
   </section>
   <section class="sec gap14">
     <div class="row"><span class="label">${strings.speed}</span><span class="speed-now" data-k="speed"></span></div>
@@ -91,6 +97,7 @@ export function createHudDom(root, { dispatch }) {
   for (const b of root.querySelectorAll('[data-act]')) buttons[b.dataset.act] = b;
   const ACTIONS = { launch: { type: 'FIRE' }, pause: { type: 'PAUSE' }, restart: { type: 'RESTART' } };
   for (const v of SPEEDS) ACTIONS[`speed-${v}`] = { type: 'SET_SPEED', v };
+  for (const v of MODES) ACTIONS[`mode-${v}`] = { type: 'SET_MODE', v };
   ACTIONS['modal-RESTART'] = ACTIONS['modal-RESTART-defeat'] = { type: 'PRESS', target: 'RESTART' };
   ACTIONS['modal-NEXT'] = { type: 'PRESS', target: 'NEXT' };
   const stars = [...victory.querySelectorAll('.star')];
@@ -149,7 +156,7 @@ export function createHudDom(root, { dispatch }) {
     cls(status, 'statusTone', `status tone-${t.status.tone}`);
     text('stage', t.stage);
     text('puzzle', t.puzzle);
-    text('ballsActive', t.balls.active);
+    text('ballsLeft', t.balls.left);
     text('ballsSize', ` / ${t.balls.size}`);
     flag(pipsBox, 'pipsOn', t.balls.mode === 'pips', (v) => pipsBox.classList.toggle('off', !v));
     const { flying, used, available } = t.balls.pips;
@@ -177,6 +184,13 @@ export function createHudDom(root, { dispatch }) {
       const b = buttons[`speed-${o.v}`];
       flag(b, `speedOn${o.v}`, o.enabled, (v) => (b.disabled = !v));
       flag(b, `speedActive${o.v}`, o.active, (v) => b.classList.toggle('on', v));
+    }
+    const m = c.mode;
+    for (const o of m.options) {
+      const b = buttons[`mode-${o.v}`];
+      flag(b, `modeOn${o.v}`, m.enabled, (v) => (b.disabled = !v));
+      flag(b, `modeActive${o.v}`, o.active, (v) => b.classList.toggle('on', v));
+      flag(b, `modeLimited${o.v}`, o.active && m.limited, (v) => b.classList.toggle('limited', v));
     }
     flag(pause, 'paused', hud.pause.visible, (v) => pause.classList.toggle('show', v));
   }
