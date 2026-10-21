@@ -17,10 +17,10 @@ Strict TDD: write or update the failing test first, then the code. One PR per sl
 
 ## 3. Slice 3 - Fire groups (game-state, volley-economy)
 
-- [ ] 3.1 Test (unit): group sizes 1/2/3 and limited by balls left (CP-20, CP-26); group end returns to Aiming without counting a shot (CP-21); shots counted at Resolving (CP-24); GameOver only after the last ball of the last turn (CP-25); victory mid-turn (CP-27).
-- [ ] 3.2 Test (unit): relocation after each group (CP-22, CP-01); cap per group keeps launcher; orbs grow only following turns (CP-23).
-- [ ] 3.3 Test (unit): mode default 1, reset on load/restart/next (CP-19); cycle and set; locked in flight (CP-28, CP-30); speed keys never change the mode (CP-32); same stars and score rule across modes (CP-31).
-- [ ] 3.4 Implement D1–D3, D5 and the FSM edge Simulating → Aiming.
+- [x] 3.1 Test (unit): group sizes 1/2/3 and limited by balls left (CP-20, CP-26); group end returns to Aiming without counting a shot (CP-21); shots counted at Resolving (CP-24); GameOver only after the last ball of the last turn (CP-25); victory mid-turn (CP-27).
+- [x] 3.2 Test (unit): relocation after each group (CP-22, CP-01); cap per group keeps launcher; orbs grow only following turns (CP-23).
+- [x] 3.3 Test (unit): mode default 1, reset on load/restart/next (CP-19); cycle and set; locked in flight (CP-28, CP-30); speed keys never change the mode (CP-32); same stars and score rule across modes (CP-31).
+- [x] 3.4 Implement D1–D3, D5 and the FSM edge Simulating → Aiming.
 
 ## 4. Slice 4 - HUD (hud)
 

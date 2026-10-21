@@ -9,9 +9,10 @@ test("'turn' mode: one FIRE emits the whole volley and counts one shot (v1 behav
   s.loadLevel(1); // level 2: startBalls 5
   openField(s);
   fire(s);
+  stepUntil(s, (snap) => snap.state === 'Simulating');
+  expect(s.snapshot().volley.emitted).toBe(5); // the whole volley from one FIRE
   stepUntil(s, turnOver);
   const snap = s.snapshot();
-  expect(snap.volley.emitted).toBe(5);
   expect(snap.shots.used).toBe(1);
   expect(snap.fireMode).toBe('turn');
 });

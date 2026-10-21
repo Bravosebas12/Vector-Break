@@ -176,7 +176,7 @@ test.describe('GameSession level state', () => {
     expect(s.snapshot().shots.used).toBe(0);
   });
 
-  test('FIRE locks the direction, spends a shot and enters Firing', () => {
+  test('FIRE locks the direction and enters Firing; the shot is counted when the turn resolves', () => {
     const s = boot();
     s.dispatch({ type: 'AIM', x: 740, y: 756 });
     const aimed = { ...s.snapshot().aim };
@@ -184,7 +184,7 @@ test.describe('GameSession level state', () => {
     s.dispatch({ type: 'AIM', x: 100, y: 100 }); // ignored while Firing
     const snap = s.snapshot();
     expect(snap.state).toBe('Firing');
-    expect(snap.shots).toEqual({ used: 1, left: 9, max: 10 });
+    expect(snap.shots).toEqual({ used: 0, left: 10, max: 10 }); // HU-11: counted at Resolving
     expect(snap.aim).toEqual(aimed);
     expect(snap.lockedDir).toEqual(aimed);
   });
