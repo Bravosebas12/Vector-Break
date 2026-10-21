@@ -33,6 +33,15 @@ export function createTestHook(session, audioLog = [], drain = null, render = nu
     setSeed: guard((seed) => session.rng.setSeed(seed)),
     setVolley: guard((n) => session.setVolley(n)),
     setFireMode: guard((v) => session.setFireMode(v)),
+    // Holds A (dir -1) or D (dir +1) for `seconds` of play time, stepping the session, then releases it.
+    move: guard((dir, seconds) => {
+      session.dispatch({ type: 'MOVE_START', dir });
+      for (let i = 0; i < Math.round(seconds / STEP); i++) {
+        session.step(STEP);
+        drain?.();
+      }
+      session.dispatch({ type: 'MOVE_STOP', dir });
+    }),
     start: guard(() => session.dispatch({ type: 'FIRE', pointer: true })),
     audioLog: guard(() => audioLog.slice()),
     render: guard((nowMs = 0) => render?.(1, nowMs)),
