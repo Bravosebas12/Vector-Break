@@ -12,7 +12,7 @@ From page open until the game starts, the stage MUST show the Key Art image (`as
 #### Scenario: Title during loading
 - GIVEN the page has just opened and assets are loading
 - WHEN a frame is rendered
-- THEN the Key Art is visible and the wordmark is centered at logical x = 960 with horizontal alignment `center`
+- THEN the Key Art is visible and the wordmark (`Angle` + `Craft`, measured together) has its horizontal center at logical x = 960
 
 #### Scenario: Title after loading
 - GIVEN all assets have finished loading

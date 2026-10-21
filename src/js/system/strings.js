@@ -1,6 +1,10 @@
 // Centralized UI copy (neutral Spanish, P2/E9). No other module hardcodes visible text.
 export const strings = Object.freeze({
   title: 'AngleCraft',
+  titleFirst: 'Angle',
+  titleSecond: 'Craft',
+  // Key Art says "Setenta y dos bolas"; v1 caps a volley at 50, so a neutral line until design confirms (OI-1).
+  tagline: 'Un ángulo. Cero margen de error.',
   loading: 'Cargando... {pct}%',
   clickToStart: 'Haz clic para comenzar',
   loadError: 'No se pudieron cargar los niveles',
