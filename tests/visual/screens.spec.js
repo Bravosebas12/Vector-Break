@@ -47,6 +47,7 @@ test('title', async ({ page }) => {
 test('aiming on level 1 with the crosshair', async ({ page }) => {
   await boot(page);
   await level(page, 0);
+  await page.evaluate(() => window.__ANGLECRAFT__.setFireMode(1)); // the player's default mode (HU-11)
   await page.mouse.move(420 + 330, 40 + 520); // board (330, 520): the move also sets the aim
   await settle(page);
   await expect(page).toHaveScreenshot('aiming.png');
@@ -57,6 +58,7 @@ test('paused mid-volley on level 1', async ({ page }) => {
   await level(page, 0);
   await page.evaluate(() => {
     const hook = window.__ANGLECRAFT__;
+    hook.setFireMode(2);
     hook.fire((70 * Math.PI) / 180);
     hook.step(90);
     hook.action({ type: 'PAUSE' });

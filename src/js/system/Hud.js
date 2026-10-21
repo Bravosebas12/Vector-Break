@@ -4,6 +4,7 @@ import { strings } from './strings.js';
 
 export const MAX_PIPS = 12;
 export const SPEEDS = Object.freeze([1, 2, 4]);
+export const MODES = Object.freeze([1, 2, 3]);
 const PLAYING = ['Aiming', 'Firing', 'Simulating', 'Resolving'];
 const RUNNING = ['Firing', 'Simulating'];
 
@@ -69,6 +70,21 @@ export function modalModel(snap, { levelCount = 6, record = null } = {}) {
   };
 }
 
+// MODO DE DISPARO selector (HU-11). The test-only 'turn' mode shows no option active.
+function modeModel(snap) {
+  const current = MODES.includes(snap.fireMode) ? snap.fireMode : null;
+  const left = snap.volley.size - snap.volley.emitted;
+  return {
+    label: strings.fireMode,
+    key: 'M',
+    caption: strings.fireModeCaption,
+    current,
+    enabled: snap.state === 'Aiming' && !snap.paused,
+    limited: current !== null && left < current,
+    options: MODES.map((v) => ({ v, label: String(v), dots: v, active: v === current })),
+  };
+}
+
 export function hudModel(snap, { levelCount = 6 } = {}) {
   const { shots, volley, paused } = snap;
   const stage = pad2(snap.level.index + 1);
@@ -83,7 +99,7 @@ export function hudModel(snap, { levelCount = 6 } = {}) {
       puzzle: `${strings.puzzle} ${stage} / ${pad2(levelCount)}`,
       balls: {
         mode: volley.size <= MAX_PIPS ? 'pips' : 'number',
-        active: pad2(volley.active),
+        left: pad2(volley.size - volley.emitted), // balls of the turn not fired yet (HU-11)
         size: pad2(volley.size),
         pips: { flying: volley.active, used: volley.emitted - volley.active, available: volley.size - volley.emitted },
       },
@@ -107,6 +123,7 @@ export function hudModel(snap, { levelCount = 6 } = {}) {
         current: `×${snap.speed}`,
         options: SPEEDS.map((v) => ({ label: `${v}X`, key: String(v), v, active: snap.speed === v, enabled: speedOn })),
       },
+      mode: modeModel(snap),
       shortcuts: strings.shortcutList,
     },
     pause: { visible: paused, label: strings.pause, key: 'P' },

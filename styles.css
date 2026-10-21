@@ -119,7 +119,7 @@ html, body {
 .pip[data-s="fly"] { background: var(--c-cyan); border-color: var(--c-cyan); box-shadow: 0 0 8px rgba(0, 245, 212, 0.6); }
 .pip[data-s="avail"] { border-color: #C9D0DC; }
 .pip[data-s="used"] { background: var(--c-border); border-color: var(--c-border); }
-.legend { display: flex; gap: 16px; font: 400 14px var(--font-mono); color: var(--c-text-muted); }
+.legend { display: flex; gap: 12px; font: 400 13px var(--font-mono); color: var(--c-text-muted); white-space: nowrap; }
 .legend span { display: flex; align-items: center; gap: 6px; }
 .lg { width: 10px; height: 10px; border-radius: 50%; box-sizing: border-box; }
 .lg.fly { background: var(--c-cyan); }
@@ -245,3 +245,15 @@ kbd {
 .btn.light { margin-top: 12px; height: 64px; padding: 0 28px; gap: 20px; border-color: var(--c-text); background: var(--c-text); color: var(--c-stage); font: 700 19px var(--font-mono); }
 .btn.light:hover { background: #FFFFFF; }
 .btn.light kbd { border-color: rgba(14, 17, 23, 0.4); background: transparent; color: inherit; }
+
+/* HU-10 / HU-11 (Claude Design canvas "AngleCraft — Tutorial y modo de disparo"): MODO DE DISPARO selector,
+   BOLAS of the turn caption; CONTROL sections at 22 px so the panel keeps fitting 1000 px. */
+.hud-panel.right .sec.gap12,
+.hud-panel.right .sec.gap14 { padding: 22px 24px; }
+.hud-panel.right .sec.gap14.last { gap: 10px; }
+.sub.small.tight { margin-top: -10px; }
+.modes .speed { gap: 6px; padding: 10px 0 8px; }
+.mdots { display: flex; gap: 4px; }
+.mdot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.speed.on.limited { border-color: var(--c-amber); background: rgba(255, 158, 0, 0.12); color: var(--c-amber); }
+.mode.highlight { background: rgba(0, 245, 212, 0.06); box-shadow: inset 0 0 0 1px rgba(0, 245, 212, 0.55), 0 0 24px rgba(0, 245, 212, 0.18); }
