@@ -404,3 +404,39 @@ Tasks 9a.1-9a.2 are marked `[x]`. Branch `feat/anglecraft-v1-slice-9a` (base sli
 - L1: standard (1,5 hp4) moved to (1,9) (it blocked the only left-wall bounce lane). L2: titanium (5,2) moved to (4,7) and standard (0,9) moved to (0,7); authored entry `(6,2)` unchanged and still a valid trap entry. Window 42 angles of 3600, all `wall-left`, all obtuse.
 - L4 "Bank Shot" (shots 12, balls 4, core 200 at (7,1), entry (7,2), right-wall bank, titanium diagonal shield, orb +2). L5 "Hard Corner" (13, 5, core 300 at (1,1), entry (1,2), titanium shields + reinforced, orb +2). L6 "Twin Traps" (15, 6, two cores 250+250 at (1,1) and (7,1), mirrored traps: one aims left, one right, five titanium shields, two orbs +3).
 - L1/L2 `test.fail()` markers removed from `reachability.spec.js`.
+
+
+## Slice 9b: Solutions + playthrough - COMPLETE (3/3)
+
+Tasks 9b.1-9b.3 are marked `[x]`. Branch `feat/anglecraft-v1-slice-9b` (base slice 9a). Optional mouse-clickable modal buttons and `sfx_ui_click`/`sfx_ui_confirm` NOT done (remaining).
+
+### TDD Cycle Evidence
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| 9b.2/9b.1 | `tests/e2e/playthrough.spec.js` | E2E | full suite 437 green | spec written first; failed at load (`tests/fixtures/solutions.json` missing) | 2/2 after the fixture (hook beam search per level, seed 1, 1 degree grid) and L4 tune | `--repeat-each=5`: 10/10; test 1 hook-stepped L1-L6, test 2 real loop L6 with last-level notice | Test 2 first waited on every real-time shot (30 s timeout); now only the last shot is real-time |
+| 9b.3 | whole suite | All | - | - | 437 passed, repeated | 5 consecutive runs 437/437, plus `--repeat-each=3` 1311/1311 | None needed |
+
+### Solutions (degrees, seed 1) and results
+
+| Level | Shots used / max | Angles |
+|---|---|---|
+| L1 | 3 / 10 | 155, 22, 10 |
+| L2 | 3 / 12 | 11, 142, 14 |
+| L3 | 2 / 12 | 30, 125 |
+| L4 | 9 / 12 | 107, 14, 11, 14, 151, 12, 170, 65, 25 |
+| L5 | 10 / 13 | 145, 16, 106, 82, 92, 7, 164, 164, 164, 164 |
+| L6 | 14 / 15 | 140, 38, 48, 67, 60, 130, 140, 174, 123, 126, 125, 126, 124, 21 |
+
+### Work Unit Evidence
+
+| Evidence | Value |
+|---|---|
+| Focused test command and exact result | `npx playwright test --project=e2e tests/e2e/playthrough.spec.js --repeat-each=5`: 10 passed |
+| Runtime harness | The spec drives `main.js` through a real Chromium Title click, the hook (fire/step) and localStorage; test 2 uses the real loop and the canvas `fillText` capture |
+| Rollback boundary | `tests/e2e/playthrough.spec.js`, `tests/fixtures/solutions.json`, `src/levels/level4.json` (core hp 200 -> 100), tasks.md/apply-progress.md |
+
+### Design notes / deviations
+- L4 was not completable: a single shot dealt at most ~12-14 core damage (fine 0.1 degree scan), so 200 HP could not fall in 12 shots. Core HP lowered to 100 (shots 12, startBalls 4 unchanged); content tests keep 100-500 and T4 <= T5 <= T6.
+- `package.json` has no `dependencies` (only devDependency `@playwright/test` 1.63.0).
+- One unidentified failure was seen in one of the first three full runs; the next 8 full runs and a 3x repeat were all green.

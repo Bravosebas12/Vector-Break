@@ -8,7 +8,7 @@
   "blocks": [
     { "type": "indestructible", "col": 6, "row": 0 },
     { "type": "indestructible", "col": 6, "row": 1 },
-    { "type": "core", "col": 7, "row": 1, "hp": 200 },
+    { "type": "core", "col": 7, "row": 1, "hp": 100 },
     { "type": "reinforced", "col": 3, "row": 2, "hp": 30 },
     { "type": "indestructible", "col": 8, "row": 2 },
     { "type": "standard", "col": 1, "row": 4, "hp": 9 },
