@@ -140,24 +140,27 @@ test('P toggles the overlay through a real session', () => {
 const result = (stars, score = 640, shots = 1) => ({ state: 'Victory', result: { stars, score, shots } });
 
 test.describe('Victory modal', () => {
-  test('RESUELTO shows points, stars, record and Repetir/Reiniciar/Siguiente', () => {
-    const m = modalModel(snap({ ...result(2, 640, 3), level: { index: 2, id: 'level-03' } }), {
+  test('kicker, title, stars, PUNTOS with record, TIEMPO, TURNOS with margin; Repetir + Siguiente nivel', () => {
+    const m = modalModel(snap({ ...result(2, 18420, 9), shots: { used: 9, left: 3, max: 12 }, playTime: 102.6, level: { index: 2, id: 'level-03' } }), {
       levelCount: 6,
-      record: { stars: 3, score: 900, shots: 1 },
+      record: { stars: 3, score: 20100, shots: 1 },
     });
-    expect(m.kind).toBe('victory');
-    expect(m.title).toBe(strings.solved);
-    expect(m.points).toBe(640);
-    expect(m.stars).toBe(2);
-    expect(m.perfect).toBe(false);
-    expect(m.record).toEqual({ stars: 3, score: 900, shots: 1 });
-    expect(m.buttons).toEqual([
-      { label: strings.retry, action: 'RESTART', primary: false },
-      { label: strings.restart, action: 'RESTART', primary: false },
-      { label: strings.nextLevel, action: 'NEXT', primary: true },
+    expect(m).toMatchObject({ kind: 'victory', kicker: 'STAGE 03 · RESUELTO', title: 'Puzzle completado', stars: 2, perfect: false, notice: null, primaryAction: 'NEXT' });
+    expect(m.metrics).toEqual([
+      { label: 'PUNTOS', value: '18 420', total: '', sub: 'récord 20 100 pts' },
+      { label: 'TIEMPO', value: '01:42.6', total: '', sub: '' },
+      { label: 'TURNOS', value: '09', total: ' / 12', sub: '3 de margen' },
     ]);
-    expect(m.primaryAction).toBe('NEXT');
-    expect(m.notice).toBeNull();
+    expect(m.buttons).toEqual([
+      { label: strings.retry, key: 'R', action: 'RESTART', primary: false },
+      { label: strings.nextLevel, key: 'Enter', action: 'NEXT', primary: true },
+    ]);
+  });
+
+  test('a new best shows "nuevo récord"; no stored record shows nothing', () => {
+    const fresh = modalModel(snap({ ...result(2, 500, 3), newRecord: true }), { record: { stars: 2, score: 500, shots: 3 } });
+    expect(fresh.metrics[0].sub).toBe('nuevo récord');
+    expect(modalModel(snap(result(2, 500, 3))).metrics[0].sub).toBe('');
   });
 
   test('3 stars in one shot carries the perfect-shot mark', () => {
@@ -169,23 +172,26 @@ test.describe('Victory modal', () => {
 
   test('last level: no Siguiente, notice shown, Repetir primary', () => {
     const m = modalModel(snap({ ...result(1, 300, 5), level: { index: 5, id: 'level-06' } }), { levelCount: 6 });
-    expect(m.buttons.map((b) => b.label)).toEqual([strings.retry, strings.restart]);
+    expect(m.buttons).toEqual([{ label: strings.retry, key: 'R', action: 'RESTART', primary: true }]);
     expect(m.notice).toBe(strings.lastLevel);
     expect(m.primaryAction).toBe('RESTART');
-    expect(m.buttons[0].primary).toBe(true);
   });
 });
 
 test.describe('Defeat modal', () => {
-  const lost = snap({ state: 'GameOver', result: { stars: 0, score: 45, shots: 6 } });
+  const lost = (over = {}) =>
+    snap({ state: 'GameOver', result: { stars: 0, score: 45, shots: 12 }, shots: { used: 12, left: 0, max: 12 }, ...over });
 
-  test('FALLIDO shows PUNTOS and one primary restart button; Enter restarts', () => {
-    const m = modalModel(lost);
-    expect(m.kind).toBe('defeat');
-    expect(m.title).toBe(strings.failed);
-    expect(m.points).toBe(45);
-    expect(m.buttons).toEqual([{ label: strings.restartPuzzle, action: 'RESTART', primary: true }]);
-    expect(m.primaryAction).toBe('RESTART');
+  test('SIN TURNOS, title, sentence with active cores and combined HP, one Reiniciar puzzle button', () => {
+    const m = modalModel(lost({ cores: 2, blocks: [{ type: 'core', hp: 320 }, { type: 'core', hp: 320 }, { type: 'standard', hp: 4 }] }));
+    expect(m).toMatchObject({ kind: 'defeat', kicker: 'SIN TURNOS', title: 'Puzzle no resuelto', primaryAction: 'RESTART' });
+    expect(m.message).toBe('Se agotaron los 12 turnos. Quedan 2 núcleos activos con 640 HP combinados.');
+    expect(m.buttons).toEqual([{ label: strings.restartPuzzle, key: 'R', action: 'RESTART', primary: true }]);
+  });
+
+  test('singular forms for one shot and one core', () => {
+    const m = modalModel(lost({ shots: { used: 1, left: 0, max: 1 }, cores: 1, blocks: [{ type: 'core', hp: 100 }] }));
+    expect(m.message).toBe('Se agotó el único turno. Queda 1 núcleo activo con 100 HP.');
   });
 
   test('no modal outside Victory/GameOver', () => {

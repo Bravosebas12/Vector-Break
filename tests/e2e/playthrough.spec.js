@@ -60,20 +60,12 @@ test('title click then seeded solutions win levels 1-6 in order with records and
 });
 
 test('level 6 victory shows the last-level notice and no Siguiente nivel button', async ({ page }) => {
-  await page.addInitScript(() => {
-    window.__TEXTS__ = new Set();
-    const fill = CanvasRenderingContext2D.prototype.fillText;
-    CanvasRenderingContext2D.prototype.fillText = function (t, ...rest) {
-      window.__TEXTS__.add(String(t));
-      return fill.call(this, t, ...rest);
-    };
-  });
   await begin(page, '/?test=1&loop=1');
   await page.evaluate(() => window.__ANGLECRAFT__.loadLevel(5));
   const angles = SOLUTIONS.levels[5].angles;
   for (const deg of angles.slice(0, -1)) await shoot(page, deg); // hook-stepped; the real loop only draws
   await page.evaluate((d) => window.__ANGLECRAFT__.fire((d * Math.PI) / 180), angles.at(-1)); // real-time final shot
   await page.waitForFunction(() => window.__ANGLECRAFT__.snapshot().state === 'Victory');
-  await page.waitForFunction(() => window.__TEXTS__.has('Último nivel completado'));
-  expect(await page.evaluate(() => window.__TEXTS__.has('Siguiente nivel'))).toBe(false);
+  await expect(page.locator('.result.victory .notice')).toHaveText('Último nivel completado');
+  await expect(page.locator('[data-act="modal-NEXT"]')).toBeHidden();
 });

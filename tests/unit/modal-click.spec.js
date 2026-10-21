@@ -1,8 +1,5 @@
-// hud spec "Next": result-modal buttons are clickable. Geometry, PRESS action and button sounds.
+// hud spec "Button actions": PRESS action, new-record flag and button sounds (the buttons are DOM, see hud-dom).
 import { test, expect } from '@playwright/test';
-import { modalButtonRects, hitModalButton } from '../../src/js/system/HudView.js';
-import { modalModel } from '../../src/js/system/Hud.js';
-import { LOGICAL_W, LOGICAL_H } from '../../src/js/system/Viewport.js';
 import { createProgression } from '../../src/js/system/Progression.js';
 import { RecordingSink, createSoundMapper } from '../../src/js/system/AudioSinks.js';
 import { boot, openField, fire, stepUntil } from './helpers/session.js';
@@ -11,35 +8,6 @@ const memory = () => {
   const data = new Map();
   return { getItem: (k) => (data.has(k) ? data.get(k) : null), setItem: (k, v) => data.set(k, String(v)) };
 };
-const center = (r) => ({ x: r.x + r.w / 2, y: r.y + r.h / 2 });
-const victory = { state: 'Victory', level: { index: 0 }, result: { stars: 3, score: 600 } };
-const defeat = { state: 'GameOver', level: { index: 0 }, result: { stars: 0, score: 10 } };
-
-test.describe('modal button geometry', () => {
-  test('rects are centered, laid out left to right inside the logical canvas', () => {
-    const rects = modalButtonRects(3);
-    expect(rects).toHaveLength(3);
-    for (const r of rects) {
-      expect(r.x).toBeGreaterThanOrEqual(0);
-      expect(r.x + r.w).toBeLessThanOrEqual(LOGICAL_W);
-      expect(r.y + r.h).toBeLessThanOrEqual(LOGICAL_H);
-    }
-    expect(rects[0].x + rects[0].w).toBeLessThan(rects[1].x);
-    expect(rects[1].x + rects[1].w).toBeLessThan(rects[2].x);
-    expect((rects[0].x + rects[2].x + rects[2].w) / 2).toBeCloseTo(LOGICAL_W / 2);
-  });
-
-  test('hit test maps each button center to its action and misses elsewhere', () => {
-    const modal = modalModel(victory);
-    const rects = modalButtonRects(modal.buttons.length);
-    expect(modal.buttons.map((b, i) => hitModalButton(modal, center(rects[i]).x, center(rects[i]).y))).toEqual(['RESTART', 'RESTART', 'NEXT']);
-    expect(hitModalButton(modal, 5, 5)).toBeNull();
-    expect(hitModalButton(modal, rects[0].x - 1, center(rects[0]).y)).toBeNull();
-    const lost = modalModel(defeat);
-    const [only] = modalButtonRects(1);
-    expect(hitModalButton(lost, center(only).x, center(only).y)).toBe('RESTART');
-  });
-});
 
 test.describe('PRESS action', () => {
   const win = (s, level) => {
@@ -80,6 +48,17 @@ test.describe('PRESS action', () => {
     s.dispatch({ type: 'PRESS', target: 'NEXT' });
     expect(s.snapshot().state).toBe('Victory');
     expect(drained(s)).toEqual(['UI_CLICK']);
+  });
+
+  test('newRecord is true when the win beats the stored record and false when it does not', () => {
+    const progression = createProgression({ storage: memory() });
+    const s = boot({ progression });
+    win(s, 0);
+    expect(s.snapshot().newRecord).toBe(true);
+    s.dispatch({ type: 'RESTART' });
+    expect(s.snapshot().newRecord).toBe(false);
+    win(s, 0); // same result: not better
+    expect(s.snapshot().newRecord).toBe(false);
   });
 
   test('PRESS is ignored outside Victory and GameOver', () => {

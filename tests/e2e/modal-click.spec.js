@@ -1,7 +1,6 @@
-// hud spec "Next": the result-modal buttons answer real mouse clicks on the drawn buttons (?test=1&loop=1).
-// Viewport 1280x720: logical = client * 1.5. Fresh context per test, so storage starts empty; no page.clock.
+// hud delta "Button actions": the DOM result-modal buttons answer real clicks (?test=1&loop=1).
+// Fresh context per test, so storage starts empty; no page.clock. The modal is awaited, never slept for.
 import { test, expect } from '@playwright/test';
-import { modalButtonRects } from '../../src/js/system/HudView.js';
 
 const serveLevel = (page, patch) =>
   page.route('**/src/levels/level1.json', async (route) => {
@@ -11,10 +10,6 @@ const serveLevel = (page, patch) =>
   });
 const snap = (page) => page.evaluate(() => window.__ANGLECRAFT__.snapshot());
 const plays = (page) => page.evaluate(() => window.__ANGLECRAFT__.audioLog().filter((c) => c.call === 'play').map((c) => c.type));
-const clickButton = async (page, count, index) => {
-  const r = modalButtonRects(count)[index];
-  await page.mouse.click((r.x + r.w / 2) / 1.5, (r.y + r.h / 2) / 1.5);
-};
 async function reach(page, state, patch, volley) {
   await serveLevel(page, patch);
   await page.goto('/?test=1&loop=1');
@@ -31,29 +26,36 @@ const won = async (page) => {
   await page.waitForFunction(() => window.__ANGLECRAFT__.snapshot().shots.used === 1);
   await page.evaluate(() => window.__ANGLECRAFT__.fire(Math.PI / 2));
   await page.waitForFunction(() => window.__ANGLECRAFT__.snapshot().state === 'Victory');
+  await expect(page.locator('.result.victory')).toBeVisible();
 };
 
 test('clicking Siguiente nivel on the victory modal loads level 2 with click and confirm sounds', async ({ page }) => {
   await won(page);
-  await page.waitForTimeout(200); // let the modal draw
-  await clickButton(page, 3, 2);
+  await page.click('[data-act="modal-NEXT"]');
   expect(await snap(page)).toMatchObject({ state: 'Aiming', level: { index: 1 } });
-  const sounds = await plays(page);
-  expect(sounds.slice(-2)).toEqual(['sfx_ui_click', 'sfx_ui_confirm']);
+  // UI sounds are drained into the audio sink on the next loop frame: wait for them, never sleep.
+  await expect.poll(async () => (await plays(page)).slice(-2)).toEqual(['sfx_ui_click', 'sfx_ui_confirm']);
+  await expect(page.locator('.result.victory')).toBeHidden();
 });
 
 test('clicking Repetir on the victory modal restarts the same level', async ({ page }) => {
   await won(page);
-  await page.waitForTimeout(200);
-  await clickButton(page, 3, 0);
+  await page.click('[data-act="modal-RESTART"]');
   expect(await snap(page)).toMatchObject({ state: 'Aiming', level: { index: 0 }, shots: { used: 0 } });
 });
 
-test('clicking Reiniciar puzzle on the defeat modal restarts the level; clicks off the button do nothing', async ({ page }) => {
+test('defeat: clicks on the scrim do nothing; Reiniciar puzzle restarts; R restarts within 500 ms', async ({ page }) => {
   await reach(page, 'GameOver', { shots: 1 }, 3);
-  await page.waitForTimeout(200);
+  await expect(page.locator('.result.defeat')).toBeVisible();
   await page.mouse.click(40, 40);
   expect((await snap(page)).state).toBe('GameOver');
-  await clickButton(page, 1, 0);
+  await page.click('[data-act="modal-RESTART-defeat"]');
   expect(await snap(page)).toMatchObject({ state: 'Aiming', level: { index: 0 } });
+
+  await page.evaluate(() => window.__ANGLECRAFT__.fire(Math.PI / 2));
+  await page.waitForFunction(() => window.__ANGLECRAFT__.snapshot().state === 'GameOver');
+  const t0 = Date.now();
+  await page.keyboard.press('r');
+  await page.waitForFunction(() => window.__ANGLECRAFT__.snapshot().state === 'Aiming');
+  expect(Date.now() - t0).toBeLessThan(500);
 });
