@@ -1,0 +1,23 @@
+{
+  "id": "level-04",
+  "name": "Bank Shot",
+  "grid": { "cols": 9, "rows": 12 },
+  "launcher": { "x": 0.5 },
+  "shots": 12,
+  "startBalls": 4,
+  "blocks": [
+    { "type": "indestructible", "col": 6, "row": 0 },
+    { "type": "indestructible", "col": 6, "row": 1 },
+    { "type": "core", "col": 7, "row": 1, "hp": 200 },
+    { "type": "reinforced", "col": 3, "row": 2, "hp": 30 },
+    { "type": "indestructible", "col": 8, "row": 2 },
+    { "type": "standard", "col": 1, "row": 4, "hp": 9 },
+    { "type": "standard", "col": 7, "row": 5, "hp": 6 },
+    { "type": "multiplier", "col": 2, "row": 6, "value": 2 },
+    { "type": "indestructible", "col": 6, "row": 7 },
+    { "type": "standard", "col": 0, "row": 8, "hp": 10 },
+    { "type": "indestructible", "col": 6, "row": 8 },
+    { "type": "indestructible", "col": 5, "row": 9 },
+    { "type": "standard", "col": 8, "row": 9, "hp": 10 }
+  ]
+}
