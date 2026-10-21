@@ -43,6 +43,12 @@ export class RecordingSink {
   }
 }
 
+// Fans every call out to several sinks (the real adapter plus a recorder in ?test=1&audio=1); the first sink's state wins.
+export function teeSink(...sinks) {
+  const each = (name) => (...args) => sinks.forEach((s) => s[name](...args));
+  return { get state() { return sinks[0].state; }, unlock: each('unlock'), play: each('play'), music: each('music'), setVolume: each('setVolume') };
+}
+
 // Consecutive hits within 250 ms rise by one; a larger gap or a turn end resets to 0.
 export function createComboLadder() {
   let step = -1;
@@ -117,6 +123,12 @@ export function createSoundMapper({ audio, now }) {
         return audio.play('sfx_ui_pause_in', {});
       case 'RESUME':
         return audio.play('sfx_ui_pause_out', {});
+      case 'STARS':
+        for (let i = 1; i <= a; i++) audio.play(`sfx_star_${i}`, {});
+        return;
+      case 'TURNS': // shots left at the start of a turn
+        if (a >= 1 && a <= 3) audio.play(a === 1 ? 'sfx_turns_critical' : 'sfx_turns_warning', {});
+        return;
       case 'STATE':
         if (a === STATE_RESOLVING) ladder.reset();
         if (a === STATE_VICTORY) audio.play('sfx_victory', {});

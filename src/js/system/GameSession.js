@@ -245,6 +245,8 @@ export function createSession({
       if (won && index !== null) progression?.submit(index, run.result);
     }
     enter(won ? 'Victory' : run.result ? 'GameOver' : 'Aiming');
+    if (won) events.push('STARS', run.result.stars); // presentation only: sound
+    else if (!run.result) events.push('TURNS', shots - run.shotsUsed);
   }
 
   function snapshot() {
@@ -287,6 +289,10 @@ export function createSession({
     },
     get board() {
       return run.board;
+    },
+    // Live progress counters for the start screen (no snapshot allocation per frame).
+    get loading() {
+      return loading;
     },
     rng,
     sealedFloor,

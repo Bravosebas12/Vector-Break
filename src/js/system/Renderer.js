@@ -8,6 +8,7 @@ import { LOGICAL_W, LOGICAL_H } from './Viewport.js';
 import { Raycaster } from './Raycaster.js';
 import { hudModel, modalModel } from './Hud.js';
 import { drawHud, drawModal } from './HudView.js';
+import { titleModel, drawTitle } from './TitleScreen.js';
 import { BLOCK_TYPES } from '../entities/Block.js';
 import {
   BOARD_W,
@@ -56,7 +57,8 @@ export const crackFor = (hp, maxHp) => {
 };
 
 // `onEvent(type, a, b)`: extra consumer (audio) fed from the renderer's single drain of the event ring.
-export function createRenderer({ session, ctx, particles, atlas = null, progression = null, onEvent: extra = null }) {
+// `ui.loadError` is set by the boot code when a level fails to load (the start screen then shows loadError).
+export function createRenderer({ session, ctx, particles, atlas = null, progression = null, onEvent: extra = null, ui = {} }) {
   const layer = createCanvas(BOARD_W, BOARD_H);
   const lctx = layer.getContext('2d');
   const stats = { frames: 0, layerRedraws: 0, blocksDrawn: 0 };
@@ -259,7 +261,10 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
     ctx.fillStyle = '#05060F';
     ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
     const state = session.fsm.state;
-    if (state === 'Loading' || state === 'Title') return; // start screen arrives in slice 8b
+    if (state === 'Loading' || state === 'Title') {
+      drawTitle(ctx, titleModel({ state, loading: session.loading }, nowMs, ui.loadError === true));
+      return;
+    }
     syncBoard();
     session.drainEvents(onEvent);
     particles.update(dt);

@@ -160,6 +160,35 @@ test.describe('event-to-sound mapping', () => {
     expect(types(sink)).toEqual(['sfx_speed_x4', 'sfx_ui_pause_in', 'sfx_ui_pause_out', 'sfx_victory', 'sfx_defeat']);
   });
 
+  test('victory stars play one chime per star and the turns warning escalates at 3 and 1', () => {
+    const { sink, onEvent } = setup();
+    onEvent('STARS', 3, 0);
+    onEvent('STARS', 1, 0);
+    onEvent('STARS', 0, 0);
+    expect(types(sink)).toEqual(['sfx_star_1', 'sfx_star_2', 'sfx_star_3', 'sfx_star_1']);
+    sink.log.length = 0;
+    for (const left of [4, 3, 2, 1, 0]) onEvent('TURNS', left, 0);
+    expect(types(sink)).toEqual(['sfx_turns_warning', 'sfx_turns_warning', 'sfx_turns_critical']);
+  });
+
+  test('the session emits STARS on a win and TURNS (shots left) when the next turn begins', () => {
+    const run = (win) => {
+      const s = openField(boot());
+      if (win) s.board.cores.forEach((c) => (c.hp = 0));
+      fire(s);
+      stepUntil(s, turnOver);
+      const seen = [];
+      s.drainEvents((type, a) => seen.push([type, a]));
+      return { s, seen };
+    };
+    const won = run(true);
+    expect(won.seen).toContainEqual(['STARS', won.s.snapshot().result.stars]);
+    expect(won.seen.some(([type]) => type === 'TURNS')).toBe(false);
+    const open = run(false);
+    expect(open.seen).toContainEqual(['TURNS', open.s.snapshot().shots.left]);
+    expect(open.seen.some(([type]) => type === 'STARS')).toBe(false);
+  });
+
   test('a real session turn feeds the mapper through a single drain', () => {
     const s = openField(boot(), [
       { type: 'standard', col: 4, row: 8, hp: 1 },

@@ -347,3 +347,35 @@ Tasks 8a.1-8a.2 are marked `[x]`. Branch `feat/anglecraft-v1-slice-8a` (base sli
 Work Unit Evidence: focused `npx playwright test tests/unit/audio-seam.spec.js --project=unit` 23 passed; `tests/browser/webaudio.spec.js --project=browser --repeat-each=5` 35 passed. Runtime harness: real Chromium AudioContext (suspended is fine; assertions read node params and adapter counters). Rollback: `AudioSinks.js`, `WebAudio.js`, the two specs, and the small `GameSession.js`/`Renderer.js` edits. Full suite x3: 396 passed each.
 
 Notes: session now pushes `STEEL` (indestructible hit) and `ORB` (capture) events; `createRenderer({ onEvent })` fans its single ring drain out to audio. Mapper takes `now()` ms (adapter passes `playTime`). Hook-only runs (no `loop=1`) never drain the ring; 8b must pump it for `audioLog`. Star/turns-warning sounds have recipes but no session events yet.
+
+
+## Slice 8b: Start screen - COMPLETE (3/3)
+
+Tasks 8b.1-8b.3 are marked `[x]`. Branch `feat/anglecraft-v1-slice-8b` (base slice 8a). Slice 9a NOT started.
+
+### TDD Cycle Evidence
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-----------|-------------|----------|
+| 8b.1 | `tests/unit/asset-loader.spec.js` | Unit | 396 green | `AssetLoader.js` missing (no tests found) | 6/6 | per-settle progress with gated fetches, fetch/decode failure, failed atlas, level fetch failure, level validation failure | None needed |
+| 8b.2 | `tests/unit/title-screen.spec.js` | Unit | 402 green | `TitleScreen.js` missing (no tests found) | 8/8 | 40%/33%/0-total, bar centered, pulse 0.5..1 over 1 s, error state, draw calls via fake ctx | None needed |
+| 8b.3 | `tests/e2e/start-screen.spec.js` | E2E | 410 green | 10 failed, 1 trivially passing (no listeners, no audio, no title draw) | 11/11, `--repeat-each=5` 55/55 | Loading ignored + not replayed, Title keys/right click ignored, click unlock+music, aim/fire/Space/Esc/contextmenu, visibility pause, single drain with and without loop, title/prompt/no HUD, loadError, 404 sample (synth), real decode (samples) | Hold-back of the last settle so Title is entered after levels/buffers are installed |
+| 8b.3 extra | `tests/unit/audio-seam.spec.js` | Unit | 23 green | 2 failed (`STARS`/`TURNS` unmapped) | 25/25 | stars 3/1/0, turns 4/3/2/1/0, session win vs open turn | None needed |
+
+### Work Unit Evidence
+
+| Evidence | Value |
+|---|---|
+| Focused test command and exact result | `npx playwright test tests/unit/{asset-loader,title-screen}.spec.js --project=unit`: 14 passed; `tests/e2e/start-screen.spec.js --project=e2e --repeat-each=5`: 55 passed |
+| Runtime harness | `start-screen.spec.js` drives `main.js` through real Chromium mouse/keyboard events, `page.route` (held levels, 404 sample/music/level), real `OfflineAudioContext` decode of the shipped WAVs, and the real WebAudio adapter (`&audio=1`) |
+| Rollback boundary | `AssetLoader.js`, `TitleScreen.js`, `main.js`, small edits in `GameSession.js` (`loading` getter, `STARS`/`TURNS` events), `Renderer.js` (title draw, `ui`), `TestHook.js` (`drain`), `AudioSinks.js` (`teeSink`, mapper cases), the three specs |
+
+### Design notes / deviations
+- Real DOM input lives in `main.js` (window listeners registered once); AIM subtracts `BOARD_ORIGIN` from the logical point because the session aims in board coordinates.
+- `?test=1` skips real audio assets (instant settle) unless `&audio=1`; with `&audio=1` the real WebAudio is wrapped in `teeSink` with a RecordingSink so `audioLog` still works. `window.__ANGLECRAFT_AUDIO__` exposes the WebAudio adapter (state, stats) in test mode.
+- Hook-only runs (no `&loop=1`) drain the ring inside the hook's `step`; with the loop only the renderer drains.
+- The last settle is held back (`setLoadProgress(total - 1)`) until levels and buffers are installed, then completed, so Title implies a ready session.
+- Samples listed: the 18 shipped SFX plus music (decoded with one OfflineAudioContext). Sounds without a shipped WAV use synth recipes.
+- Newly mapped sounds: stars on Victory (`STARS` event), turns warning (<=3) / critical (<=1) on each new turn (`TURNS` event). Already mapped earlier: pause in/out, speed x1/x2/x4, victory, defeat.
+- REMAINING unmapped: `sfx_ui_click`/`sfx_ui_confirm` (modal buttons are not mouse-clickable yet, no button events exist).
+- Level 1/2 reachability `test.fail()` markers untouched.

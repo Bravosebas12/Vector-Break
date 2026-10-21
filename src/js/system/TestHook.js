@@ -2,7 +2,9 @@
 // Everything except snapshot() throws NOT_READY while the session is still Loading.
 import { STEP, LAUNCHER_Y } from './Layout.js';
 
-export function createTestHook(session, audioLog = []) {
+// `drain()` pumps the event ring into the audio mapper after each step; main.js passes it only when the
+// real loop (renderer) is not running, so every event is consumed exactly once.
+export function createTestHook(session, audioLog = [], drain = null) {
   const guard =
     (fn) =>
     (...args) => {
@@ -13,7 +15,10 @@ export function createTestHook(session, audioLog = []) {
   return {
     snapshot: () => session.snapshot(),
     step: guard((n) => {
-      for (let i = 0; i < n; i++) session.step(STEP);
+      for (let i = 0; i < n; i++) {
+        session.step(STEP);
+        drain?.();
+      }
     }),
     loadLevel: guard((x) => session.loadLevel(x)),
     aim: guard((x, y) => session.dispatch({ type: 'AIM', x, y })),

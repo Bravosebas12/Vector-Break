@@ -118,9 +118,9 @@ Notes: slices 5, 6, 7, 9 are pre-split (each estimated at or above ~900 lines co
 
 ## Slice 8b: Start screen (start-screen; HU-09)
 
-- [ ] 8b.1 RED `tests/unit/asset-loader.spec.js`: per-asset settle progress, failed audio settles and lands in `failed[]`, level fetch/validate failure rejects -> GREEN `src/js/system/AssetLoader.js` with OfflineAudioContext decode. (Blocking loading, Failed audio)
-- [ ] 8b.2 RED `tests/unit/title-screen.spec.js`: title at (960, 470), 600x12 progress bar, pulsing prompt, no board/HUD -> GREEN `src/js/system/TitleScreen.js`. (Centered title, Ready prompt)
-- [ ] 8b.3 RED `tests/e2e/start-screen.spec.js`: input ignored in Loading, key on Title ignored, click -> Aiming L1 with `audioLog` unlock + music, 404 sample still reaches Title (`page.route`), `loadError` on bad level -> GREEN wire boot in `src/js/main.js`. (Input ignored, Start on click)
+- [x] 8b.1 RED `tests/unit/asset-loader.spec.js`: per-asset settle progress, failed audio settles and lands in `failed[]`, level fetch/validate failure rejects -> GREEN `src/js/system/AssetLoader.js` with OfflineAudioContext decode. (Blocking loading, Failed audio)
+- [x] 8b.2 RED `tests/unit/title-screen.spec.js`: title at (960, 470), 600x12 progress bar, pulsing prompt, no board/HUD -> GREEN `src/js/system/TitleScreen.js`. (Centered title, Ready prompt)
+- [x] 8b.3 RED `tests/e2e/start-screen.spec.js`: input ignored in Loading, key on Title ignored, click -> Aiming L1 with `audioLog` unlock + music, 404 sample still reaches Title (`page.route`), `loadError` on bad level -> GREEN wire boot in `src/js/main.js`. (Input ignored, Start on click)
 
 ## Slice 9a: Levels 4-6 (level-content; HU-06, HU-08 s2/s4)
 
