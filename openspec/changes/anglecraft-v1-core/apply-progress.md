@@ -119,3 +119,39 @@ Tasks 3.1-3.5 are marked `[x]` in `tasks.md`. Slices 4-9b are NOT started. Branc
 - Trap analysis: a valid entry may be 2 vertically adjacent cells too (design says 4-adjacent); pocket excludes the entry cells. LAUNCH joins row `rows-1`.
 - Separate spec `level-catalog.spec.js` added (tasks.md names only two spec files) for Board and atomic load.
 - Trap-wall predicate: indestructible, reinforced, core; spec OI-1 "high-HP" resolved as `reinforced` only (no HP threshold).
+
+## Slice 4: Aiming (PR 4 of 14) - COMPLETE (3/3)
+
+Tasks 4.1-4.3 are marked `[x]` in `tasks.md`. Slices 5a-9b are NOT started. Branch `feat/anglecraft-v1-slice-4` (base slice 3).
+
+### TDD Cycle Evidence
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| 4.1 | `tests/unit/raycaster.spec.js` | Unit | N/A (stub class only) | `does not provide an export named REFLECT_LENGTH` | 12/12 after 2 fixes (test core placement; downward cursor now lands on the clamp) | block face, left/right wall, ceiling, titanium, orb ignored, rounded corner, missed corner, 2 reflected-segment cases, 4 aim cases | None needed |
+| 4.2 | `tests/unit/reachability.spec.js` | Unit | 12 raycaster tests green | `Raycaster.sweep is not a function` | 10/10 (L1/L2 preview via `test.fail`) | angle range, unbounded post-bounce, surface records, two-bounce target, static vs preview, sealed row, L1-L3 static, L3 preview | Cross-checked sweep against a brute-force Collision.circleAabb stepper: 3597/3600, 3600/3600, 3598/3600 angle agreement (L1/L2/L3) |
+| 4.3 | `tests/unit/level-validator.spec.js` | Unit | 42 validator tests green | unreachable-core test: expected `['CORE_UNREACHABLE']`, got `[]` | 46/46 | straight notch valid, serpentine unreachable, standard blocks ignored, injected override | Stub removed |
+
+### Test Summary
+- New tests: 12 raycaster, 10 reachability, 4 validator; full `npx playwright test`: 180 passed, exit 0.
+
+### Work Unit Evidence
+
+| Evidence | Value |
+|---|---|
+| Focused test command and exact result | `npx playwright test --project=unit tests/unit/{raycaster,reachability,level-validator}.spec.js`: all passed |
+| Runtime harness | N/A: pure modules, no runtime boundary |
+| Rollback boundary | `src/js/system/{Raycaster,Reachability,TrapAnalysis,LevelValidator}.js`, `tests/unit/{raycaster,reachability,level-validator}.spec.js`, tasks.md/apply-progress.md |
+
+### Design notes / deviations
+- API: `Raycaster.aimDirection(origin, cursor)` (null on zero vector; always upward, `|dir.y| >= 0.05`, a downward cursor lands on the clamp keeping the x sign; resolves spec OI-3), `Raycaster.cast(origin, dir, board, maxBounces = 1)` -> `{contact, reflected}`, `Raycaster.trace`, `Raycaster.sweep`. `REFLECT_LENGTH = 180` (resolves spec OI-1).
+- Task 4.2 says `Raycaster.sweep`, design says `Reachability.sweep`: both exist (`Reachability.sweep` delegates). `Reachability.js` also holds `coreReachabilityErrors`, wired as the default `validateLevel` reachability.
+- Static geometry blockers = trap-wall types (indestructible, reinforced, core). Target per core = core cell + every cell of a valid entry (`TrapAnalysis.entryCells`, new). Reaching a target also counts when the ball touches a target block (the core). Error code `CORE_UNREACHABLE` (col,row).
+- Reachability runs only when the trap rules pass (entries are undefined otherwise); trap-error behavior is unchanged.
+- Reflection in the preview and the sweep re-clamps `|dir.y| >= 0.05` like `Collision.resolve`.
+
+### Issues Found (level content, NOT edited; belongs to slice 9a)
+- Level 1 under `preview` geometry: entry (3,2) is reachable only through standard-block bounces (2 angles, ~0.978 and ~1.978 rad); NO exact single side-wall bounce exists (spec scenario "Wall bounce reachable"). Under `static` geometry it is reachable via wall-right.
+- Level 2 under `preview` geometry: entry (6,2) has NO reaching angle at all (no direct line holds). Under `static` it is reachable via wall-left.
+- Level 3 passes under both geometries.
+- The two failing content assertions are encoded as `test.fail()` in `reachability.spec.js`; remove the marker when slice 9a retunes the levels.

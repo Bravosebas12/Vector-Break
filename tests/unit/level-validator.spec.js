@@ -131,7 +131,47 @@ test.describe('validateLevel: trap and reachability wiring', () => {
     expect(r.errors.map((e) => e.code)).toEqual(['CORE_UNREACHABLE']);
   });
 
-  test('the default static reachability stub reports nothing', () => {
+  test('the default static reachability accepts the authored level 2', () => {
     expect(validateLevel(load(2)).valid).toBe(true);
+  });
+});
+
+// ASCII level: row 0 first, 9 chars per row, I indestructible, C core, S standard, '.' empty.
+function asciiLevel(...rows) {
+  const TYPES = { I: 'indestructible', C: 'core', S: 'standard' };
+  const blocks = [];
+  rows.forEach((line, row) =>
+    [...line].forEach((ch, col) => {
+      if (ch === '.') return;
+      blocks.push({ type: TYPES[ch], col, row, ...(ch === 'C' ? { hp: 100 } : ch === 'S' ? { hp: 3 } : {}) });
+    }),
+  );
+  return { id: 'level-98', name: 'ascii', grid: { cols: 9, rows: 12 }, launcher: { x: 0.5 }, shots: 5, startBalls: 3, blocks };
+}
+const NOTCH = ['', '...III...', '...ICI...', '...I.I...'];
+// Serpentine corridor under the notch: each gap is on the far side, so no single bounce threads both.
+const SERPENTINE = ['', '', '', '', '', '', '.IIIIIIII', '', 'IIIIIIII.'];
+
+test.describe('validateLevel: core reachability (static geometry)', () => {
+  test('a notch with a straight approach is reachable', () => {
+    expect(validateLevel(asciiLevel(...NOTCH))).toEqual({ valid: true, errors: [] });
+  });
+
+  test('a trap-valid core with no <=1-bounce path to any entry or to the core -> CORE_UNREACHABLE', () => {
+    const rows = NOTCH.concat(SERPENTINE.slice(NOTCH.length));
+    const r = validateLevel(asciiLevel(...rows));
+    expect(r.errors.map((e) => e.code)).toEqual(['CORE_UNREACHABLE']);
+    expect(r.errors[0]).toMatchObject({ col: 4, row: 2 });
+    expect(r.valid).toBe(false);
+  });
+
+  test('standard blocks do not make a core unreachable (the ball removes them)', () => {
+    const rows = NOTCH.concat(['', '', '', '', 'SSSSSSSSS']);
+    expect(validateLevel(asciiLevel(...rows)).valid).toBe(true);
+  });
+
+  test('an injected reachability still replaces the default check', () => {
+    const rows = NOTCH.concat(SERPENTINE.slice(NOTCH.length));
+    expect(validateLevel(asciiLevel(...rows), { reachability: () => [] }).valid).toBe(true);
   });
 });

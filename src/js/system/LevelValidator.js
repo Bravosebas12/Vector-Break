@@ -3,16 +3,14 @@
 import { BLOCK_TYPES, HP_RANGES } from '../entities/Block.js';
 import { Board } from './Board.js';
 import { isLauncherXValid } from './Layout.js';
+import { coreReachabilityErrors } from './Reachability.js';
 import { findTraps } from './TrapAnalysis.js';
 
 const REQUIRED = ['id', 'name', 'grid', 'launcher', 'shots', 'startBalls', 'blocks'];
 const isInt = (v) => Number.isInteger(v);
 const inRange = (v, lo, hi) => isInt(v) && v >= lo && v <= hi;
 
-// Static reachability is completed in slice 4 (Raycaster.sweep); until then it reports nothing.
-const staticReachabilityStub = () => [];
-
-export function validateLevel(level, { reachability = staticReachabilityStub } = {}) {
+export function validateLevel(level, { reachability = coreReachabilityErrors } = {}) {
   const errors = [];
   const add = (code, field, message) => errors.push({ code, field, message: message ?? `${code}: ${field}` });
   const bad = (field, why) => add('INVALID_FIELD', field, `${field} ${why}`);
@@ -45,7 +43,9 @@ export function validateLevel(level, { reachability = staticReachabilityStub } =
   if (errors.length > 0) return { valid: false, errors };
 
   const board = Board.fromLevel(level);
-  errors.push(...findTraps(board), ...reachability(board));
+  // Reachability is only meaningful once every core sits in a valid trap (entries are defined).
+  const traps = findTraps(board);
+  errors.push(...traps, ...(traps.length === 0 ? reachability(board) : []));
   return { valid: errors.length === 0, errors };
 }
 

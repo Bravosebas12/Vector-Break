@@ -67,9 +67,9 @@ Notes: slices 5, 6, 7, 9 are pre-split (each estimated at or above ~900 lines co
 
 ## Slice 4: Aiming (aiming; HU-01)
 
-- [ ] 4.1 RED `tests/unit/raycaster.spec.js`: rounded-rect Minkowski hit, 1 bounce, second segment 180 px, clamp `|dir.y|>=0.05`, orbs ignored -> GREEN `src/js/system/Raycaster.js`. (First-contact, Single segment, Angle clamp)
-- [ ] 4.2 RED `tests/unit/reachability.spec.js`: sweep 3600 angles, `static` vs `preview` geometry, unbounded post-bounce segment -> GREEN `Raycaster.sweep`. (Reachability checking)
-- [ ] 4.3 RED validator test: unreachable core -> error -> GREEN hook `Reachability.sweep` into `LevelValidator.js`. (Core reachability)
+- [x] 4.1 RED `tests/unit/raycaster.spec.js`: rounded-rect Minkowski hit, 1 bounce, second segment 180 px, clamp `|dir.y|>=0.05`, orbs ignored -> GREEN `src/js/system/Raycaster.js`. (First-contact, Single segment, Angle clamp)
+- [x] 4.2 RED `tests/unit/reachability.spec.js`: sweep 3600 angles, `static` vs `preview` geometry, unbounded post-bounce segment -> GREEN `Raycaster.sweep`. (Reachability checking)
+- [x] 4.3 RED validator test: unreachable core -> error -> GREEN hook `Reachability.sweep` into `LevelValidator.js`. (Core reachability)
 
 ## Slice 5a: FSM, input, session core (game-state; HU-01, HU-03, HU-05, HU-09 s1)
 

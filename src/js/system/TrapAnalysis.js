@@ -89,3 +89,20 @@ function hasEntry(board, core, candidates, connected) {
   }
   return false;
 }
+
+// Every cell that belongs to some valid entry (1 cell, or 2 4-adjacent cells) of `core`.
+export function entryCells(board, core) {
+  const connected = flood(board, launchSeeds(board));
+  const found = new Map();
+  const add = (cells) => cells.forEach((c) => found.set(key(c.col, c.row), c));
+  for (const k of connected) {
+    const [col, row] = k.split(',').map(Number);
+    const a = { col, row };
+    if (isEntry(board, core, [a], connected)) add([a]);
+    for (const [dc, dr] of [[1, 0], [0, 1]]) {
+      const b = { col: col + dc, row: row + dr };
+      if (connected.has(key(b.col, b.row)) && isEntry(board, core, [a, b], connected)) add([a, b]);
+    }
+  }
+  return [...found.values()];
+}
