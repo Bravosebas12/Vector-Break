@@ -95,9 +95,9 @@ Notes: slices 5, 6, 7, 9 are pre-split (each estimated at or above ~900 lines co
 
 ## Slice 6b: Renderer, particles, stress (rendering; HU-02, NFR Performance)
 
-- [ ] 6b.1 RED particle pool tests (512, drop-on-full, 400 ms life) -> GREEN `src/js/entities/Particle.js`, `src/js/system/Particles.js`. (Destruction particles)
-- [ ] 6b.2 GREEN `src/js/system/Renderer.js`: static bg layer (dirty), HP tint/cracks, flash, balls, aim, launcher; verified via hook-driven e2e smoke (no pixel asserts). (Static layer, HP feedback)
-- [ ] 6b.3 RED `tests/e2e/stress.spec.js` + `tests/fixtures/stress-level.json`: `?test=1&loop=1&stress=1`, `setVolley(50)`, 4X, 600 frames <= 16.7 ms avg, `active==50`, pool `created` unchanged -> GREEN tune hot paths. (50 balls at 4X, Frame rate)
+- [x] 6b.1 RED particle pool tests (512, drop-on-full, 400 ms life) -> GREEN `src/js/entities/Particle.js`, `src/js/system/Particles.js`. (Destruction particles)
+- [x] 6b.2 GREEN `src/js/system/Renderer.js`: static bg layer (dirty), HP tint/cracks, flash, balls, aim, launcher; verified via hook-driven e2e smoke (no pixel asserts). (Static layer, HP feedback)
+- [x] 6b.3 RED `tests/e2e/stress.spec.js` + `tests/fixtures/stress-level.json`: `?test=1&loop=1&stress=1`, `setVolley(50)`, 4X, 600 frames <= 16.7 ms avg, `active==50`, pool `created` unchanged -> GREEN tune hot paths. (50 balls at 4X, Frame rate)
 
 ## Slice 7a: strings + HudModel (hud; HU-03, HU-05 s1)
 

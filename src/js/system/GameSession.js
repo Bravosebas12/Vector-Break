@@ -8,6 +8,7 @@ import { LevelCatalog } from './LevelCatalog.js';
 import { allows } from './Input.js';
 import { Physics } from '../engine/Physics.js';
 import { Ball } from '../entities/Ball.js';
+import { BLOCK_TYPES } from '../entities/Block.js';
 import {
   LAUNCHER_Y,
   BALL_SPEED,
@@ -147,7 +148,9 @@ export function createSession({
       if (block === null || !block.destructible || block.hp <= 0) return;
       block.hp--;
       run.damage++;
-      if (block.hp > 0) return;
+      const cell = block.row * run.board.cols + block.col;
+      if (block.hp > 0) return events.push('HIT', cell); // presentation only: flash
+      events.push('DESTROY', cell, BLOCK_TYPES.indexOf(block.type)); // presentation only: burst
       run.board.cells[block.row * run.board.cols + block.col] = null; // freed at once
       run.board.blocks.splice(run.board.blocks.indexOf(block), 1);
     },
@@ -263,6 +266,11 @@ export function createSession({
   return {
     fsm,
     events,
+    // Read-only views for the renderer (no per-frame snapshot allocation).
+    balls,
+    get run() {
+      return run;
+    },
     get board() {
       return run.board;
     },

@@ -255,3 +255,30 @@ Smoke safety net: `tests/e2e/smoke.spec.js` canvas attribute assertion changed 1
 - Loop step counts are measured through `snapshot().playTime / STEP` in Aiming (no extra hook method); tolerance-based, no exact frame counts.
 - Atlas is not yet loaded by `main.js` (sprite settle joins `setLoadProgress` in slice 8b); `loadAtlas(scale)` never rejects and falls back to magenta placeholders.
 - `applyViewport` sets the backing store to `1920*s*dpr` and a logical->backing transform; `atlasScale = clamp(ceil(s*dpr),1,3)`.
+
+## Slice 6b: Renderer, particles, stress - COMPLETE (3/3)
+
+Tasks 6b.1-6b.3 are marked `[x]`. Branch `feat/anglecraft-v1-slice-6b` (base slice 6a + flaky-test fix). Slice 7a NOT started.
+
+### TDD Cycle Evidence
+
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-----------|-------------|----------|
+| 6b.1 | `tests/unit/particles.spec.js` | Unit | N/A (new) | module missing | 5/5 | burst count + expansion, 400 ms life/release, reset, drop-on-full + recovery | None needed |
+| 6b.2 | `tests/browser/renderer.spec.js`, `tests/e2e/render-smoke.spec.js` | Browser/E2E | 316 green | 6 failed (no Renderer); smoke failed (no stats global) | 6/6 (x5 repeat 30/30); smoke 5/5 | idle 60 frames = 1 redraw, HP redraw, destroy redraw, hpStep/crack thresholds, 12/32 burst, tiny-pool drop, placeholder atlas, Title | Fixed 3 test expectations (threshold boundaries, frame count, state) |
+| 6b.3 | `tests/e2e/stress.spec.js` + `tests/fixtures/stress-level.json` | E2E | 329 green | failed (no `__ANGLECRAFT_PERF__` probe) | passed, avg ~5.0 ms CPU/frame over 601 frames | x5 repeat all green (4.9-5.3 ms) | No tuning needed |
+
+### Work Unit Evidence
+
+| Evidence | Value |
+|---|---|
+| Focused test command and exact result | `npx playwright test tests/unit/particles.spec.js tests/browser/renderer.spec.js tests/e2e/render-smoke.spec.js tests/e2e/stress.spec.js`: all passed (repeat-each=5 for browser/e2e specs) |
+| Runtime harness | `render-smoke` and `stress` drive `main.js` (`?test=1&loop=1[&stress=1]`) with real rAF, no `page.clock` |
+| Rollback boundary | `src/js/{entities/Particle,system/Particles,system/Renderer}.js`, `GameSession.js` (HIT/DESTROY events, `balls`/`run` views), `main.js`, new specs + fixture, tasks.md/apply-progress.md |
+
+### Design notes / deviations
+- Session now pushes presentation-only events: `HIT(cell)` and `DESTROY(cell, blockTypeIndex)`; the Renderer is the only drainer today (slice 8a audio must share one drain handler). Session exposes read-only `balls` pool and `run` so rendering never calls `snapshot()` per frame.
+- Renderer draws procedural placeholders only (HP tint 4 steps, crack lines, flash); `crack_30/60/90` atlas frames are used only when a real (non-placeholder) sheet loaded. `BOARD_ORIGIN` = centred (420, 40). `Loading`/`Title` draw only the dark background (start screen is slice 8b); HUD/modals arrive in 7a/7b.
+- Aim preview is cached (recomputed only when launcher, aim or layer version changes) because `Raycaster.cast` allocates.
+- Stress "CPU per frame" is measured by a test-only probe in `main.js` (`window.__ANGLECRAFT_PERF__`, only with `?test=1`): time inside each loop frame, counted from the first frame with 50 active balls. Fixture `level-99` is a trap-valid dense board with a clear column to the core.
+- No page.clock in any new test, so no fixed-time pause flakiness.

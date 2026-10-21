@@ -6,6 +6,9 @@ import { createTestHook } from './system/TestHook.js';
 import { Rng } from './system/Rng.js';
 import { createLoop } from './system/Loop.js';
 import { applyViewport } from './system/Viewport.js';
+import { loadAtlas } from './system/Atlas.js';
+import { Particles } from './system/Particles.js';
+import { createRenderer } from './system/Renderer.js';
 
 const LEVEL_FILES = ['level1', 'level2', 'level3'];
 
@@ -24,12 +27,35 @@ if (testMode) window.__ANGLECRAFT__ = createTestHook(session);
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const resize = () => applyViewport(canvas, ctx);
-resize();
+const { atlasScale } = resize();
+const renderer = createRenderer({ session, ctx, particles: new Particles() });
+// Sprites are optional: a failed sheet falls back to procedural drawing (loadAtlas never rejects).
+loadAtlas(atlasScale).then((atlas) => renderer.setAtlas(atlas));
+if (testMode) window.__ANGLECRAFT_RENDER__ = renderer.stats;
 window.addEventListener('resize', resize);
 
 // Real-time loop. Tests keep the session under their own control unless ?loop=1 is set (with ?test=1).
 if (!testMode || params.get('loop') === '1') {
-  createLoop({ step: (dt) => session.step(dt), render: () => {} /* Renderer joins in slice 6b */ }).start();
+  const raf = testMode ? probeRaf(session, renderer.particles) : undefined;
+  createLoop({ step: (dt) => session.step(dt), render: (alpha) => renderer.draw(alpha, performance.now()), raf }).start();
+}
+
+// Test-only frame probe (stress spec): CPU time of each loop frame, counted from the first frame with
+// 50 active balls, plus the ball/particle pool sizes at start and now (they must never grow).
+function probeRaf(sess, particles) {
+  const created = () => sess.balls.created + particles.pool.created;
+  const perf = (window.__ANGLECRAFT_PERF__ = { frames: 0, cpuMs: 0, createdStart: 0, createdEnd: 0 });
+  return (tick) =>
+    requestAnimationFrame((now) => {
+      const t0 = performance.now();
+      tick(now);
+      const cpu = performance.now() - t0;
+      if (perf.frames === 0 && sess.balls.count < 50) return;
+      if (perf.frames === 0) perf.createdStart = created();
+      perf.frames++;
+      perf.cpuMs += cpu;
+      perf.createdEnd = created();
+    });
 }
 
 async function boot() {
