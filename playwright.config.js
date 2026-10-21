@@ -30,5 +30,12 @@ export default defineConfig({
       testMatch: ['e2e/**/*.spec.js'],
       use: { browserName: 'chromium' },
     },
+    // Screenshot baselines (test-harness "Visual snapshot tests"): fixed 1920x1080, DPR 1, no animations.
+    {
+      name: 'visual',
+      testMatch: ['visual/**/*.spec.js'],
+      use: { browserName: 'chromium', viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 },
+      expect: { toHaveScreenshot: { animations: 'disabled', maxDiffPixelRatio: 0.002 } },
+    },
   ],
 });

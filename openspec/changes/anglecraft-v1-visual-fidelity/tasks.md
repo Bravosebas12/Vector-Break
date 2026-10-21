@@ -4,16 +4,16 @@ Strict TDD: in every task write or update the failing test first, then the code.
 
 ## 0. Setup
 
-- [ ] 0.1 Clone/work outside OneDrive, `npm ci`, `npx playwright install chromium`, baseline run: 451 green.
+- [x] 0.1 Clone/work outside OneDrive, `npm ci`, `npx playwright install chromium`, baseline run: 451 green.
 
 ## 1. Slice 1 - Theme foundations (visual-theme, test-harness)
 
-- [ ] 1.1 Test: `Theme.js` tokens equal the `--c-*` properties parsed from `styles.css`; then add `Theme.js` and the CSS tokens.
-- [ ] 1.2 Extract the Latin woff2 files of IBM Plex Sans and JetBrains Mono from the mockup bundle into `assets/fonts/`; add `@font-face` (weight ranges, `font-display: block`).
-- [ ] 1.3 Test (e2e): fonts requested only from `/assets/fonts/`, no third-party requests; 404 font still reaches `Title`. Add `Fonts.js` `loadFonts()` and register it as one AssetLoader asset.
-- [ ] 1.4 Test (e2e): stage regions at 1920x1080 and DOM/canvas alignment at 1280x900 (<= 1 px). Restructure `index.html` (`#stage`, `#game`, `#hud`), CSS scale variable set by `Viewport.js` on resize, stage background (grid + glows).
-- [ ] 1.5 Test (unit/e2e): `hook.render(t)` draws one frame, throws `NOT_READY` in `Loading`, schedules no rAF. Implement in `TestHook.js` / `main.js`.
-- [ ] 1.6 Add the `visual` project to `playwright.config.js` (Chromium, 1920x1080, DPR 1, animations disabled) with one smoke screenshot test of the stage only.
+- [x] 1.1 Test: `Theme.js` tokens equal the `--c-*` properties parsed from `styles.css`; then add `Theme.js` and the CSS tokens.
+- [x] 1.2 Extract the Latin woff2 files of IBM Plex Sans and JetBrains Mono from the mockup bundle into `assets/fonts/`; add `@font-face` (weight ranges, `font-display: block`).
+- [x] 1.3 Test (e2e): fonts requested only from `/assets/fonts/`, no third-party requests; 404 font still reaches `Title`. Add `Fonts.js` `loadFonts()` and register it as one AssetLoader asset.
+- [x] 1.4 Test (e2e): stage scale/centering and DOM/canvas alignment at 1280x900 and 1000x1000 (<= 1 px); panel regions are asserted in 3.2 once the DOM panels exist. Restructure `index.html` (`#stage`, `#game`, `#hud`), CSS scale variable set by `Viewport.js` on resize, stage background (grid + glows).
+- [x] 1.5 Test (unit/e2e): `hook.render(t)` draws one frame, throws `NOT_READY` in `Loading`, schedules no rAF. Implement in `TestHook.js` / `main.js`.
+- [x] 1.6 Add the `visual` project to `playwright.config.js` (Chromium, 1920x1080, DPR 1, animations disabled) with one smoke screenshot test of the stage only.
 
 ## 2. Slice 2 - Board sprites and aim preview (rendering)
 

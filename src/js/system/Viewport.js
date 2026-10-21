@@ -21,6 +21,12 @@ export function mapClientToLogical(x, y, rect) {
   return { x: (x - rect.left - offX) / s, y: (y - rect.top - offY) / s };
 }
 
+// Scales the 1920x1080 #stage (CSS transform) to fit the window; run before applyViewport so the
+// canvas rect it reads is already the fitted size.
+export function applyStageScale(stage, win = window) {
+  stage.style.setProperty('--stage-scale', String(fitScale(win.innerWidth, win.innerHeight)));
+}
+
 // Resizes the backing store once per window change and maps logical px to it.
 // Returns { atlasScale } so the caller can pick the matching spritesheet.
 export function applyViewport(canvas, ctx, win = window) {

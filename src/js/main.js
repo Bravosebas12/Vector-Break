@@ -7,7 +7,8 @@ import { createSession } from './system/GameSession.js';
 import { createTestHook } from './system/TestHook.js';
 import { Rng } from './system/Rng.js';
 import { createLoop } from './system/Loop.js';
-import { applyViewport, mapClientToLogical } from './system/Viewport.js';
+import { applyStageScale, applyViewport, mapClientToLogical } from './system/Viewport.js';
+import { loadFonts } from './system/Fonts.js';
 import { loadAtlas } from './system/Atlas.js';
 import { Particles } from './system/Particles.js';
 import { createRenderer, BOARD_ORIGIN } from './system/Renderer.js';
@@ -47,18 +48,22 @@ const session = createSession({
 });
 // Event ring -> sounds. Combo clock is the play time in ms (read from the live run, no snapshot).
 const onSound = createSoundMapper({ audio, now: () => session.run.playTime * 1000 });
-if (testMode) {
-  window.__ANGLECRAFT__ = createTestHook(session, recorder.log, loopOn ? null : () => session.drainEvents(onSound));
-  window.__ANGLECRAFT_AUDIO__ = webAudio;
-}
-
+const stage = document.getElementById('stage');
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-const resize = () => applyViewport(canvas, ctx);
+const resize = () => {
+  applyStageScale(stage);
+  return applyViewport(canvas, ctx);
+};
 const { atlasScale } = resize();
 const ui = { loadError: false };
 const renderer = createRenderer({ session, ctx, particles: new Particles(), progression, onEvent: onSound, ui });
-if (testMode) window.__ANGLECRAFT_RENDER__ = renderer.stats;
+if (testMode) {
+  const drain = loopOn ? null : () => session.drainEvents(onSound);
+  window.__ANGLECRAFT__ = createTestHook(session, recorder.log, drain, (alpha, nowMs) => renderer.draw(alpha, nowMs));
+  window.__ANGLECRAFT_AUDIO__ = webAudio;
+  window.__ANGLECRAFT_RENDER__ = renderer.stats;
+}
 window.addEventListener('resize', resize);
 
 // DOM input: listeners are registered once and forward plain records to Input.mapEvent. The session
@@ -120,6 +125,7 @@ function probeRaf(sess, particles) {
 async function boot() {
   const spec = {
     atlas: () => loadAtlas(atlasScale),
+    fonts: () => loadFonts(),
     levels: LEVEL_FILES.map((name) => `src/levels/${name}.json`),
     samples: realAudio ? SAMPLES : [],
     music: realAudio ? MUSIC : null,
@@ -129,6 +135,7 @@ async function boot() {
   webAudio.setBuffers(loaded.buffers);
   loaded.failed.forEach((name) => webAudio.markFailed(name));
   if (loaded.atlas) renderer.setAtlas(loaded.atlas);
+  if (loaded.fonts) renderer.invalidate();
   session.setLevels(loaded.levels);
   const { total } = session.loading;
   session.setLoadProgress(total, total);
