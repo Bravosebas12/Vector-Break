@@ -1,7 +1,7 @@
 # Comparación visual: juego vs. diseño (AngleCraft v1)
 
 **Fecha:** 2026-10-21
-**Cambio:** `openspec/changes/anglecraft-v1-visual-fidelity/`
+**Cambio:** `openspec/changes/archive/2026-10-21-anglecraft-v1-visual-fidelity/` (archivado; especificaciones vigentes en `openspec/specs/`)
 **Estado:** pendiente de aprobación de diseño
 
 Este documento pone cada captura de referencia del juego (pruebas visuales de Playwright, 1920×1080, DPR 1, Chromium) junto a la pantalla equivalente de la maqueta o del Key Art. Cuando diseño apruebe, estas capturas quedan como referencia: cualquier cambio visual futuro hará fallar `npx playwright test --project=visual` hasta que se apruebe y se regeneren.
