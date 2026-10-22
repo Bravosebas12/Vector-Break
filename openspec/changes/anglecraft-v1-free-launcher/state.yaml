@@ -6,7 +6,7 @@ phases:
   design: done
   spec: done
   tasks: done
-  apply: in-progress  # slice 1 done
+  apply: done  # slices 1-2 done; levels 4-6 mode-1 search result pending for OI-1
   verify: pending
   archive: pending
 blocked_reason: none

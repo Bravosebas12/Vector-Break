@@ -23,17 +23,17 @@ test.describe('volley time cap', () => {
     expect(events(s)).toContain('VOLLEY_CAPPED');
   });
 
-  test('a cap after the first landing keeps that landing x as the launcher x', () => {
+  test('CP-43 a cap after the first landing never moves the launcher (HU-14)', () => {
     const ref = openField(boot());
     fire(ref, SHALLOW);
     let firstLand = 0;
     for (; ref.snapshot().volley.active === ref.snapshot().volley.emitted; firstLand++) ref.step(STEP);
-    stepUntil(ref, turnOver);
 
     const s = openField(boot({ volleyCapS: (firstLand + 3) * STEP }));
     fire(s, SHALLOW);
     stepUntil(s, turnOver);
-    expect(s.snapshot().launcherX).toBe(ref.snapshot().launcherX);
+    expect(s.snapshot().volley.size).toBeGreaterThan(1); // balls were still flying when the cap hit
+    expect(s.snapshot().launcherX).toBe(540);
     expect(events(s)).toContain('VOLLEY_CAPPED');
   });
 
