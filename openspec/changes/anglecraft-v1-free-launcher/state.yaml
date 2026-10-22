@@ -1,0 +1,26 @@
+change: anglecraft-v1-free-launcher
+phases:
+  explore: done  # relocation analysis in Design/hu-12-14-saltar-nivel-disparo-simultaneo-lanzador-libre.md
+  research: skipped  # no external research needed
+  proposal: done
+  design: done
+  spec: done
+  tasks: done
+  apply: pending
+  verify: pending
+  archive: pending
+blocked_reason: none
+delivery:
+  delivery_strategy: auto-chain
+  chain_strategy: feature-branch-chain
+  tracker_branch: feature/anglecraft-v1-free-launcher
+  review_budget_lines: 800
+inputs:
+  user_stories: Design/hu-12-14-saltar-nivel-disparo-simultaneo-lanzador-libre.md
+  test_cases: Design/casos/hu-14-casos-de-prueba.md
+confirmed_decisions:
+  D-14.0: "HU-14 supersedes D-10.1 and D-11.3 (automatic relocation) and HU-10 AC1 / HU-11 AC4; landing balls never move the launcher"
+  D-14.1: "R (restart) returns the launcher to the level's starting x (center), like loading a level"
+pending_decisions:
+  OI-1: "PO question 1: balance with a fixed launcher; solutions keep levels winnable via recorded positions (design D3); felt difficulty pending design review"
+  OI-2: "on archive, remove aiming open item about launcher shift (resolved by HU-14)"
