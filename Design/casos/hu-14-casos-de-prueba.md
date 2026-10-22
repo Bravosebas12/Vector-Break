@@ -75,7 +75,7 @@
 - **Precondición:** nivel 1 con el lanzador en x = 300, ganado con la solución sembrada.
 - **Pasos:**
   1. En el modal de victoria, pulsar "Siguiente nivel".
-- **Resultado esperado:** el nivel 2 está en `Aiming` con `launcherX` = 540. Cuando exista HU-12, se repite con "Saltar nivel" (S-QA6).
+- **Resultado esperado:** el nivel 2 está en `Aiming` con `launcherX` = 540. Con "Saltar nivel" (HU-12) el resultado es el mismo: lo cubre CP-58 en [`hu-12-casos-de-prueba.md`](hu-12-casos-de-prueba.md).
 
 ### CP-41 — R devuelve el lanzador a la posición inicial del nivel
 - **Tipo:** funcional positivo · **Prioridad:** Alta · **Técnica:** partición de equivalencia · **Automatizable:** sí
@@ -111,7 +111,7 @@
 
 | Hueco | Motivo |
 |---|---|
-| "Saltar nivel" en AC4 | Depende de HU-12 (S-QA6); se agrega a CP-40 cuando exista. |
+| "Saltar nivel" en AC4 | Cubierto por CP-58 (HU-12). |
 | Dificultad percibida sin reubicación | Pregunta abierta del PO (balance); CP-44 solo prueba que los niveles se pueden ganar. |
 | Niveles 4–6 en modo 1 | Siguen como pendiente conocido (`test.fixme`) hasta HU-13 o un rebalanceo. |
 

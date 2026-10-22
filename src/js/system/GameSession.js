@@ -238,6 +238,8 @@ export function createSession({
         return events.push('RESTART');
       case 'NEXT':
         return next();
+      case 'SKIP':
+        return skip();
       case 'CONFIRM':
         return confirm();
       case 'PRESS':
@@ -253,12 +255,22 @@ export function createSession({
     loadLevel(target);
   }
 
-  // Modal button click: UI_CLICK on press, UI_CONFIRM when the button's action took effect.
+  // SKIP (HU-12): the next level without a win and without classifying. It bypasses the NEXT gate, never resolves
+  // the turn (no record, stars or victory) and marks the level sin resolver; loadLevel clears balls and pause.
+  function skip() {
+    if (index === null || index + 1 >= catalog.length) return;
+    const skipped = index;
+    progression?.markSkipped(skipped);
+    loadLevel(skipped + 1);
+    events.push('SKIP', skipped);
+  }
+
+  // Modal button click: UI_CLICK on press, UI_CONFIRM when the button's action took effect (a skip confirms itself).
   function press(target) {
     const before = fsm.state;
     events.push('UI_CLICK');
     dispatch({ type: target });
-    if (fsm.state !== before) events.push('UI_CONFIRM');
+    if (fsm.state !== before && target !== 'SKIP') events.push('UI_CONFIRM');
   }
 
   // Enter: the modal primary action (next level when offered, otherwise restart).

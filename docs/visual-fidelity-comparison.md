@@ -85,6 +85,7 @@ Diferencias intencionales:
 | Indicación A / D cerca del borde derecho | Siempre a la derecha del lanzador | Pasa a la izquierda si el lanzador está a más de x = 640 | Que no se salga del tablero |
 | Opción de modo en modo de pruebas `'turn'` | No existe | Ninguna opción activa | Solo pruebas de v1; inalcanzable jugando |
 | Lanzador entre grupos | Junto a donde cayó la primera bola | Donde lo dejó el jugador | HU-14: las bolas que caen ya no mueven el lanzador |
+| Botón "Saltar nivel" [N] | No existe | Compacto a la derecha de la cabecera CONTROL; fila en ATAJOS; segundo botón en el modal de derrota | HU-12; propuesta pendiente de revisión de diseño (el panel solo tenía 61 px libres) |
 
 Umbral de las capturas: `threshold` 0,1 y `maxDiffPixels` 150. El umbral anterior (0,2 % de los píxeles) dejaba pasar un recuadro oscuro sobre fondo oscuro, como la indicación del tutorial.
 

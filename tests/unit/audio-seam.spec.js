@@ -160,6 +160,12 @@ test.describe('event-to-sound mapping', () => {
     expect(types(sink)).toEqual(['sfx_speed_x4', 'sfx_ui_pause_in', 'sfx_ui_pause_out', 'sfx_victory', 'sfx_defeat']);
   });
 
+  test('HU-12 SKIP plays the confirm sound and nothing else', () => {
+    const { sink, onEvent } = setup();
+    onEvent('SKIP', 1, 0);
+    expect(types(sink)).toEqual(['sfx_ui_confirm']);
+  });
+
   test('victory stars play one chime per star and the turns warning escalates at 3 and 1', () => {
     const { sink, onEvent } = setup();
     onEvent('STARS', 3, 0);

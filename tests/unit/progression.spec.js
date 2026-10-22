@@ -72,6 +72,34 @@ test.describe('createProgression records and unlock', () => {
   });
 });
 
+// HU-12 (openspec change anglecraft-v1-skip-level, progression delta "Skip without classification").
+test.describe('sin resolver marker (D-12.5)', () => {
+  test('CP-55 a skipped level without a record is unsolved until it is won', () => {
+    const p = createProgression({ storage: memory() });
+    expect(p.status(3)).toBe('unplayed');
+    p.markSkipped(3);
+    expect(p.status(3)).toBe('unsolved');
+    expect(p.record(3)).toBeNull();
+    p.submit(3, { stars: 1, score: 50, shots: 9 });
+    expect(p.status(3)).toBe('resolved');
+    p.markSkipped(3); // skipping it again later never unsolves it
+    expect(p.status(3)).toBe('resolved');
+  });
+
+  test('CP-51 marking a solved level keeps its record and resolved status', () => {
+    const p = createProgression({ storage: memory() });
+    p.submit(1, { stars: 2, score: 900, shots: 5 });
+    p.markSkipped(1);
+    expect([p.status(1), p.record(1)]).toEqual(['resolved', { stars: 2, score: 900, shots: 5 }]);
+  });
+
+  test('a skip unlocks nothing: canAccess still needs a win', () => {
+    const p = createProgression({ storage: memory() });
+    p.markSkipped(0);
+    expect(p.canAccess(1)).toBe(false);
+  });
+});
+
 test.describe('session wiring (NEXT gating, end of content)', () => {
   const win = (s, level) => {
     s.loadLevel(level);
