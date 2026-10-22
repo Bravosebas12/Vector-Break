@@ -21,5 +21,5 @@ Strict TDD: write or update the failing test first, then the code. One PR per sl
 
 ## 3. Close
 
-- [ ] 3.1 Verify (3 full runs), PR from the tracker to `main`.
-- [ ] 3.2 Archive: merge the deltas (complete MODIFIED texts), archive report.
+- [x] 3.1 Verify (3 full runs), PR from the tracker to `main`.
+- [x] 3.2 Archive: merge the deltas (complete MODIFIED texts), archive report.

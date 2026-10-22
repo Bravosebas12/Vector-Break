@@ -2,7 +2,7 @@
 
 **Módulo:** progresión de niveles (entrada, sesión, récords, HUD) | **Ambiente:** local, Chromium (últimas 2 versiones), 1920×1080 | **Autor:** QA | **Fecha:** 2026-10-21
 **Requisito / AC:** [`Design/hu-12-14-saltar-nivel-disparo-simultaneo-lanzador-libre.md`](../hu-12-14-saltar-nivel-disparo-simultaneo-lanzador-libre.md) — HU-12 AC1–AC11 (decisiones D-12.1 a D-12.5)
-**Especificación:** `openspec/changes/anglecraft-v1-skip-level/`
+**Especificación:** `openspec/changes/archive/2026-10-21-anglecraft-v1-skip-level/` (archivado; especificaciones vigentes en `openspec/specs/`)
 
 **Supuestos:**
 - S-QA1 y S-QA2 de los casos de HU-10/11 siguen vigentes (estado leído con el hook `?test=1`, tiempos con el reloj de la página).
