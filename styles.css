@@ -245,6 +245,11 @@ kbd {
 .btn.light { margin-top: 12px; height: 64px; padding: 0 28px; gap: 20px; border-color: var(--c-text); background: var(--c-text); color: var(--c-stage); font: 700 19px var(--font-mono); }
 .btn.light:hover { background: #FFFFFF; }
 .btn.light kbd { border-color: rgba(14, 17, 23, 0.4); background: transparent; color: inherit; }
+/* HU-12 Saltar nivel: compact ghost buttons (CONTROL header, defeat modal); no extra panel height. */
+.btn.ghost { gap: 10px; background: transparent; color: #C9D0DC; }
+.btn.ghost.skip { height: 32px; padding: 0 8px 0 12px; font-size: 14px; }
+.btn.ghost.skip kbd { height: 22px; min-width: 24px; padding: 0 6px; font-size: 12px; margin-left: 0; }
+.btn.ghost.skip-defeat { height: 48px; padding: 0 20px; gap: 16px; font-size: 16px; }
 
 /* HU-10 / HU-11 (Claude Design canvas "AngleCraft — Tutorial y modo de disparo"): MODO DE DISPARO selector,
    BOLAS of the turn caption; CONTROL sections at 22 px so the panel keeps fitting 1000 px. */

@@ -7,6 +7,7 @@ export const SPEEDS = Object.freeze([1, 2, 4]);
 export const MODES = Object.freeze([1, 2, 3]);
 const PLAYING = ['Aiming', 'Firing', 'Simulating', 'Resolving'];
 const RUNNING = ['Firing', 'Simulating'];
+const SKIPPABLE = ['Aiming', 'Firing', 'Simulating', 'Resolving', 'GameOver']; // HU-12: Input.allows, not Victory
 
 const pad2 = (n) => String(n).padStart(2, '0');
 
@@ -45,7 +46,10 @@ export function modalModel(snap, { levelCount = 6, record = null } = {}) {
     const cores = snap.blocks.filter((b) => b.type === 'core' && b.hp > 0);
     const hp = cores.reduce((sum, b) => sum + b.hp, 0);
     const message = `${plural(max, strings.noShotsOne, strings.noShotsMany)} ${plural(cores.length, strings.coresOne, strings.coresMany).replace('{hp}', hp)}`;
-    const buttons = [{ label: strings.restartPuzzle, key: 'R', action: 'RESTART', primary: true }];
+    const buttons = [
+      { label: strings.restartPuzzle, key: 'R', action: 'RESTART', primary: true },
+      { label: strings.skipLevel, key: 'N', action: 'SKIP', primary: false, enabled: snap.level.index + 1 < levelCount },
+    ];
     return { kind: 'defeat', kicker: strings.noShots, title: strings.puzzleFailed, message, buttons, primaryAction: 'RESTART' };
   }
   const hasNext = snap.level.index + 1 < levelCount;
@@ -118,6 +122,8 @@ export function hudModel(snap, { levelCount = 6 } = {}) {
       launch: { label: strings.launch, key: 'Space', enabled: snap.state === 'Aiming' && !paused },
       pause: { label: paused ? strings.resume : strings.pauseButton, key: 'P', active: paused, enabled: playing },
       restart: { label: strings.restart, key: 'R', enabled: true },
+      // HU-12: next level without classifying; none after the last level, and Victory offers Siguiente nivel.
+      skip: { label: strings.skipLevel, key: 'N', enabled: SKIPPABLE.includes(snap.state) && snap.level.index + 1 < levelCount },
       speed: {
         label: strings.speed,
         current: `×${snap.speed}`,
