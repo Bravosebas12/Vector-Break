@@ -1,7 +1,7 @@
 // openspec start-screen delta: the Key Art is a boot asset drawn behind the title; a missing file never blocks.
 import { test, expect } from '@playwright/test';
 
-const state = (page) => page.evaluate(() => window.__ANGLECRAFT__.snapshot().state);
+const state = (page) => page.evaluate(() => window.__ANGLECRAFT__?.snapshot().state);
 
 test('the Key Art is requested at boot, counted as an asset and drawn on the title canvas', async ({ page }) => {
   const requested = page.waitForRequest('**/assets/art/key-art.webp');

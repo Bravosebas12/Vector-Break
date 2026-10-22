@@ -3,11 +3,11 @@ import { test, expect } from '@playwright/test';
 
 test.use({ viewport: { width: 1920, height: 1080 } }); // stage at scale 1: logical = client coordinates
 
-const snap = (page) => page.evaluate(() => window.__ANGLECRAFT__.snapshot());
+const snap = (page) => page.evaluate(() => window.__ANGLECRAFT__?.snapshot());
 const render = (page) => page.evaluate(() => window.__ANGLECRAFT__.render((window.__t = (window.__t ?? 0) + 200)));
 const level = async (page) => {
   await page.goto('/?test=1');
-  await expect.poll(async () => (await snap(page)).state).toBe('Title');
+  await expect.poll(async () => (await snap(page))?.state).toBe('Title');
   await page.evaluate(() => {
     const hook = window.__ANGLECRAFT__;
     hook.loadLevel(0);
@@ -18,7 +18,7 @@ const level = async (page) => {
 
 test('the HUD is hidden on the title and shown in a level', async ({ page }) => {
   await page.goto('/?test=1');
-  await expect.poll(async () => (await snap(page)).state).toBe('Title');
+  await expect.poll(async () => (await snap(page))?.state).toBe('Title');
   await page.evaluate(() => window.__ANGLECRAFT__.render(0));
   await expect(page.locator('[data-hud="telemetry"]')).toBeHidden();
   await page.evaluate(() => window.__ANGLECRAFT__.loadLevel(0));
@@ -30,7 +30,7 @@ test('the HUD is hidden on the title and shown in a level', async ({ page }) => 
 test('LANZAR fires exactly once and is disabled while the volley runs', async ({ page }) => {
   await level(page);
   await page.click('[data-act="launch"]');
-  expect((await snap(page)).shots.used).toBe(1);
+  expect(await snap(page)).toMatchObject({ state: 'Firing', volley: { emitted: 1 } });
   await render(page);
   await expect(page.locator('[data-act="launch"]')).toBeDisabled();
 });
@@ -60,9 +60,9 @@ test('a click on a panel outside its buttons does not fire; a click on the board
   await level(page);
   await page.mouse.click(1700, 900); // CONTROL panel, below ATAJOS
   await page.mouse.click(400, 900); // gap between the left panel and the board
-  expect((await snap(page)).shots.used).toBe(0);
+  expect(await snap(page)).toMatchObject({ state: 'Aiming', volley: { emitted: 0 } });
   await page.mouse.click(420 + 540, 40 + 500); // board
-  expect((await snap(page)).shots.used).toBe(1);
+  expect((await snap(page))?.state).toBe('Firing');
 });
 
 test('P shows the pause overlay over the board only and a second P hides it', async ({ page }) => {

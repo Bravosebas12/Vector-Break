@@ -16,9 +16,16 @@ export const strings = Object.freeze({
   balls: 'BOLAS',
   turns: 'TURNOS',
   turnsCaption: 'LÍMITE DEL PUZZLE · {n} TURNOS',
+  ballsCaption: 'POR DISPARAR EN EL TURNO',
   inFlight: 'en vuelo',
-  available: 'disponible',
-  used: 'usada',
+  available: 'por disparar',
+  used: 'recogida',
+  fireMode: 'MODO DE DISPARO',
+  fireModeCaption: 'BOLAS POR TIRO',
+  tutorial: 'TUTORIAL',
+  hintMove: 'Mueve el lanzador',
+  hintMode: 'Elige cuántas bolas lanzar por tiro',
+  hintModeKeys: '1, 2 o 3 · cambia con',
   points: 'PUNTOS',
   time: 'TIEMPO',
 
@@ -33,7 +40,9 @@ export const strings = Object.freeze({
   // v1 controls only: no right-click cancel and no Esc.
   shortcutList: Object.freeze([
     Object.freeze({ label: 'Apuntar', keys: Object.freeze(['Ratón']) }),
+    Object.freeze({ label: 'Mover lanzador', keys: Object.freeze(['A', 'D']) }),
     Object.freeze({ label: 'Lanzar', keys: Object.freeze(['Clic', 'Space']) }),
+    Object.freeze({ label: 'Modo', keys: Object.freeze(['M']) }),
     Object.freeze({ label: 'Velocidad', keys: Object.freeze(['1', '2', '4']) }),
     Object.freeze({ label: 'Pausa', keys: Object.freeze(['P']) }),
     Object.freeze({ label: 'Reiniciar', keys: Object.freeze(['R']) }),

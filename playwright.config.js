@@ -7,6 +7,8 @@ export default defineConfig({
   testDir: 'tests',
   fullyParallel: true,
   reporter: 'list',
+  // Boot (fonts, atlas, Key Art, levels) can exceed 5 s with 8 workers on a loaded machine.
+  expect: { timeout: 15_000 },
   use: { baseURL: BASE_URL },
   webServer: {
     command: `node scripts/static-server.mjs --port ${PORT}`,
@@ -35,7 +37,7 @@ export default defineConfig({
       name: 'visual',
       testMatch: ['visual/**/*.spec.js'],
       use: { browserName: 'chromium', viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 },
-      expect: { toHaveScreenshot: { animations: 'disabled', maxDiffPixelRatio: 0.002 } },
+      expect: { timeout: 15_000, toHaveScreenshot: { animations: 'disabled', threshold: 0.1, maxDiffPixels: 150 } },
     },
   ],
 });

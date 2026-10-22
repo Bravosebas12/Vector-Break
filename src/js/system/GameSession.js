@@ -20,6 +20,8 @@ import {
 } from './Layout.js';
 
 const PLAYING = ['Aiming', 'Firing', 'Simulating'];
+const MOVE_SPEED = 480; // px/s of play time while A or D is held (HU-10, D-10.3)
+const MOVE_TAP = 8; // px: a press released before moving this far moves exactly this far
 
 export function createSession({
   rng,
@@ -29,6 +31,9 @@ export function createSession({
   canAccess = progression ? (i) => progression.canAccess(i) : () => false,
   sealedFloor = false,
   volleyCapS = 45,
+  // Fire mode (HU-11): 1 | 2 | 3 balls per FIRE (a group). 'turn' is test-only and pinned across loads:
+  // one FIRE emits every ball left in the turn, as in v1.
+  fireMode = 1,
 } = {}) {
   const catalog = new LevelCatalog();
   const events = new EventRing();
@@ -37,6 +42,8 @@ export function createSession({
   const balls = Ball.createPool();
   let source = null; // level index or JSON currently loaded (RESTART reloads it)
   let index = null;
+  if (![1, 2, 3, 'turn'].includes(fireMode)) throw new Error(`invalid fire mode: ${fireMode}`);
+  let pinnedMode = fireMode === 'turn' ? 'turn' : null;
 
   const fsm = new Fsm({
     strict,
@@ -53,8 +60,9 @@ export function createSession({
     run.emitAcc = 0;
     run.firstLandX = null;
     run.shotsUsed = 0;
-    run.volleySize = board.startBalls;
-    run.emitted = 0;
+    run.volleySize = board.startBalls; // balls of the current turn, fixed until Resolving
+    run.emitted = 0; // balls of the turn already fired, across its groups
+    run.groupTarget = 0; // value of `emitted` at which the current group stops emitting
     run.active = 0;
     run.pendingBonus = 0;
     run.launcherX = board.launcher.x;
@@ -69,6 +77,10 @@ export function createSession({
     run.playTime = 0;
     run.aim = null;
     run.lockedDir = null;
+    run.aimTarget = null;
+    run.held = { [-1]: false, [1]: false };
+    run.tapFrom = { [-1]: 0, [1]: 0 };
+    run.fireMode = pinnedMode ?? 1;
   }
   resetRun({ startBalls: 0, shots: 0, launcher: { x: 0 }, blocks: [], cores: [] });
 
@@ -88,21 +100,54 @@ export function createSession({
     enter('Aiming');
   }
 
+  // The pointer target is kept so moving the launcher re-aims at the same point (HU-10 AC2/AC3).
   function aim(action) {
-    const origin = { x: run.launcherX, y: LAUNCHER_Y };
-    const dir = Raycaster.aimDirection(origin, action);
+    run.aimTarget = { x: action.x, y: action.y };
+    reaim();
+  }
+
+  function reaim() {
+    if (!run.aimTarget) return;
+    const dir = Raycaster.aimDirection({ x: run.launcherX, y: LAUNCHER_Y }, run.aimTarget);
     run.aim = dir ? { x: dir.x, y: dir.y } : null;
+  }
+
+  function setLauncherX(x) {
+    const next = clampLauncherX(x);
+    if (next === run.launcherX) return;
+    run.launcherX = next;
+    reaim();
+  }
+
+  function moveStart(dir) {
+    run.held[dir] = true;
+    run.tapFrom[dir] = run.launcherX;
+    events.push('LAUNCHER_MOVED', dir);
+  }
+
+  // Tap rule (D4): released before moving MOVE_TAP px -> moved exactly MOVE_TAP px from the press point.
+  function moveStop(dir) {
+    if (!run.held[dir]) return;
+    run.held[dir] = false;
+    if (fsm.state !== 'Aiming' || run.paused || run.held[-dir]) return;
+    if (Math.abs(run.launcherX - run.tapFrom[dir]) < MOVE_TAP) setLauncherX(run.tapFrom[dir] + MOVE_TAP * dir);
+  }
+
+  function moveLauncher(dt) {
+    const dir = (run.held[1] ? 1 : 0) - (run.held[-1] ? 1 : 0);
+    if (dir !== 0) setLauncherX(run.launcherX + dir * MOVE_SPEED * dt);
   }
 
   function fire() {
     if (!run.aim) return; // no valid angle yet
+    run.held[-1] = run.held[1] = false; // keys held through FIRE never move the launcher later
     run.lockedDir = { ...run.aim };
-    run.shotsUsed++;
-    run.volleySimTime = 0;
-    run.emitted = 0;
+    const left = run.volleySize - run.emitted;
+    run.groupTarget = run.emitted + (run.fireMode === 'turn' ? left : Math.min(run.fireMode, left));
+    run.volleySimTime = 0; // the 45 s cap is measured per group
     run.emitAcc = 0;
-    run.firstLandX = null;
-    events.push('FIRE', run.shotsUsed);
+    run.firstLandX = null; // relocation follows the first landing of each group (D-11.3)
+    events.push('FIRE', run.shotsUsed + 1);
     enter('Firing');
     emitBall(); // the first ball leaves on FIRE
   }
@@ -141,9 +186,9 @@ export function createSession({
     blockAt: (col, row) => run.board.blockAt(col, row),
     onSubstep(subDt) {
       captureOrbs(); // positions left by the previous substep
-      if (run.emitted >= run.volleySize) return;
+      if (run.emitted >= run.groupTarget) return;
       run.emitAcc += subDt;
-      while (run.emitAcc >= EMIT_INTERVAL && run.emitted < run.volleySize) {
+      while (run.emitAcc >= EMIT_INTERVAL && run.emitted < run.groupTarget) {
         run.emitAcc -= EMIT_INTERVAL;
         emitBall();
       }
@@ -176,8 +221,16 @@ export function createSession({
     switch (action.type) {
       case 'AIM':
         return aim(action);
+      case 'MOVE_START':
+        return moveStart(action.dir);
+      case 'MOVE_STOP':
+        return moveStop(action.dir);
       case 'FIRE':
         return fsm.state === 'Title' ? titleClick() : fire();
+      case 'CYCLE_MODE':
+        return setMode(run.fireMode === 'turn' ? 1 : (run.fireMode % 3) + 1);
+      case 'SET_MODE':
+        return setMode(action.v);
       case 'SET_SPEED':
         run.speed = action.v;
         return events.push('SPEED', action.v);
@@ -222,31 +275,51 @@ export function createSession({
   function step(dt) {
     if (run.paused || !PLAYING.includes(fsm.state)) return;
     run.playTime += dt;
-    if (fsm.state === 'Aiming') return;
+    if (fsm.state === 'Aiming') return moveLauncher(dt);
     run.simTime += dt * run.speed;
     run.volleySimTime += dt * run.speed;
-    if (Physics.step(balls, world, run.speed, dt) === 0 && run.emitted < run.volleySize) {
+    if (Physics.step(balls, world, run.speed, dt) === 0 && run.emitted < run.groupTarget) {
       world.onSubstep(dt * run.speed); // no ball in flight: Physics runs no substep
     }
     captureOrbs();
     if (run.volleySimTime >= volleyCapS) capVolley();
-    if (fsm.state === 'Firing' && run.emitted >= run.volleySize) enter('Simulating');
-    if (fsm.state === 'Simulating' && balls.count === 0) resolve();
+    if (fsm.state === 'Firing' && run.emitted >= run.groupTarget) enter('Simulating');
+    if (fsm.state === 'Simulating' && balls.count === 0) endGroup();
   }
 
   // D11: past volleyCapS every ball counts as landed (damage kept, no launcher shift of its own).
   function capVolley() {
     while (balls.count > 0) balls.release(balls.items[0]);
-    run.emitted = run.volleySize;
-    events.push('VOLLEY_CAPPED', run.shotsUsed);
+    run.emitted = run.groupTarget; // the cap ends the group, not the turn
+    events.push('VOLLEY_CAPPED', run.shotsUsed + 1);
   }
 
   // End of turn: launcher shift, volley growth, then Victory > GameOver > Aiming.
+  function setMode(v) {
+    if (![1, 2, 3].includes(v) || v === run.fireMode) return;
+    run.fireMode = v;
+    events.push('UI_CLICK');
+    events.push('MODE', v);
+  }
+
+  // A group is over (no ball in flight). With balls of the turn left and cores standing, the player aims the
+  // next group from where its first ball landed; otherwise the turn resolves (D-11.1, D-11.3).
+  function endGroup() {
+    const won = run.board.cores.every((c) => c.hp <= 0);
+    if (won || run.emitted >= run.volleySize) return resolve();
+    if (run.firstLandX !== null) setLauncherX(run.firstLandX);
+    events.push('GROUP_END', run.volleySize - run.emitted);
+    enter('Aiming');
+  }
+
   function resolve() {
     enter('Resolving');
-    if (run.firstLandX !== null) run.launcherX = clampLauncherX(run.firstLandX);
+    run.shotsUsed++; // a shot is a whole turn, counted when it resolves
+    if (run.firstLandX !== null) setLauncherX(run.firstLandX);
     run.volleySize = Math.min(MAX_VOLLEY, run.volleySize + run.pendingBonus);
     run.pendingBonus = 0;
+    run.emitted = 0;
+    run.groupTarget = 0;
     const { shots } = run.board;
     const won = run.board.cores.every((c) => c.hp <= 0);
     if (won || run.shotsUsed >= shots) {
@@ -287,6 +360,7 @@ export function createSession({
       volleySimTime: run.volleySimTime,
       playTime: run.playTime,
       result: run.result && { ...run.result },
+      fireMode: run.fireMode,
       newRecord: run.newRecord,
     };
   }
@@ -301,6 +375,10 @@ export function createSession({
     },
     get board() {
       return run.board;
+    },
+    // Catalog index of the loaded level, or null (tutorial hints, no snapshot allocation per frame).
+    get levelIndex() {
+      return index;
     },
     // Live progress counters for the start screen (no snapshot allocation per frame).
     get loading() {
@@ -318,6 +396,12 @@ export function createSession({
     loadLevel,
     setVolley(n) {
       run.volleySize = Math.max(1, Math.min(MAX_VOLLEY, n));
+    },
+    // Test seam (openspec test-harness): 'turn' pins v1 emission across loads; 1..3 unpin.
+    setFireMode(v) {
+      if (![1, 2, 3, 'turn'].includes(v)) throw new Error(`invalid fire mode: ${v}`);
+      pinnedMode = v === 'turn' ? 'turn' : null;
+      run.fireMode = v;
     },
     dispatch,
     step,

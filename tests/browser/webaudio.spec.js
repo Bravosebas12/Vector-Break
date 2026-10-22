@@ -128,7 +128,7 @@ test('the renderer drains the ring once and fans events out to an extra consumer
     const { Rng } = await import('/src/js/system/Rng.js');
     const level = await (await fetch('/src/levels/level1.json')).json();
     const ctx = Object.assign(document.createElement('canvas'), { width: 1920, height: 1080 }).getContext('2d');
-    const session = createSession({ rng: new Rng(1) });
+    const session = createSession({ rng: new Rng(1), fireMode: 'turn' });
     session.setLevels([level]);
     session.setLoadProgress(1, 1);
     session.dispatch({ type: 'FIRE', pointer: true });

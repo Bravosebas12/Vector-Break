@@ -1,7 +1,7 @@
 // openspec visual-theme spec (fonts, logical stage) and test-harness "Single-frame render hook".
 import { test, expect } from '@playwright/test';
 
-const state = (page) => page.evaluate(() => window.__ANGLECRAFT__.snapshot().state);
+const state = (page) => page.evaluate(() => window.__ANGLECRAFT__?.snapshot().state);
 const ready = async (page, url = '/?test=1') => {
   await page.goto(url);
   await expect.poll(() => state(page)).toBe('Title');

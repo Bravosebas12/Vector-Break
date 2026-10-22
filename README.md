@@ -28,11 +28,15 @@ Open http://127.0.0.1:4173 and click to start once loading finishes. Use `--port
 | Input | Action |
 |---|---|
 | Mouse | Aim (shows a one-bounce preview) |
-| Left click / `Space` | Fire |
+| `A` / `D` (hold or tap) | Move the launcher left / right before firing |
+| Left click / `Space` | Fire one group of balls |
+| `M` | Fire mode: 1, 2 or 3 balls per shot (also clickable in the CONTROL panel) |
 | `1` / `2` / `4` | Simulation speed 1X / 2X / 4X (while balls are in flight) |
 | `P` | Pause / resume |
 | `R` | Restart the level |
 | `Enter` or click | Modal action (next level / restart) |
+
+A turn fires its whole volley in groups of the chosen size; between groups you aim again (and may move the launcher) without spending a turn. Levels 1 and 2 show tutorial hints for `A` / `D` and `M` once per session.
 
 Every session starts at level 1. Best records (stars, score, shots) are stored in `localStorage`.
 

@@ -3,16 +3,17 @@
 import { test, expect } from '@playwright/test';
 
 const STEP = 1 / 120;
-const playTime = (page) => page.evaluate(() => window.__ANGLECRAFT__.snapshot().playTime);
+const playTime = (page) => page.evaluate(() => window.__ANGLECRAFT__?.snapshot().playTime);
 
 async function boot(page, query = '/?test=1&loop=1') {
   await page.clock.install({ time: 0 });
   await page.goto(query);
   await page.waitForFunction(() => window.__ANGLECRAFT__?.snapshot().state === 'Title');
   // Freeze before measuring (S1 gotcha). Pause relative to the current fake time: a slow boot can
-  // already be past any fixed instant, and pauseAt cannot move the clock backwards.
+  // already be past any fixed instant, and pauseAt cannot move the clock backwards. The margin covers the
+  // time the fake clock keeps flowing between this read and pauseAt on a loaded machine (50 ms was flaky).
   const now = await page.evaluate(() => Date.now());
-  await page.clock.pauseAt(now + 50);
+  await page.clock.pauseAt(now + 1000);
   await page.evaluate(() => window.__ANGLECRAFT__.loadLevel(0)); // Aiming: playTime accrues one STEP per loop step
 }
 

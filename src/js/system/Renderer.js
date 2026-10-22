@@ -11,7 +11,7 @@ import { hudModel, modalModel } from './Hud.js';
 import { titleModel, drawTitle } from './TitleScreen.js';
 import { BLOCK_TYPES } from '../entities/Block.js';
 import { COLORS, FONT_MONO, BOARD_STYLE, BLOCK_FRAME, BLOCK_TEXT, BURST, FX } from './Theme.js';
-import { BOARD_W, BOARD_H, CELL_W, CELL_H, BALL_RADIUS, FLOOR_Y, LAUNCHER_Y, STEP, cellMinX, cellMinY } from './Layout.js';
+import { BOARD_W, BOARD_H, CELL_W, CELL_H, BALL_RADIUS, FLOOR_Y, LAUNCHER_Y, LAUNCHER_MIN_X, LAUNCHER_MAX_X, STEP, cellMinX, cellMinY } from './Layout.js';
 
 // Render-only placement of the 1080x1000 board on the 1920x1080 canvas (centred).
 export const BOARD_ORIGIN = Object.freeze({ x: (LOGICAL_W - BOARD_W) / 2, y: (LOGICAL_H - BOARD_H) / 2 });
@@ -31,6 +31,11 @@ const DOT_SPRITE = 16;
 const BOUNCE_SPRITE = 32;
 const IMPACT_SPRITE = 48;
 const GLOW_R = 60;
+const CHEVRON = 24; // launcher move hints (HU-10), cached sprites
+const TRAIL_W = 56;
+const TRAIL_H = 12;
+const CHEVRON_DIM = 0.35;
+const CHEVRON_BACK = 0.15;
 const HP_FONT = `700 20px ${FONT_MONO}`;
 const ORB_FONT = `700 14px ${FONT_MONO}`;
 const MAX_DOTS = 96;
@@ -70,11 +75,14 @@ export function aimDots(pts, n, out) {
 // `ui.loadError` is set by the boot code when a level fails to load (the start screen then shows loadError).
 // `ui.pointer` ({ x, y, inBoard } in board coordinates) is set by the DOM adapter for the crosshair.
 // `hudView` (HudDom) receives the HUD model; it is hidden on the Loading/Title screens.
-export function createRenderer({ session, ctx, particles, atlas = null, progression = null, onEvent: extra = null, ui = {}, hudView = null }) {
+// `tutorial` (Tutorial.js) receives the drained events and yields the hint to show each frame.
+export function createRenderer({ session, ctx, particles, atlas = null, progression = null, onEvent: extra = null, ui = {}, hudView = null, tutorial = null }) {
   const layer = createCanvas(BOARD_W, BOARD_H);
   const lctx = layer.getContext('2d');
   const stats = { frames: 0, layerRedraws: 0, blocksDrawn: 0, launcherGlow: 0, glowSpritesBuilt: 0 };
   const glow = buildGlow();
+  const chevrons = { [-1]: buildChevron(-1), [1]: buildChevron(1) };
+  const trails = { [-1]: buildTrail(-1), [1]: buildTrail(1) };
   let board = null;
   let lastHp = null;
   let maxHp = null;
@@ -104,6 +112,36 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
     g.fillStyle = grad;
     g.fillRect(0, 0, GLOW_R * 2, GLOW_R * 2);
     stats.glowSpritesBuilt++;
+    return canvas;
+  }
+
+  // Launcher chevron pointing left (-1) or right (+1), built once.
+  function buildChevron(dir) {
+    const canvas = createCanvas(CHEVRON, CHEVRON);
+    const g = canvas.getContext('2d');
+    g.strokeStyle = COLORS.cyan;
+    g.lineWidth = 2;
+    g.lineCap = 'round';
+    g.lineJoin = 'round';
+    g.beginPath();
+    g.moveTo(12 - 3.5 * dir, 5);
+    g.lineTo(12 + 3.5 * dir, 12);
+    g.lineTo(12 - 3.5 * dir, 19);
+    g.stroke();
+    return canvas;
+  }
+
+  // Short cyan trail left behind a launcher moving in `dir`, built once (transparent at the far end).
+  function buildTrail(dir) {
+    const canvas = createCanvas(TRAIL_W, TRAIL_H);
+    const g = canvas.getContext('2d');
+    const grad = g.createLinearGradient(dir > 0 ? 0 : TRAIL_W, 0, dir > 0 ? TRAIL_W : 0, 0);
+    grad.addColorStop(0, 'rgba(0,245,212,0)');
+    grad.addColorStop(1, FX.launcherGlow);
+    g.fillStyle = grad;
+    g.beginPath();
+    g.roundRect(0, 0, TRAIL_W, TRAIL_H, TRAIL_H / 2);
+    g.fill();
     return canvas;
   }
 
@@ -206,6 +244,7 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
   // Events are presentation-only: flash on hit, burst on destruction. Preallocated, no capture per frame.
   const onEvent = (type, a, b) => {
     extra?.(type, a, b);
+    tutorial?.onEvent(type);
     if (type === 'HIT') flash[a] = FLASH_S;
     else if (type === 'DESTROY') {
       const col = a % board.cols;
@@ -251,8 +290,20 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
     else sprite(ctx, 'traj_bounce', contact.x, contact.y, BOUNCE_SPRITE);
   }
 
-  function drawLauncher(x, enabled) {
+  // Ready: dim chevrons both ways; moving: the motion chevron lit, the other faint, a trail behind; at an
+  // edge: no chevron toward the wall; disabled (not Aiming or paused): gray ring only (HU-10 states).
+  function drawLauncher(run, enabled) {
+    const x = run.launcherX;
     if (enabled) {
+      const dir = (run.held[1] ? 1 : 0) - (run.held[-1] ? 1 : 0);
+      const blocked = (dir < 0 && x <= LAUNCHER_MIN_X) || (dir > 0 && x >= LAUNCHER_MAX_X);
+      if (dir !== 0 && !blocked) ctx.drawImage(trails[dir], dir > 0 ? x - TRAIL_W : x, LAUNCHER_Y - TRAIL_H / 2);
+      for (const side of [-1, 1]) {
+        if (side < 0 ? x <= LAUNCHER_MIN_X : x >= LAUNCHER_MAX_X) continue;
+        ctx.globalAlpha = dir === 0 ? CHEVRON_DIM : dir === side ? 1 : CHEVRON_BACK;
+        ctx.drawImage(chevrons[side], side < 0 ? x - 52 : x + 28, LAUNCHER_Y - CHEVRON / 2);
+      }
+      ctx.globalAlpha = 1;
       ctx.drawImage(glow, x - GLOW_R, LAUNCHER_Y - GLOW_R);
       stats.launcherGlow++;
     }
@@ -309,7 +360,7 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
         ctx.fill();
       }
     }
-    drawLauncher(run.launcherX, aiming);
+    drawLauncher(run, aiming);
     const p = ui.pointer;
     if (aiming && p && p.inBoard) sprite(ctx, 'cursor_crosshair', p.x, p.y, CROSS_SPRITE);
     // particles
@@ -355,6 +406,7 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
     ctx.restore();
     refreshHud(state, nowMs);
     hudView?.update(hud, modal);
+    if (tutorial) hudView?.updateHint(tutorial.view(state, session.run.paused, session.levelIndex, session.run.launcherX));
   }
 
   return {

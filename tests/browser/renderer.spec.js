@@ -15,7 +15,7 @@ const run = async (page, body, arg) => {
       canvas.width = 1920;
       canvas.height = 1080;
       const ctx = canvas.getContext('2d');
-      const session = createSession({ rng: new Rng(1) });
+      const session = createSession({ rng: new Rng(1), fireMode: 'turn' });
       session.setLevels([level]);
       session.setLoadProgress(1, 1);
       const make = (extra = {}) => createRenderer({ session, ctx, particles: new Particles(), ...extra });

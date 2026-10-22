@@ -17,6 +17,7 @@ import { AssetLoader } from './system/AssetLoader.js';
 import { mapEvent } from './system/Input.js';
 import { BOARD_W, BOARD_H } from './system/Layout.js';
 import { createHudDom } from './system/HudDom.js';
+import { createTutorial } from './system/Tutorial.js';
 import { RecordingSink, createSoundMapper, teeSink } from './system/AudioSinks.js';
 import { createWebAudio } from './system/WebAudio.js';
 
@@ -46,6 +47,8 @@ const session = createSession({
   audio,
   sealedFloor: stress,
   volleyCapS: stress ? Infinity : 45,
+  // ?test=1 pins the test-only 'turn' mode (v1 emission) for the existing suite; tests opt in to 1..3.
+  fireMode: testMode ? 'turn' : 1,
 });
 // Event ring -> sounds. Combo clock is the play time in ms (read from the live run, no snapshot).
 const onSound = createSoundMapper({ audio, now: () => session.run.playTime * 1000 });
@@ -59,9 +62,11 @@ const resize = () => {
 const { atlasScale } = resize();
 const ui = { loadError: false };
 const hudView = createHudDom(document.getElementById('hud'), { dispatch: (action) => session.dispatch(action) });
-const renderer = createRenderer({ session, ctx, particles: new Particles(), progression, onEvent: onSound, ui, hudView });
+const tutorial = createTutorial(); // session-scoped: a reload shows the hints again
+const renderer = createRenderer({ session, ctx, particles: new Particles(), progression, onEvent: onSound, ui, hudView, tutorial });
 if (testMode) {
-  const drain = loopOn ? null : () => session.drainEvents(onSound);
+  // Without the loop, the hook drains events: feed the tutorial too, as the renderer does in the real loop.
+  const drain = loopOn ? null : () => session.drainEvents((type, a, b) => (onSound(type, a, b), tutorial.onEvent(type)));
   window.__ANGLECRAFT__ = createTestHook(session, recorder.log, drain, (alpha, nowMs) => renderer.draw(alpha, nowMs));
   window.__ANGLECRAFT_AUDIO__ = webAudio;
   window.__ANGLECRAFT_RENDER__ = renderer.stats;
@@ -98,6 +103,9 @@ window.addEventListener('keydown', (e) => {
   if (e.key === ' ') e.preventDefault();
   send({ type: 'keydown', key: e.key, repeat: e.repeat });
 });
+window.addEventListener('keyup', (e) => send({ type: 'keyup', key: e.key }));
+// Losing focus releases A and D, so the launcher never keeps moving without a held key.
+window.addEventListener('blur', () => ['a', 'd'].forEach((key) => send({ type: 'keyup', key })));
 window.addEventListener('contextmenu', (e) => e.preventDefault());
 // Hiding the page pauses a running level; showing it never resumes (the player does).
 document.addEventListener('visibilitychange', () => {
