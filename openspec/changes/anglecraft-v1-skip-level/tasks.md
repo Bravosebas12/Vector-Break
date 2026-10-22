@@ -12,12 +12,12 @@ Strict TDD: write or update the failing test first, then the code. One PR per sl
 
 ## 2. Slice 2 - HUD and flows (hud, test-harness)
 
-- [ ] 2.1 Test (unit, `hud-model.spec.js`): `control.skip` enabled / disabled (last level, Victory); ATAJOS ends with Saltar nivel `N` (CP-53); defeat buttons include Saltar nivel, disabled on the last level; victory unchanged (CP-56).
-- [ ] 2.2 Test (browser): header button markup and keycap, disabled style, panel fits 1000 px; defeat modal two buttons; clicks dispatch SKIP / PRESS SKIP (CP-48, CP-52, CP-53).
-- [ ] 2.3 Test (e2e, `skip-level.spec.js`): real `N` from play and from the defeat modal, sounds (CP-45, CP-48, CP-49, CP-50); marker after reload (CP-55).
-- [ ] 2.4 Implement D5 (`Hud.js`, `HudDom.js`, `strings.js`, `styles.css`).
-- [ ] 2.5 Visual baselines for the CONTROL panel and the defeat modal; request the design review (OI-1).
-- [ ] 2.6 `qa-coverage.spec.js` covers CP-45..CP-58; CP-40 skip path noted in `Design/casos/hu-14-casos-de-prueba.md`; README (`N`), comparison doc, HU-12-14 status.
+- [x] 2.1 Test (unit, `hud-model.spec.js`): `control.skip` enabled / disabled (last level, Victory); ATAJOS ends with Saltar nivel `N` (CP-53); defeat buttons include Saltar nivel, disabled on the last level; victory unchanged (CP-56).
+- [x] 2.2 Test (browser): header button markup and keycap, disabled style, panel fits 1000 px; defeat modal two buttons; clicks dispatch SKIP / PRESS SKIP (CP-48, CP-52, CP-53).
+- [x] 2.3 Test (e2e, `skip-level.spec.js`): real `N` from play and from the defeat modal, sounds (CP-45, CP-48, CP-49, CP-50); marker after reload (CP-55).
+- [x] 2.4 Implement D5 (`Hud.js`, `HudDom.js`, `strings.js`, `styles.css`).
+- [x] 2.5 Visual baselines for the CONTROL panel and the defeat modal; design review requested as OI-1 (pending, not blocking).
+- [x] 2.6 `qa-coverage.spec.js` covers CP-45..CP-58; CP-40 skip path noted in `Design/casos/hu-14-casos-de-prueba.md`; README (`N`), comparison doc, HU-12-14 status.
 
 ## 3. Close
 

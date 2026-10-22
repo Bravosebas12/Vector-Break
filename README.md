@@ -34,6 +34,7 @@ Open http://127.0.0.1:4173 and click to start once loading finishes. Use `--port
 | `1` / `2` / `4` | Simulation speed 1X / 2X / 4X (while balls are in flight) |
 | `P` | Pause / resume |
 | `R` | Restart the level |
+| `N` | Skip to the next level (no stars, score or record; the level stays unsolved) |
 | `Enter` or click | Modal action (next level / restart) |
 
 A turn fires its whole volley in groups of the chosen size; between groups you aim again (and may move the launcher) without spending a turn. The launcher stays where you leave it: landing balls never move it, and only loading a level or `R` puts it back at the start. Levels 1 and 2 show tutorial hints for `A` / `D` and `M` once per session.

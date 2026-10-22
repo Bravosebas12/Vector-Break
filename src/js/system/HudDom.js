@@ -29,7 +29,8 @@ const TELEMETRY = `
   </section>`;
 
 const CONTROL = `
-  <header class="panel-head"><span class="label">${strings.control}</span></header>
+  <header class="panel-head"><span class="label">${strings.control}</span>
+    <button class="btn ghost skip" data-act="skip">${strings.skipLevel}${kbd('N')}</button></header>
   <section class="sec gap12">
     <button class="btn primary launch" data-act="launch">${strings.launch}${kbd('Space')}</button>
     <div class="grid2 gap12">
@@ -78,6 +79,7 @@ const DEFEAT = `<div class="card">
   <span class="kicker">${strings.noShots}</span><span class="title">${strings.puzzleFailed}</span>
   <span class="message" data-k="dMessage"></span>
   <button class="btn light" data-act="modal-RESTART-defeat">${strings.restartPuzzle}${kbd('R')}</button>
+  <button class="btn ghost skip-defeat" data-act="modal-SKIP">${strings.skipLevel}${kbd('N')}</button>
 </div>`;
 
 function el(tag, className, html, attrs = {}) {
@@ -106,11 +108,12 @@ export function createHudDom(root, { dispatch }) {
   const pips = [...pipsBox.children];
   const buttons = {};
   for (const b of root.querySelectorAll('[data-act]')) buttons[b.dataset.act] = b;
-  const ACTIONS = { launch: { type: 'FIRE' }, pause: { type: 'PAUSE' }, restart: { type: 'RESTART' } };
+  const ACTIONS = { launch: { type: 'FIRE' }, pause: { type: 'PAUSE' }, restart: { type: 'RESTART' }, skip: { type: 'SKIP' } };
   for (const v of SPEEDS) ACTIONS[`speed-${v}`] = { type: 'SET_SPEED', v };
   for (const v of MODES) ACTIONS[`mode-${v}`] = { type: 'SET_MODE', v };
   ACTIONS['modal-RESTART'] = ACTIONS['modal-RESTART-defeat'] = { type: 'PRESS', target: 'RESTART' };
   ACTIONS['modal-NEXT'] = { type: 'PRESS', target: 'NEXT' };
+  ACTIONS['modal-SKIP'] = { type: 'PRESS', target: 'SKIP' };
   const stars = [...victory.querySelectorAll('.star')];
   const perfect = victory.querySelector('.perfect');
   for (const [act, b] of Object.entries(buttons)) {
@@ -139,7 +142,11 @@ export function createHudDom(root, { dispatch }) {
   function updateModal(m) {
     flag(victory, 'victory', m?.kind === 'victory', (v) => victory.classList.toggle('show', v));
     flag(defeat, 'defeat', m?.kind === 'defeat', (v) => defeat.classList.toggle('show', v));
-    if (m?.kind === 'defeat') return void text('dMessage', m.message);
+    if (m?.kind === 'defeat') {
+      const skip = m.buttons.find((b) => b.action === 'SKIP');
+      flag(buttons['modal-SKIP'], 'defeatSkipOn', skip.enabled, (v) => (buttons['modal-SKIP'].disabled = !v));
+      return void text('dMessage', m.message);
+    }
     if (m?.kind !== 'victory') return;
     text('vKicker', m.kicker);
     stars.forEach((star, i) => flag(star, `star${i}`, i < m.stars, (v) => star.classList.toggle('on', v)));
@@ -190,6 +197,7 @@ export function createHudDom(root, { dispatch }) {
     flag(buttons.pause, 'pauseOn', c.pause.enabled, (v) => (buttons.pause.disabled = !v));
     flag(buttons.pause, 'pauseActive', c.pause.active, (v) => buttons.pause.classList.toggle('active', v));
     flag(buttons.restart, 'restartOn', c.restart.enabled, (v) => (buttons.restart.disabled = !v));
+    flag(buttons.skip, 'skipOn', c.skip.enabled, (v) => (buttons.skip.disabled = !v));
     text('speed', c.speed.current);
     for (const o of c.speed.options) {
       const b = buttons[`speed-${o.v}`];

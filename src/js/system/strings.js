@@ -46,6 +46,7 @@ export const strings = Object.freeze({
     Object.freeze({ label: 'Velocidad', keys: Object.freeze(['1', '2', '4']) }),
     Object.freeze({ label: 'Pausa', keys: Object.freeze(['P']) }),
     Object.freeze({ label: 'Reiniciar', keys: Object.freeze(['R']) }),
+    Object.freeze({ label: 'Saltar nivel', keys: Object.freeze(['N']) }),
   ]),
 
   solved: 'RESUELTO',
@@ -65,5 +66,6 @@ export const strings = Object.freeze({
   newRecord: 'nuevo récord',
   recordPoints: 'récord {pts} pts',
   nextLevel: 'Siguiente nivel',
+  skipLevel: 'Saltar nivel',
   lastLevel: 'Último nivel completado',
 });

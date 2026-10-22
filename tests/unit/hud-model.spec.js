@@ -107,7 +107,7 @@ test.describe('Control panel', () => {
     expect(hudModel(snap({ state: 'Simulating', paused: true })).control.speed.options.every((o) => !o.enabled)).toBe(true);
   });
 
-  test('CP-16 ATAJOS lists the controls in order, with A / D and M, as keycaps', () => {
+  test('CP-16 CP-53 ATAJOS lists the controls in order, with A / D, M and N, as keycaps', () => {
     const list = hudModel(snap()).control.shortcuts;
     expect(list).toEqual([
       { label: 'Apuntar', keys: ['Ratón'] },
@@ -117,6 +117,7 @@ test.describe('Control panel', () => {
       { label: 'Velocidad', keys: ['1', '2', '4'] },
       { label: 'Pausa', keys: ['P'] },
       { label: 'Reiniciar', keys: ['R'] },
+      { label: 'Saltar nivel', keys: ['N'] },
     ]);
     const text = JSON.stringify(list).toLowerCase();
     expect(text).not.toContain('esc');
@@ -182,15 +183,56 @@ test.describe('Victory modal', () => {
   });
 });
 
+// HU-12 (openspec change anglecraft-v1-skip-level, hud delta "Control panel", "Defeat modal", "Button actions").
+test.describe('Saltar nivel', () => {
+  const skip = (over, levelCount = 6) => hudModel(snap(over), { levelCount }).control.skip;
+
+  test('CP-53 the CONTROL header offers Saltar nivel with N in play, paused and on the defeat', () => {
+    expect(skip({})).toEqual({ label: 'Saltar nivel', key: 'N', enabled: true });
+    for (const over of [{ state: 'Simulating' }, { paused: true }, { state: 'GameOver' }]) {
+      expect(skip(over).enabled, JSON.stringify(over)).toBe(true);
+    }
+  });
+
+  test('CP-52 CP-56 it is disabled on the last level and on the victory', () => {
+    expect(skip({ level: { index: 5, id: 'level-06' } }).enabled).toBe(false);
+    expect(skip({ state: 'Victory' }).enabled).toBe(false);
+  });
+
+  const lost = (index) =>
+    modalModel(
+      snap({ state: 'GameOver', level: { index, id: 'x' }, result: { stars: 0, score: 0, shots: 12 }, shots: { used: 12, left: 0, max: 12 }, blocks: [{ type: 'core', hp: 10 }] }),
+      { levelCount: 6 },
+    );
+
+  test('CP-48 the defeat modal adds a secondary Saltar nivel button; Reiniciar puzzle stays primary', () => {
+    const m = lost(3);
+    expect(m.buttons).toEqual([
+      { label: strings.restartPuzzle, key: 'R', action: 'RESTART', primary: true },
+      { label: 'Saltar nivel', key: 'N', action: 'SKIP', primary: false, enabled: true },
+    ]);
+    expect(m.primaryAction).toBe('RESTART');
+  });
+
+  test('CP-52 on the last level the defeat Saltar nivel is disabled', () => {
+    expect(lost(5).buttons[1]).toMatchObject({ action: 'SKIP', enabled: false });
+  });
+
+  test('CP-56 the victory modal offers Repetir and Siguiente nivel only', () => {
+    const m = modalModel(snap({ state: 'Victory', level: { index: 1, id: 'level-02' }, result: { stars: 2, score: 300, shots: 3 } }), { levelCount: 6 });
+    expect(m.buttons.map((b) => b.action)).toEqual(['RESTART', 'NEXT']);
+  });
+});
+
 test.describe('Defeat modal', () => {
   const lost = (over = {}) =>
     snap({ state: 'GameOver', result: { stars: 0, score: 45, shots: 12 }, shots: { used: 12, left: 0, max: 12 }, ...over });
 
-  test('SIN TURNOS, title, sentence with active cores and combined HP, one Reiniciar puzzle button', () => {
+  test('SIN TURNOS, title, sentence with active cores and combined HP, Reiniciar puzzle as the primary button', () => {
     const m = modalModel(lost({ cores: 2, blocks: [{ type: 'core', hp: 320 }, { type: 'core', hp: 320 }, { type: 'standard', hp: 4 }] }));
     expect(m).toMatchObject({ kind: 'defeat', kicker: 'SIN TURNOS', title: 'Puzzle no resuelto', primaryAction: 'RESTART' });
     expect(m.message).toBe('Se agotaron los 12 turnos. Quedan 2 núcleos activos con 640 HP combinados.');
-    expect(m.buttons).toEqual([{ label: strings.restartPuzzle, key: 'R', action: 'RESTART', primary: true }]);
+    expect(m.buttons[0]).toEqual({ label: strings.restartPuzzle, key: 'R', action: 'RESTART', primary: true });
   });
 
   test('singular forms for one shot and one core', () => {
