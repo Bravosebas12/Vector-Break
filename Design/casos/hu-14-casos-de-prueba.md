@@ -2,7 +2,7 @@
 
 **Módulo:** core loop (lanzador, turno, reinicio) | **Ambiente:** local, Chromium (últimas 2 versiones), 1920×1080 | **Autor:** QA | **Fecha:** 2026-10-21
 **Requisito / AC:** [`Design/hu-12-14-saltar-nivel-disparo-simultaneo-lanzador-libre.md`](../hu-12-14-saltar-nivel-disparo-simultaneo-lanzador-libre.md) — HU-14 AC1–AC6 (decisión D-14.1). Reemplaza a HU-10 AC1 y HU-11 AC4 (casos CP-01 y CP-22 de [`hu-10-11-casos-de-prueba.md`](hu-10-11-casos-de-prueba.md)).
-**Especificación:** `openspec/changes/anglecraft-v1-free-launcher/`
+**Especificación:** `openspec/changes/archive/2026-10-21-anglecraft-v1-free-launcher/` (archivado; especificaciones vigentes en `openspec/specs/`)
 
 **Supuestos:**
 - S-QA1 y S-QA2 de los casos de HU-10/11 siguen vigentes: posición leída con `snapshot().launcherX`, ±2 px de tolerancia, tiempos medidos con el reloj de la página.
