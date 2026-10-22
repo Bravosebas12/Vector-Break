@@ -37,7 +37,7 @@ Strict TDD: write or update the failing test first, then the code. One PR per sl
 
 ## 6. Slice 6 - Levels, visuals and docs (test-harness)
 
-- [ ] 6.1 Solutions fixture still passes in `'turn'` mode; add a mode-1 solvability check per level.
-- [ ] 6.2 Visual baselines: aiming (with move hint), level 2 (with mode hint), between groups; compare with the Claude Design canvas; update `docs/visual-fidelity-comparison.md`.
-- [ ] 6.3 Coverage check: every CP-01..CP-35 appears in a test title.
-- [ ] 6.4 README controls table (A, D, M); full suite 3 runs green.
+- [x] 6.1 Solutions fixture still passes in `'turn'` mode; add a mode-1 solvability check per level (dedicated plans in `tests/fixtures/solutions-mode1.json`, see design D10 finding). Levels 1-3 pass; levels 4-6 are `test.fixme` (OI-1).
+- [x] 6.2 Visual baselines: aiming (with move hint), level 2 (with mode hint), between groups; compare with the Claude Design canvas; update `docs/visual-fidelity-comparison.md`.
+- [x] 6.3 Coverage check: every CP-01..CP-35 appears in a test title.
+- [x] 6.4 README controls table (A, D, M); full suite 3 runs green.

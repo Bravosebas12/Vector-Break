@@ -39,6 +39,7 @@ Slice 1 adds `hook.setFireMode('turn' | 1 | 2 | 3)` and `hook.move(dir, s)`, and
 
 ### D10. Levels
 Re-run `tests/fixtures/solutions.json` in `'turn'` mode (must still pass) and add a mode-1 solvability check per level (each level solvable within `shots` turns, re-aiming allowed per group). Balance review (free launcher can trivialize puzzles) is recorded as a follow-up for design, not blocking.
+*Finding (slice 6)*: the v1 solutions do **not** transfer to mode 1, even replaying each group from the turn's start x: they depend on several balls of a volley being in flight at once (one opens a path while another is still flying). The simulation has no randomness, so this is not a seed issue. Mode-1 solvability is therefore proven with dedicated plans (`tests/fixtures/solutions-mode1.json`) found offline by a greedy search (per group: angles × launcher positions, keep the shot with most core damage) and replayed from a fresh session in the unit suite.
 
 ## Slices and files
 
@@ -53,5 +54,5 @@ Re-run `tests/fixtures/solutions.json` in `'turn'` mode (must still pass) and ad
 
 ## Open Items
 
-- OI-1: Balance review of levels 1–6 with free movement and per-group re-aim (design follow-up).
+- OI-1: Balance review of levels 1–6 with free movement and per-group re-aim (design follow-up). Measured in slice 6: levels 1–3 are won in mode 1 in 2 turns (v1: 2–3 of 10–12); for levels 4–6 the greedy search finds no win in mode 1 nor mode 3 (core left at 30/210/239 and 21/211/241 HP), while v1 needs 9/12, 10/13 and 14/15 turns. Their mode-1 checks are `test.fixme` until HU-13 (simultaneous firing) or a rebalance.
 - OI-2: Hint enter/leave animations must respect `prefers-reduced-motion` (fade only) — confirm with design.

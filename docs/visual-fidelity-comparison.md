@@ -68,7 +68,26 @@ El Key Art se exporta sin su texto (`scripts/export-key-art.mjs`) y el juego dib
 - **OI-3:** reexportar bricks y grietas a 112×56 (pendiente 2.2).
 - **OI-4:** sprite del lanzador (pendiente 2.6); hoy se dibuja con el estilo del Key Art.
 
-## 8. Cómo actualizar las referencias
+## 8. Lanzador móvil y modo de disparo (HU-10, HU-11)
+
+Fuente: lienzo de Claude Design [AngleCraft — Tutorial y modo de disparo](https://claude.ai/artifact/BU6xTioBfQoAEgJuBCHFtk) (mesas 01 a 03; privado hasta compartirlo).
+
+| Lienzo | Juego |
+|---|---|
+| 01 · Nivel 1, tutorial A / D | ![Partida con la indicación A / D](../tests/visual/screens.spec.js-snapshots/aiming-visual-win32.png) |
+| 02 · Nivel 2, tutorial del modo | ![Nivel 2 con la indicación del modo](../tests/visual/screens.spec.js-snapshots/level2-mode-hint-visual-win32.png) |
+| 03 · BOLAS del turno, entre grupos | ![Entre grupos](../tests/visual/screens.spec.js-snapshots/between-groups-visual-win32.png) |
+
+Diferencias intencionales:
+
+| Diferencia | Lienzo | Juego | Motivo |
+|---|---|---|---|
+| Indicación A / D cerca del borde derecho | Siempre a la derecha del lanzador | Pasa a la izquierda si el lanzador está a más de x = 640 | Que no se salga del tablero |
+| Opción de modo en modo de pruebas `'turn'` | No existe | Ninguna opción activa | Solo pruebas de v1; inalcanzable jugando |
+
+Umbral de las capturas: `threshold` 0,1 y `maxDiffPixels` 150. El umbral anterior (0,2 % de los píxeles) dejaba pasar un recuadro oscuro sobre fondo oscuro, como la indicación del tutorial.
+
+## 9. Cómo actualizar las referencias
 
 1. Hacer el cambio visual y revisarlo con diseño.
 2. Regenerar: `npx playwright test --project=visual --update-snapshots`.

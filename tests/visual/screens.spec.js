@@ -16,7 +16,8 @@ async function boot(page) {
 // Draws several frames 1 s apart so the HUD refreshes and any destruction particles have expired.
 const settle = (page) =>
   page.evaluate(() => {
-    for (let i = 1; i <= 8; i++) window.__ANGLECRAFT__.render(i * 1000);
+    // Monotonic clock across calls: the HUD refreshes only when time moves forward (10 Hz).
+    for (let i = 1; i <= 8; i++) window.__ANGLECRAFT__.render((window.__t = (window.__t ?? 0) + 1000));
   });
 
 // Fires at `deg` and steps the session until the volley resolves.
@@ -87,4 +88,27 @@ test('defeat on level 2 (out of shots)', async ({ page }) => {
   expect(state).toBe('GameOver');
   await settle(page);
   await expect(page).toHaveScreenshot('defeat.png');
+});
+
+
+// HU-10 / HU-11 (openspec change anglecraft-v1-launcher-and-fire-mode): level 2 tutorial hint and the
+// state between two groups of the same turn. Compare with the Claude Design canvas, artboards 01-03.
+test('level 2 with the fire-mode hint and the MODO section highlighted', async ({ page }) => {
+  await boot(page);
+  await level(page, 1);
+  await page.evaluate(() => window.__ANGLECRAFT__.setFireMode(1));
+  await page.mouse.move(420 + 300, 40 + 300);
+  await settle(page);
+  await expect(page).toHaveScreenshot('level2-mode-hint.png');
+});
+
+test('between groups: mode 2, two balls recogidas and three por disparar', async ({ page }) => {
+  await boot(page);
+  await level(page, 1);
+  await page.evaluate(() => window.__ANGLECRAFT__.setFireMode(2));
+  await settle(page); // the mode hint is on screen before the first shot, as in the real loop
+  expect(await shoot(page, 70)).toBe('Aiming');
+  await page.mouse.move(420 + 300, 40 + 300);
+  await settle(page);
+  await expect(page).toHaveScreenshot('between-groups.png');
 });
