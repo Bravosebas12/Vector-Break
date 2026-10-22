@@ -1,5 +1,5 @@
 // HU-11 fire groups: openspec change anglecraft-v1-launcher-and-fire-mode, volley-economy delta (shot = turn
-// counted at Resolving, group sizes, relocation per group, orbs for following turns) and game-state delta
+// counted at Resolving, group sizes, orbs for following turns) and game-state delta
 // (group end -> Aiming, fire mode, cap per group). Titles carry the QA case IDs.
 import { test, expect } from '@playwright/test';
 import { boot, openField, stepUntil, turnOver } from './helpers/session.js';
@@ -97,13 +97,11 @@ test('CP-27 a group that destroys the last core wins at once; the remaining ball
   expect(g.snap.result).toMatchObject({ stars: 3, shots: 1 });
 });
 
-test('CP-01 CP-22 the launcher relocates after each group to where its first ball landed', () => {
+// CP-01 and CP-22 are superseded by HU-14 (openspec change anglecraft-v1-free-launcher): no relocation.
+test('CP-01 CP-22 the launcher stays put after each group (HU-14) and A / D still adjust it', () => {
   const single = level2(1);
-  group(single, SLANT);
-  const v1 = level2('turn');
-  group(v1, SLANT); // the same first ball, fired as part of the whole volley
-  expect(single.snapshot().launcherX).not.toBe(540);
-  expect(single.snapshot().launcherX).toBeCloseTo(v1.snapshot().launcherX, 6);
+  expect(group(single, SLANT).state).toBe('Aiming');
+  expect(single.snapshot().launcherX).toBe(540);
   single.dispatch({ type: 'MOVE_START', dir: -1 });
   single.dispatch({ type: 'MOVE_STOP', dir: -1 });
   const moved = single.snapshot().launcherX;

@@ -40,7 +40,7 @@ function shoot(s, deg) {
 }
 
 for (let i = 0; i < 6; i++) {
-  test(`level ${i + 1}: the v1 solution still wins in 'turn' mode`, () => {
+  test(`CP-44 level ${i + 1}: the v1 solution still wins in 'turn' mode`, () => {
     const s = start(i, 'turn');
     const { angles, xs } = V1.levels[i];
     for (const [k, deg] of angles.entries()) {
@@ -52,7 +52,7 @@ for (let i = 0; i < 6; i++) {
   });
 
   const modeOne = KNOWN_OPEN.has(i + 1) ? test.fixme : test;
-  modeOne(`level ${i + 1}: solvable in mode 1 within its shots (one ball per shot)`, () => {
+  modeOne(`CP-44 level ${i + 1}: solvable in mode 1 within its shots (one ball per shot)`, () => {
     const plan = MODE1.levels[i];
     expect(plan?.level, 'a mode-1 plan exists for this level').toBe(i + 1);
     const s = start(i, 1);
