@@ -1,0 +1,30 @@
+change: anglecraft-v1-simultaneous-fire
+phases:
+  explore: done  # session emission, cap, speed reset and FSM read; EMIT_INTERVAL is 1/12 s
+  research: skipped  # no external research needed
+  proposal: done
+  design: done
+  spec: done
+  tasks: done
+  apply: pending
+  verify: pending
+  archive: pending
+blocked_reason: none
+delivery:
+  delivery_strategy: auto-chain
+  chain_strategy: feature-branch-chain
+  tracker_branch: feature/anglecraft-v1-simultaneous-fire
+  review_budget_lines: 800
+inputs:
+  user_stories: Design/hu-12-14-saltar-nivel-disparo-simultaneo-lanzador-libre.md
+  test_cases: Design/casos/hu-13-casos-de-prueba.md
+confirmed_decisions:
+  D-13.1: "the level is won the moment the last core is destroyed"
+  D-13.2: "A / D work with balls in the air"
+  D-13.3: "the 45 s cap is measured per turn, from the turn's first shot"
+  D-13.4: "minimum cadence between shots = interval between balls of a group (EMIT_INTERVAL, 1/12 s of simulation time)"
+  S-13.1: "at the 45 s cap, balls of the turn not fired yet are lost (confirmed 2026-10-21)"
+  S-13.2: "the chosen speed holds while balls are in flight and returns to 1X at the next turn (confirmed 2026-10-21)"
+pending_decisions:
+  OI-1: "PO: changing the fire mode while balls are in flight (kept locked as in HU-11 CP-30)"
+  OI-2: "PO wrote 0,08 s; the group interval is 1/12 s (~0.083 s); D-13.4 ties the cadence to the group interval"
