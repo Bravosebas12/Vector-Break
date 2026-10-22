@@ -1,7 +1,7 @@
 # AngleCraft — HU-12, HU-13 y HU-14
 
 **Fecha:** 2026-10-21
-**Estado:** en refinamiento con PO. HU-12 y HU-14 listas para desarrollo; HU-13 con una pregunta abierta (cadencia) y dos supuestos por confirmar.
+**Estado:** HU-12, HU-13 y HU-14 listas para desarrollo (HU-13 con dos supuestos por confirmar, S-13.1 y S-13.2).
 **Contexto:** HU-10 (mover el lanzador con A / D) y HU-11 (modo de disparo 1–3) están implementadas en `feature/anglecraft-v1-launcher-and-fire-mode`.
 
 ## Análisis previo: ¿el lanzador "vuelve al centro" cuando cae la bola?
@@ -176,6 +176,12 @@ Escenario: AC10 - Tope de 45 s por turno (D-13.3)
   Cuando se alcanza el tope
   Entonces las bolas en vuelo cuentan como aterrizadas (el daño hecho se conserva)
   Y el turno se resuelve; las bolas que no se dispararon se pierden (supuesto S-13.1)
+
+Escenario: AC11 - Cadencia mínima de 0,08 s (D-13.4)
+  Dado que el jugador acaba de disparar un grupo y quedan bolas por disparar
+  Cuando vuelve a disparar 0,05 s después
+  Entonces el segundo disparo se ignora
+  Y si dispara de nuevo 0,08 s o más después del primero, sale el siguiente grupo
 ```
 
 **Decisiones del PO:**
@@ -185,13 +191,14 @@ Escenario: AC10 - Tope de 45 s por turno (D-13.3)
 | D-13.1 | Se gana **en el momento** en que se destruye el último núcleo. |
 | D-13.2 | **A / D funcionan con bolas en el aire.** |
 | D-13.3 | El tope de **45 s se mide por turno**, desde el primer disparo del turno. |
+| D-13.4 | **Cadencia mínima de 0,08 s** entre disparos (el mismo intervalo que hay entre bolas de un grupo). |
 
 **Supuestos por confirmar:**
 - S-13.1: al llegar al tope de 45 s, las bolas del turno que aún no se dispararon se pierden.
 - S-13.2: la velocidad elegida (2X / 4X) se mantiene mientras haya bolas en vuelo; vuelve a 1X al empezar el turno siguiente.
 
 ### Preguntas abiertas (PO)
-1. **Cadencia mínima entre disparos:** ¿cuánto tiempo debe pasar, como mínimo, entre un disparo y el siguiente? Ejemplo: con un mínimo de 0,25 s, si el jugador hace doble clic muy rápido sale solo un grupo, y el segundo clic se ignora; si espera un cuarto de segundo, sale el segundo grupo. Opciones: (a) sin mínimo; (b) 0,08 s, el mismo intervalo que hay hoy entre bolas de un grupo; (c) 0,25 s; (d) otro valor.
+Ninguna: HU-13 lista para desarrollo (confirmar S-13.1 y S-13.2 en la revisión).
 
 ---
 
