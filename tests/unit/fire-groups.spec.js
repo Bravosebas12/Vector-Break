@@ -118,14 +118,14 @@ test('CP-23 an orb captured mid-turn grows only the following turns', () => {
   expect(s.snapshot()).toMatchObject({ shots: { used: 1 }, volley: { size: 7, emitted: 0 } });
 });
 
-test('a group capped at 45 s ends the group, keeps the launcher and returns to Aiming', () => {
+test('the 45 s cap ends the whole turn (HU-13 D-13.3): unfired balls are lost and the launcher stays', () => {
   const s = boot({ fireMode: 1, volleyCapS: 0.05 });
   s.loadLevel(1);
   openField(s);
   const g = group(s, SLANT);
   expect(g.state).toBe('Aiming');
   expect(g.snap.launcherX).toBe(540);
-  expect(g.snap.volley.emitted).toBe(1);
+  expect(g.snap).toMatchObject({ shots: { used: 1 }, volley: { emitted: 0 } }); // the next turn started
 });
 
 test('CP-28 M cycles 1 -> 2 -> 3 -> 1 and emits a UI click; auto-repeat of M is ignored', () => {

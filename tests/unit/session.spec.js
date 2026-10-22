@@ -181,11 +181,11 @@ test.describe('GameSession level state', () => {
     s.dispatch({ type: 'AIM', x: 740, y: 756 });
     const aimed = { ...s.snapshot().aim };
     s.dispatch({ type: 'FIRE' });
-    s.dispatch({ type: 'AIM', x: 100, y: 100 }); // ignored while Firing
+    s.dispatch({ type: 'AIM', x: 100, y: 100 }); // HU-13: aims the next group; the fired one keeps its direction
     const snap = s.snapshot();
     expect(snap.state).toBe('Firing');
     expect(snap.shots).toEqual({ used: 0, left: 10, max: 10 }); // HU-11: counted at Resolving
-    expect(snap.aim).toEqual(aimed);
+    expect(snap.aim).not.toEqual(aimed);
     expect(snap.lockedDir).toEqual(aimed);
   });
 
@@ -240,12 +240,11 @@ test.describe('GameSession speed', () => {
     expect(s.snapshot().speed).toBe(4);
   });
 
-  test('entering Aiming resets the speed to 1X', () => {
+  test('the next turn resets the speed to 1X (S-13.2)', () => {
     const s = firing();
     s.dispatch({ type: 'SET_SPEED', v: 4 });
-    force(s, 'Simulating', 'Resolving', 'Aiming');
-    expect(s.snapshot().state).toBe('Aiming');
-    expect(s.snapshot().speed).toBe(1);
+    for (let i = 0; i < 20000 && s.snapshot().state !== 'Aiming'; i++) s.step(STEP);
+    expect(s.snapshot()).toMatchObject({ state: 'Aiming', speed: 1, shots: { used: 1 } });
   });
 });
 

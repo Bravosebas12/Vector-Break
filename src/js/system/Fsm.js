@@ -17,8 +17,8 @@ const TRANSITIONS = Object.freeze({
   Loading: ['Title'],
   Title: ['Aiming'],
   Aiming: ['Firing', 'Aiming'],
-  Firing: ['Simulating', 'Aiming'],
-  Simulating: ['Resolving', 'Aiming'],
+  Firing: ['Simulating', 'Aiming', 'Resolving'], // Resolving: victory or the time cap mid-emission (HU-13)
+  Simulating: ['Resolving', 'Aiming', 'Firing'], // Firing: a group fired with balls still in flight (HU-13)
   Resolving: ['Victory', 'GameOver', 'Aiming'],
   Victory: ['Aiming'],
   GameOver: ['Aiming'],

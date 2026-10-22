@@ -14,6 +14,7 @@ Let the player fire the next group while earlier balls are still in the air (HU-
 | D-13.4 | Minimum cadence between shots: the interval between balls of a group (`EMIT_INTERVAL` = 1/12 s ≈ 0.083 s of simulation time). |
 | S-13.1 | At the 45 s cap, balls of the turn not fired yet are lost (confirmed). |
 | S-13.2 | The chosen speed (2X / 4X) holds while balls are in flight and returns to 1X when the next turn starts (confirmed). |
+| D-13.5 | The fire mode stays locked while balls are in flight, as in HU-11. |
 
 ## Scope
 
@@ -24,7 +25,7 @@ Let the player fire the next group while earlier balls are still in the air (HU-
 - Tests for CP-59..CP-74; migration of the tests that assume fire / aim / movement only in `Aiming`, victory at turn end, cap per group and speed reset per group.
 
 ### Out of Scope
-- Changing the fire mode while balls are in flight (stays locked, HU-11 CP-30; open question OI-1 for the PO).
+- Changing the fire mode while balls are in flight (stays locked, HU-11 CP-30; D-13.5).
 - New sounds or sprites; level rebalancing.
 
 ## Capabilities
@@ -57,4 +58,4 @@ Revert slice 2, then slice 1: the gates are additive in `allows` and `fire()`, a
 |---|---|
 | Immediate victory lowers the score of a winning turn (balls stop dealing damage) and changes saved baselines | Stars depend only on shots; the score rule is unchanged; affected baselines regenerated and reviewed |
 | Tests written for "fire only in `Aiming`" silently keep passing | Slice 1 lists and rewrites each one (design D7) before changing the code |
-| Mode-1 rapid fire drifts from the v1 emission by a step | Emission and cadence share `EMIT_INTERVAL` in simulation time; the v1 solutions replayed in mode 1 are the proof (CP-74) |
+| Mode-1 rapid fire drifts from the v1 emission by a step | Measured: each ball leaves at most one step later; the v1 solutions replayed in mode 1 win levels 1-6 with the same shots and score (CP-74) |

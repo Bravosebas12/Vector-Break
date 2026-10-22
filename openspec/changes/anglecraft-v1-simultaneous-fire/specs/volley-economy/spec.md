@@ -4,7 +4,7 @@
 
 ### Requirement: Volley size (HU-04 s2, HU-11 AC2, AC7, HU-13)
 
-The volley size of a turn MUST be fixed when the turn starts (`startBalls`, grown by orbs at earlier `Resolving`s, capped at 50 in v1). Each `FIRE` MUST emit a group of `min(fireMode, balls left to fire in the turn)` balls, in sequence, from the locked launcher x along the locked direction, at the v1 emission interval (`EMIT_INTERVAL`, 1/12 s of simulation time). Groups of a turn MUST NOT interleave: a group starts only after the previous one has emitted all its balls. Balls fired across the groups of a turn MUST equal the volley size unless the level ends or the turn time cap is reached first. Mode 1 fired every `EMIT_INTERVAL` along one direction MUST emit exactly like the whole v1 volley.
+The volley size of a turn MUST be fixed when the turn starts (`startBalls`, grown by orbs at earlier `Resolving`s, capped at 50 in v1). Each `FIRE` MUST emit a group of `min(fireMode, balls left to fire in the turn)` balls, in sequence, from the locked launcher x along the locked direction, at the v1 emission interval (`EMIT_INTERVAL`, 1/12 s of simulation time). Groups of a turn MUST NOT interleave: a group starts only after the previous one has emitted all its balls. Balls fired across the groups of a turn MUST equal the volley size unless the level ends or the turn time cap is reached first. Mode 1 fired every `EMIT_INTERVAL` along one direction MUST emit like the whole v1 volley, each ball at most one fixed step later (a `FIRE` arrives between steps; v1 emits inside a step).
 
 #### Scenario: Group sizes
 - GIVEN level 2 (`startBalls` 5), mode 2
@@ -21,10 +21,10 @@ The volley size of a turn MUST be fixed when the turn starts (`startBalls`, grow
 - WHEN the first turn is played in any fire mode
 - THEN exactly 5 balls are emitted over the turn's groups
 
-#### Scenario: Rapid mode 1 equals the v1 volley
+#### Scenario: Rapid mode 1 follows the v1 volley
 - GIVEN the same level, seed, launcher x and angle
 - WHEN one session fires the volley in `'turn'` mode and another fires it in mode 1 with a `FIRE` every `EMIT_INTERVAL`
-- THEN both sessions have the same ball positions, block HP and score after every step
+- THEN every ball of the mode-1 session leaves 0 or 1 step after the same ball of the `'turn'` session
 
 ### Requirement: Turn-end synchronization (HU-03 s1, HU-13, HU-14)
 

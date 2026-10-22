@@ -13,7 +13,7 @@ Automated tests MUST reference the QA case IDs in their titles: `CP-01`…`CP-35
 
 ### Requirement: Solutions with launcher positions (HU-14, HU-13)
 
-The seeded solutions MUST store the launcher x for every shot (`xs` next to `angles` in `tests/fixtures/solutions.json`; an explicit `x` for every step in `tests/fixtures/solutions-mode1.json`). Replays MUST place the launcher with `setLauncherX` before each shot. Levels 1–6 MUST be won by their solution in `'turn'` mode, and also in fire mode 1 by firing each turn's balls one per `FIRE` every `EMIT_INTERVAL` along the solution's angle (HU-13), with the same number of shots. The greedy mode-1 plans of levels 1–3 MUST still win.
+The seeded solutions MUST store the launcher x for every shot (`xs` next to `angles` in `tests/fixtures/solutions.json`). Replays MUST place the launcher with `setLauncherX` before each shot. Levels 1–6 MUST be won by their solution in `'turn'` mode, and also in fire mode 1 by firing each turn's balls one per `FIRE` every `EMIT_INTERVAL` along the solution's angle (HU-13), with the same number of shots and the same score. The greedy mode-1 plans of HU-11 (`solutions-mode1.json`) are retired: they waited for every group to land and do not fit the turn time cap of HU-13.
 
 #### Scenario: Replay before and after HU-14
 - GIVEN the recorded positions
@@ -23,4 +23,4 @@ The seeded solutions MUST store the launcher x for every shot (`xs` next to `ang
 #### Scenario: Mode 1 with rapid fire
 - GIVEN the v1 solution of level 4, 5 or 6 and its launcher positions
 - WHEN each turn is fired in mode 1 with one `FIRE` every `EMIT_INTERVAL`
-- THEN the level is won in the same number of shots as in `'turn'` mode
+- THEN the level is won in the same number of shots and with the same score as in `'turn'` mode

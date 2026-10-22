@@ -50,7 +50,9 @@ The speed reset moves from `onEnter.Aiming` to the turn start: `resolve()` when 
 `control.launch.enabled` = not paused and (`Aiming`, or `Firing` / `Simulating` with balls left to fire). The launcher draws "ready" under the same condition and "disabled" otherwise (paused, no balls left, or out of a level). The cadence is not reflected in the HUD (1/12 s is below perception).
 
 ### D9. Levels in mode 1 (closes archived OI-1)
-Mode 1 fired every `EMIT_INTERVAL` along one direction emits exactly like the v1 volley. A new replay fires each v1 solution in mode 1 with that cadence (`steps` of the cadence between `FIRE`s, launcher at `xs`). It must win levels 1-6 with the same shots, which removes the `test.fixme` for levels 4-6. The greedy mode-1 plans of levels 1-3 stay as an extra check.
+Mode 1 fired every `EMIT_INTERVAL` along one direction emits like the v1 volley, each ball at most one step later (a `FIRE` arrives between steps, v1 emits inside a step's substep). A new replay fires each v1 solution in mode 1 with that cadence (launcher at `xs`). Measured in slice 1: levels 1-6 are won with the same shots and the same score as in `'turn'` mode, which removes the `test.fixme` for levels 4-6.
+
+The greedy mode-1 plans of HU-11 (`tests/fixtures/solutions-mode1.json`) are retired: they waited for every group to land, and with the cap per turn (D5) levels 2 and 3 run out of time. `scripts/record-launcher-x.mjs` is removed too: it recorded the positions that relocation produced, and rerunning it without relocation would overwrite `xs` with the level start.
 
 ## Slices and files
 
@@ -61,5 +63,5 @@ Mode 1 fired every `EMIT_INTERVAL` along one direction emits exactly like the v1
 
 ## Open Items
 
-- OI-1 (PO): changing the fire mode while balls are in flight. Kept locked as in HU-11 (CP-30); between groups with balls still flying the player cannot switch mode.
+- OI-1: resolved by the PO (D-13.5, 2026-10-21): the fire mode stays locked while balls are in flight, as in HU-11 (CP-30).
 - OI-2: the PO wrote "0,08 s"; the group interval is 1/12 s ≈ 0.083 s. D-13.4 ties the cadence to the group interval, so 1/12 s is used and AC11 is tested with 0.05 s (rejected) and 0.09 s (accepted).

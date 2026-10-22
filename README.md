@@ -37,7 +37,7 @@ Open http://127.0.0.1:4173 and click to start once loading finishes. Use `--port
 | `N` | Skip to the next level (no stars, score or record; the level stays unsolved) |
 | `Enter` or click | Modal action (next level / restart) |
 
-A turn fires its whole volley in groups of the chosen size; between groups you aim again (and may move the launcher) without spending a turn. The launcher stays where you leave it: landing balls never move it, and only loading a level or `R` puts it back at the start. Levels 1 and 2 show tutorial hints for `A` / `D` and `M` once per session.
+A turn fires its whole volley in groups of the chosen size. You can fire the next group while earlier balls are still flying (one shot every 1/12 s at most), aim and move the launcher in flight, and the level is won the moment the last core falls. A turn ends when its last ball lands, or after 45 s from its first shot (balls not fired yet are lost); the chosen speed holds for the whole turn. The launcher stays where you leave it: landing balls never move it, and only loading a level or `R` puts it back at the start. Levels 1 and 2 show tutorial hints for `A` / `D` and `M` once per session.
 
 Every session starts at level 1. Best records (stars, score, shots) are stored in `localStorage`.
 

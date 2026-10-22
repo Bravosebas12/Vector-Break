@@ -6,7 +6,7 @@ phases:
   design: done
   spec: done
   tasks: done
-  apply: pending
+  apply: done  # slices 1-2 done
   verify: pending
   archive: pending
 blocked_reason: none
@@ -25,6 +25,6 @@ confirmed_decisions:
   D-13.4: "minimum cadence between shots = interval between balls of a group (EMIT_INTERVAL, 1/12 s of simulation time)"
   S-13.1: "at the 45 s cap, balls of the turn not fired yet are lost (confirmed 2026-10-21)"
   S-13.2: "the chosen speed holds while balls are in flight and returns to 1X at the next turn (confirmed 2026-10-21)"
+  D-13.5: "the fire mode stays locked while balls are in flight, as in HU-11 (PO, 2026-10-21)"
 pending_decisions:
-  OI-1: "PO: changing the fire mode while balls are in flight (kept locked as in HU-11 CP-30)"
   OI-2: "PO wrote 0,08 s; the group interval is 1/12 s (~0.083 s); D-13.4 ties the cadence to the group interval"

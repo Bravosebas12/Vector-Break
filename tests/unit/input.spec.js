@@ -70,8 +70,8 @@ test.describe('Input.allows (state gating)', () => {
 
   const table = {
     Aiming: ['AIM', 'FIRE', 'CLICK', 'PAUSE', 'RESTART', 'SKIP'],
-    Firing: ['SPEED', 'PAUSE', 'RESTART', 'SKIP'],
-    Simulating: ['SPEED', 'PAUSE', 'RESTART', 'SKIP'],
+    Firing: ['AIM', 'FIRE', 'CLICK', 'SPEED', 'PAUSE', 'RESTART', 'SKIP'], // HU-13: fire and aim in flight
+    Simulating: ['AIM', 'FIRE', 'CLICK', 'SPEED', 'PAUSE', 'RESTART', 'SKIP'],
     Resolving: ['RESTART', 'SKIP'],
     Victory: ['RESTART', 'NEXT', 'CONFIRM', 'PRESS'], // HU-12 D-12.4: no skip on victory
     GameOver: ['RESTART', 'CONFIRM', 'PRESS', 'SKIP'],

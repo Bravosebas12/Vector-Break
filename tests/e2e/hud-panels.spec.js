@@ -27,8 +27,9 @@ test('the HUD is hidden on the title and shown in a level', async ({ page }) => 
   await expect(page.locator('[data-hud="telemetry"]')).toContainText('PUZZLE 01 / 06');
 });
 
-test('LANZAR fires exactly once and is disabled while the volley runs', async ({ page }) => {
+test('LANZAR fires exactly once and is disabled once every ball of the turn is fired (HU-13)', async ({ page }) => {
   await level(page);
+  await page.evaluate(() => window.__ANGLECRAFT__.setVolley(1));
   await page.click('[data-act="launch"]');
   expect(await snap(page)).toMatchObject({ state: 'Firing', volley: { emitted: 1 } });
   await render(page);
