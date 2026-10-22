@@ -20,14 +20,15 @@ const settle = (page) =>
     for (let i = 1; i <= 8; i++) window.__ANGLECRAFT__.render((window.__t = (window.__t ?? 0) + 1000));
   });
 
-// Fires at `deg` and steps the session until the volley resolves.
-const shoot = (page, deg) =>
-  page.evaluate((d) => {
+// Places the launcher at `x` when given (recorded per shot, HU-14), fires at `deg` and steps until the turn resolves.
+const shoot = (page, deg, x) =>
+  page.evaluate(([d, lx]) => {
     const hook = window.__ANGLECRAFT__;
+    if (lx != null) hook.setLauncherX(lx);
     hook.fire((d * Math.PI) / 180);
     for (let i = 0; i < 400 && ['Firing', 'Simulating', 'Resolving'].includes(hook.snapshot().state); i++) hook.step(30);
     return hook.snapshot().state;
-  }, deg);
+  }, [deg, x]);
 
 async function level(page, index) {
   await page.evaluate(
@@ -72,7 +73,8 @@ test('victory with 2 stars on level 1', async ({ page }) => {
   await boot(page);
   await level(page, 0);
   let state = 'Aiming';
-  for (const deg of SOLUTIONS.levels[0].angles) state = await shoot(page, deg);
+  const { angles, xs } = SOLUTIONS.levels[0];
+  for (const [k, deg] of angles.entries()) state = await shoot(page, deg, xs[k]);
   expect(state).toBe('Victory');
   expect(await page.evaluate(() => window.__ANGLECRAFT__?.snapshot().result.stars)).toBe(2);
   await settle(page);

@@ -4,11 +4,11 @@ Strict TDD: write or update the failing test first, then the code. One PR per sl
 
 ## 1. Slice 1 - Test seam: solutions with launcher positions (test-harness)
 
-- [ ] 1.1 Test: hook `setLauncherX` places and clamps in `Aiming`, does nothing in `Simulating`, throws `NOT_READY` in `Loading`; listed among the hook functions.
-- [ ] 1.2 Expose `session.setLauncherX` and add `hook.setLauncherX` (D4).
-- [ ] 1.3 Add `scripts/record-launcher-x.mjs` (dev-only): replays `solutions.json` in `'turn'` mode and the mode-1 plans, writes `xs` per level and replaces every `x: null` with the recorded x (D3).
-- [ ] 1.4 Replays place the launcher before each shot: `tests/e2e/playthrough.spec.js`, `tests/visual/screens.spec.js`, `tests/unit/level-solvability-modes.spec.js` (use `setLauncherX`, not `s.run.launcherX`).
-- [ ] 1.5 Full suite green with no expectation changes (the recorded x equals the relocated x).
+- [x] 1.1 Test: hook `setLauncherX` places and clamps in `Aiming`, does nothing in `Simulating`, throws `NOT_READY` in `Loading`; listed among the hook functions.
+- [x] 1.2 Expose `session.setLauncherX` and add `hook.setLauncherX` (D4).
+- [x] 1.3 Add `scripts/record-launcher-x.mjs` (dev-only): replays `solutions.json` in `'turn'` mode and the mode-1 plans, writes `xs` per level and replaces every `x: null` with the recorded x (D3).
+- [x] 1.4 Replays place the launcher before each shot: `tests/e2e/playthrough.spec.js`, `tests/visual/screens.spec.js`, `tests/unit/level-solvability-modes.spec.js` (use `setLauncherX`, not `s.run.launcherX`).
+- [x] 1.5 Full suite green with no expectation changes (the recorded x equals the relocated x).
 
 ## 2. Slice 2 - Free launcher (volley-economy, aiming, game-state, test-harness)
 
