@@ -83,9 +83,9 @@ test('control buttons dispatch FIRE, PAUSE, RESTART and SET_SPEED; disabled ones
   await page.click('[data-act="pause"]');
   await page.click('[data-act="restart"]');
   await page.click('[data-act="speed-4"]', { force: true }); // disabled while Aiming
-  await show(page, { state: 'Simulating', speed: 1 });
+  await show(page, { state: 'Simulating', speed: 1, volley: { size: 5, emitted: 5, active: 3 } });
   await page.click('[data-act="speed-4"]');
-  await page.click('[data-act="launch"]', { force: true }); // disabled while Simulating
+  await page.click('[data-act="launch"]', { force: true }); // disabled: every ball of the turn fired (HU-13)
   expect(await page.evaluate(() => window.actions)).toEqual([{ type: 'FIRE' }, { type: 'PAUSE' }, { type: 'RESTART' }, { type: 'SET_SPEED', v: 4 }]);
   await show(page, { state: 'Simulating', speed: 4, paused: true });
   expect(await page.locator('[data-act="pause"]').innerText()).toContain('Seguir');

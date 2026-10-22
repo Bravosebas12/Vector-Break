@@ -344,8 +344,10 @@ export function createRenderer({ session, ctx, particles, atlas = null, progress
       ctx.fillStyle = COLORS.cyan;
       ctx.fillText(`+${o.value}`, o.x + ORB_SPRITE / 2 - 6, o.y - ORB_SPRITE / 2 + 10);
     }
-    const aiming = state === 'Aiming' && !run.paused;
-    if (state === 'Aiming' && run.aim) drawAim(run);
+    // Ready to fire (HU-13): Aiming, or in flight while the turn has balls left; drives preview, launcher, crosshair.
+    const inFlight = state === 'Firing' || state === 'Simulating';
+    const aiming = !run.paused && (state === 'Aiming' || (inFlight && run.emitted < run.volleySize));
+    if (aiming && run.aim) drawAim(run);
     // balls, interpolated while the simulation is running
     const flying = (state === 'Firing' || state === 'Simulating') && !run.paused;
     const k = flying ? alpha * STEP * run.speed : 0;

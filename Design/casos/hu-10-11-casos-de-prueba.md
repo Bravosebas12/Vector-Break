@@ -41,7 +41,7 @@
 | HU-10 AC4 — Movimiento libre desde la posición automática | CP-05 |
 | HU-10 AC5 — Toque corto | CP-06, CP-07 |
 | HU-10 AC6 — Se detiene en el borde | CP-08, CP-09 |
-| HU-10 AC7 — Teclas ignoradas fuera de Aiming | CP-10, CP-11 |
+| HU-10 AC7 — Teclas ignoradas fuera de Aiming (en vuelo: **reemplazado por HU-13**) | CP-10, CP-11 |
 | HU-10 AC8 — El tiro sale desde la posición elegida | CP-12 |
 | HU-10 AC9 — Teclas opuestas a la vez | CP-13 |
 | HU-10 AC10 — Reiniciar devuelve la posición del nivel | CP-14 |
@@ -140,6 +140,8 @@
 - **Resultado esperado:** x = 1030 en todas las lecturas (nunca 1031); la trayectoria sigue siendo válida (no atraviesa la pared derecha).
 
 ### CP-10 — A y D no mueven el lanzador con un grupo en vuelo ni en pausa
+
+> **Reemplazado en parte por HU-13** (2026-10-22): con bolas en vuelo A / D sí mueven el lanzador (D-13.2); en pausa siguen sin moverlo. El ID se conserva y su prueba automática comprueba la regla nueva; ver CP-67 y CP-73 en [`hu-13-casos-de-prueba.md`](hu-13-casos-de-prueba.md).
 - **Tipo:** negativo · **Prioridad:** Alta · **Técnica:** transición de estados · **Automatizable:** sí
 - **Precondición:** nivel 2 en `Aiming`, lanzador en x = 540, modo 3.
 - **Pasos:**
