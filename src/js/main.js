@@ -65,7 +65,8 @@ const hudView = createHudDom(document.getElementById('hud'), { dispatch: (action
 const tutorial = createTutorial(); // session-scoped: a reload shows the hints again
 const renderer = createRenderer({ session, ctx, particles: new Particles(), progression, onEvent: onSound, ui, hudView, tutorial });
 if (testMode) {
-  const drain = loopOn ? null : () => session.drainEvents(onSound);
+  // Without the loop, the hook drains events: feed the tutorial too, as the renderer does in the real loop.
+  const drain = loopOn ? null : () => session.drainEvents((type, a, b) => (onSound(type, a, b), tutorial.onEvent(type)));
   window.__ANGLECRAFT__ = createTestHook(session, recorder.log, drain, (alpha, nowMs) => renderer.draw(alpha, nowMs));
   window.__ANGLECRAFT_AUDIO__ = webAudio;
   window.__ANGLECRAFT_RENDER__ = renderer.stats;
