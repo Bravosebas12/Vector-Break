@@ -45,14 +45,7 @@ export function createSession({
   if (![1, 2, 3, 'turn'].includes(fireMode)) throw new Error(`invalid fire mode: ${fireMode}`);
   let pinnedMode = fireMode === 'turn' ? 'turn' : null;
 
-  const fsm = new Fsm({
-    strict,
-    onEnter: {
-      Aiming: () => {
-        run.speed = 1;
-      },
-    },
-  });
+  const fsm = new Fsm({ strict }); // the speed resets per turn, not on every Aiming (S-13.2)
 
   function resetRun(board) {
     while (balls.count > 0) balls.release(balls.items[0]);
@@ -76,6 +69,8 @@ export function createSession({
     run.playTime = 0;
     run.aim = null;
     run.lockedDir = null;
+    run.lockedX = 0; // launcher x of the group being emitted (HU-13)
+    run.lastFireSim = 0; // simTime of the turn's latest FIRE, for the cadence (D-13.4)
     run.aimTarget = null;
     run.held = { [-1]: false, [1]: false };
     run.tapFrom = { [-1]: 0, [1]: 0 };
@@ -128,7 +123,7 @@ export function createSession({
   function moveStop(dir) {
     if (!run.held[dir]) return;
     run.held[dir] = false;
-    if (fsm.state !== 'Aiming' || run.paused || run.held[-dir]) return;
+    if (!PLAYING.includes(fsm.state) || run.paused || run.held[-dir]) return;
     if (Math.abs(run.launcherX - run.tapFrom[dir]) < MOVE_TAP) setLauncherX(run.tapFrom[dir] + MOVE_TAP * dir);
   }
 
@@ -137,23 +132,28 @@ export function createSession({
     if (dir !== 0) setLauncherX(run.launcherX + dir * MOVE_SPEED * dt);
   }
 
+  // HU-13: also with balls in flight, when the turn has balls left, the previous group has emitted them all and
+  // the cadence (one EMIT_INTERVAL of simTime since the turn's previous FIRE) has elapsed. Otherwise ignored.
   function fire() {
     if (!run.aim) return; // no valid angle yet
-    run.held[-1] = run.held[1] = false; // keys held through FIRE never move the launcher later
-    run.lockedDir = { ...run.aim };
     const left = run.volleySize - run.emitted;
+    if (left <= 0 || run.emitted < run.groupTarget) return;
+    if (run.emitted > 0 && run.simTime - run.lastFireSim < EMIT_INTERVAL - 1e-9) return;
+    if (run.emitted === 0) run.volleySimTime = 0; // the 45 s cap counts from the turn's first FIRE (D-13.3)
+    run.lastFireSim = run.simTime;
+    run.lockedDir = { ...run.aim };
+    run.lockedX = run.launcherX; // the group leaves from here even if the launcher moves (D2)
     run.groupTarget = run.emitted + (run.fireMode === 'turn' ? left : Math.min(run.fireMode, left));
-    run.volleySimTime = 0; // the 45 s cap is measured per group
     run.emitAcc = 0;
     events.push('FIRE', run.shotsUsed + 1);
-    enter('Firing');
+    if (fsm.state !== 'Firing') enter('Firing');
     emitBall(); // the first ball leaves on FIRE
   }
 
   function emitBall() {
     const ball = balls.acquire();
     if (ball === null) return;
-    ball.x = run.launcherX;
+    ball.x = run.lockedX;
     ball.y = LAUNCHER_Y;
     ball.dir.set(run.lockedDir.x, run.lockedDir.y);
     ball.speed = BALL_SPEED;
@@ -283,22 +283,31 @@ export function createSession({
   function step(dt) {
     if (run.paused || !PLAYING.includes(fsm.state)) return;
     run.playTime += dt;
-    if (fsm.state === 'Aiming') return moveLauncher(dt);
+    moveLauncher(dt); // A / D also work in flight (D-13.2)
+    if (fsm.state === 'Aiming') return;
     run.simTime += dt * run.speed;
     run.volleySimTime += dt * run.speed;
     if (Physics.step(balls, world, run.speed, dt) === 0 && run.emitted < run.groupTarget) {
       world.onSubstep(dt * run.speed); // no ball in flight: Physics runs no substep
     }
     captureOrbs();
+    if (run.board.cores.every((c) => c.hp <= 0)) return win(); // D-13.1: the moment the last core falls
     if (run.volleySimTime >= volleyCapS) capVolley();
     if (fsm.state === 'Firing' && run.emitted >= run.groupTarget) enter('Simulating');
     if (fsm.state === 'Simulating' && balls.count === 0) endGroup();
   }
 
-  // D11: past volleyCapS every ball counts as landed (damage kept).
+  // Immediate victory: balls in flight are removed and the turn's unfired balls are never fired.
+  function win() {
+    while (balls.count > 0) balls.release(balls.items[0]);
+    resolve();
+  }
+
+  // D11 / D-13.3: past volleyCapS (from the turn's first FIRE) every ball counts as landed (damage kept) and the
+  // balls of the turn not fired yet are lost (S-13.1): the turn resolves.
   function capVolley() {
     while (balls.count > 0) balls.release(balls.items[0]);
-    run.emitted = run.groupTarget; // the cap ends the group, not the turn
+    run.emitted = run.groupTarget = run.volleySize;
     events.push('VOLLEY_CAPPED', run.shotsUsed + 1);
   }
 
@@ -334,6 +343,7 @@ export function createSession({
       run.result = { stars, score: run.score, shots: run.shotsUsed };
       if (won && index !== null) run.newRecord = progression?.submit(index, run.result) === true;
     }
+    if (!won && !run.result) run.speed = 1; // a new turn starts at 1X (S-13.2)
     enter(won ? 'Victory' : run.result ? 'GameOver' : 'Aiming');
     if (won) events.push('STARS', run.result.stars); // presentation only: sound
     else if (!run.result) events.push('TURNS', shots - run.shotsUsed);

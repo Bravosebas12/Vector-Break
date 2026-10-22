@@ -42,9 +42,10 @@ test.describe('block damage', () => {
 });
 
 test.describe('result', () => {
-  // [name, level shots, volley, expected stars, expected score = damage + 100 per unused shot]
+  // [name, level shots, volley, expected stars, expected score = damage + 100 per unused shot]. The core starts
+  // destroyed, so the level is won on the first step, before the ball reaches the block (D-13.1): damage 0.
   for (const [name, shots, volley, stars, score] of [
-    ['first shot -> 3 stars, 100 per unused shot', 6, 1, 3, 1 + 500],
+    ['first shot -> 3 stars, 100 per unused shot', 6, 1, 3, 0 + 500],
   ]) {
     test(name, () => {
       const s = boot();

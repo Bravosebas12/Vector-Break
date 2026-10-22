@@ -53,7 +53,7 @@ test.describe('Fsm', () => {
     ['Loading', 'Firing'],
     ['Aiming', 'Victory'],
     ['Aiming', 'Simulating'],
-    ['Firing', 'Resolving'],
+    ['Firing', 'Victory'], // Firing -> Resolving is legal since HU-13 (immediate victory, time cap)
     ['Simulating', 'Victory'],
     ['Title', 'Firing'],
     ['Victory', 'GameOver'],
