@@ -58,7 +58,6 @@ export function createSession({
     while (balls.count > 0) balls.release(balls.items[0]);
     run.board = board;
     run.emitAcc = 0;
-    run.firstLandX = null;
     run.shotsUsed = 0;
     run.volleySize = board.startBalls; // balls of the current turn, fixed until Resolving
     run.emitted = 0; // balls of the turn already fired, across its groups
@@ -146,7 +145,6 @@ export function createSession({
     run.groupTarget = run.emitted + (run.fireMode === 'turn' ? left : Math.min(run.fireMode, left));
     run.volleySimTime = 0; // the 45 s cap is measured per group
     run.emitAcc = 0;
-    run.firstLandX = null; // relocation follows the first landing of each group (D-11.3)
     events.push('FIRE', run.shotsUsed + 1);
     enter('Firing');
     emitBall(); // the first ball leaves on FIRE
@@ -205,9 +203,7 @@ export function createSession({
       run.board.cells[block.row * run.board.cols + block.col] = null; // freed at once
       run.board.blocks.splice(run.board.blocks.indexOf(block), 1);
     },
-    onLand(ball) {
-      if (run.firstLandX === null) run.firstLandX = ball.x;
-    },
+    // No onLand: landing balls never move the launcher (HU-14, supersedes D-10.1 / D-11.3).
   };
 
   function titleClick() {
@@ -287,14 +283,13 @@ export function createSession({
     if (fsm.state === 'Simulating' && balls.count === 0) endGroup();
   }
 
-  // D11: past volleyCapS every ball counts as landed (damage kept, no launcher shift of its own).
+  // D11: past volleyCapS every ball counts as landed (damage kept).
   function capVolley() {
     while (balls.count > 0) balls.release(balls.items[0]);
     run.emitted = run.groupTarget; // the cap ends the group, not the turn
     events.push('VOLLEY_CAPPED', run.shotsUsed + 1);
   }
 
-  // End of turn: launcher shift, volley growth, then Victory > GameOver > Aiming.
   function setMode(v) {
     if (![1, 2, 3].includes(v) || v === run.fireMode) return;
     run.fireMode = v;
@@ -303,19 +298,18 @@ export function createSession({
   }
 
   // A group is over (no ball in flight). With balls of the turn left and cores standing, the player aims the
-  // next group from where its first ball landed; otherwise the turn resolves (D-11.1, D-11.3).
+  // next group from where the launcher was left (HU-14); otherwise the turn resolves (D-11.1).
   function endGroup() {
     const won = run.board.cores.every((c) => c.hp <= 0);
     if (won || run.emitted >= run.volleySize) return resolve();
-    if (run.firstLandX !== null) setLauncherX(run.firstLandX);
     events.push('GROUP_END', run.volleySize - run.emitted);
     enter('Aiming');
   }
 
+  // End of turn: volley growth, then Victory > GameOver > Aiming.
   function resolve() {
     enter('Resolving');
     run.shotsUsed++; // a shot is a whole turn, counted when it resolves
-    if (run.firstLandX !== null) setLauncherX(run.firstLandX);
     run.volleySize = Math.min(MAX_VOLLEY, run.volleySize + run.pendingBonus);
     run.pendingBonus = 0;
     run.emitted = 0;
@@ -402,6 +396,10 @@ export function createSession({
       if (![1, 2, 3, 'turn'].includes(v)) throw new Error(`invalid fire mode: ${v}`);
       pinnedMode = v === 'turn' ? 'turn' : null;
       run.fireMode = v;
+    },
+    // Test seam (openspec free-launcher D4): a position reachable with A / D, placed at once; Aiming only.
+    setLauncherX(x) {
+      if (fsm.state === 'Aiming') setLauncherX(x);
     },
     dispatch,
     step,

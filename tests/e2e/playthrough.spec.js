@@ -1,5 +1,5 @@
 // Completability: the real boot path plays L1 -> L6 with seeded angle sequences (tests/fixtures/solutions.json,
-// degrees from the +x axis, upward positive). The hook steps the fixed-step simulation, so no clock is needed.
+// degrees from the +x axis, upward positive, with the launcher x of each shot in `xs`). The hook steps the fixed-step simulation, so no clock is needed.
 // Each test runs in a fresh browser context, so localStorage starts empty.
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
@@ -9,14 +9,15 @@ const KEY = 'anglecraft.v1.records';
 const CENTER = { x: 640, y: 360 };
 const snap = (page) => page.evaluate(() => window.__ANGLECRAFT__?.snapshot());
 
-// Fires one angle and steps until the turn resolves; returns the resulting state.
-async function shoot(page, deg) {
-  return page.evaluate((d) => {
+// Places the launcher at `x`, fires one angle and steps until the turn resolves; returns the resulting state.
+async function shoot(page, deg, x) {
+  return page.evaluate(([d, lx]) => {
     const hook = window.__ANGLECRAFT__;
+    hook.setLauncherX(lx);
     hook.fire((d * Math.PI) / 180);
     for (let i = 0; i < 400 && ['Firing', 'Simulating', 'Resolving'].includes(hook.snapshot().state); i++) hook.step(30);
     return hook.snapshot().state;
-  }, deg);
+  }, [deg, x]);
 }
 
 async function begin(page, url = '/?test=1') {
@@ -37,7 +38,7 @@ test('title click then seeded solutions win levels 1-6 in order with records and
     expect((await snap(page)).level.index).toBe(i);
 
     let state = 'Aiming';
-    for (const deg of level.angles) state = await shoot(page, deg);
+    for (const [k, deg] of level.angles.entries()) state = await shoot(page, deg, level.xs[k]);
     expect(state, `level ${i + 1}`).toBe('Victory');
 
     const result = (await snap(page)).result;
@@ -62,9 +63,12 @@ test('title click then seeded solutions win levels 1-6 in order with records and
 test('level 6 victory shows the last-level notice and no Siguiente nivel button', async ({ page }) => {
   await begin(page, '/?test=1&loop=1');
   await page.evaluate(() => window.__ANGLECRAFT__.loadLevel(5));
-  const angles = SOLUTIONS.levels[5].angles;
-  for (const deg of angles.slice(0, -1)) await shoot(page, deg); // hook-stepped; the real loop only draws
-  await page.evaluate((d) => window.__ANGLECRAFT__.fire((d * Math.PI) / 180), angles.at(-1)); // real-time final shot
+  const { angles, xs } = SOLUTIONS.levels[5];
+  for (const [k, deg] of angles.slice(0, -1).entries()) await shoot(page, deg, xs[k]); // hook-stepped; the real loop only draws
+  await page.evaluate(([d, lx]) => {
+    window.__ANGLECRAFT__.setLauncherX(lx);
+    window.__ANGLECRAFT__.fire((d * Math.PI) / 180); // real-time final shot
+  }, [angles.at(-1), xs.at(-1)]);
   await page.waitForFunction(() => window.__ANGLECRAFT__?.snapshot().state === 'Victory');
   await expect(page.locator('.result.victory .notice')).toHaveText('Último nivel completado');
   await expect(page.locator('[data-act="modal-NEXT"]')).toBeHidden();

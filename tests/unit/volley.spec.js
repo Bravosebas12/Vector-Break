@@ -75,8 +75,8 @@ test.describe('Resolving order', () => {
   }
 });
 
-test.describe('launcher shift', () => {
-  test('the first landing x becomes the launcher x (mirrored aims give mirrored x)', () => {
+test.describe('launcher after a turn (HU-14)', () => {
+  test('landings never move the launcher (mirrored aims both leave it at 540)', () => {
     const land = (x) => {
       const s = openField(boot());
       s.setVolley(1);
@@ -84,8 +84,6 @@ test.describe('launcher shift', () => {
       stepUntil(s, turnOver);
       return s.snapshot().launcherX;
     };
-    const [right, left] = [land(740), land(340)];
-    expect(right).not.toBeCloseTo(540, 0);
-    expect(right + left).toBeCloseTo(1080, 0);
+    expect([land(740), land(340)]).toEqual([540, 540]);
   });
 });

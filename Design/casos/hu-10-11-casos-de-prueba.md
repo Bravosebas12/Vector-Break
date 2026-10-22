@@ -35,7 +35,7 @@
 
 | Criterio de aceptación | Casos que lo cubren |
 |---|---|
-| HU-10 AC1 — Reubicación automática se mantiene | CP-01 |
+| HU-10 AC1 — Reubicación automática se mantiene (**reemplazado por HU-14**) | CP-01 |
 | HU-10 AC2 — Mover a la izquierda | CP-02, CP-04 |
 | HU-10 AC3 — Mover a la derecha | CP-03, CP-04 |
 | HU-10 AC4 — Movimiento libre desde la posición automática | CP-05 |
@@ -50,7 +50,7 @@
 | HU-11 AC1 — Modo por defecto | CP-19 |
 | HU-11 AC2 — Un disparo lanza exactamente N bolas | CP-20 |
 | HU-11 AC3 — Entre grupos se vuelve a apuntar | CP-21 |
-| HU-11 AC4 — Reubicación después de cada grupo | CP-22 |
+| HU-11 AC4 — Reubicación después de cada grupo (**reemplazado por HU-14**) | CP-22 |
 | HU-11 AC5 — Orbes para los turnos siguientes | CP-23 |
 | HU-11 AC6 — Fin de turno con la última bola | CP-24, CP-25 |
 | HU-11 AC7 — Menos bolas que el modo | CP-26 |
@@ -66,6 +66,8 @@
 ## Casos — HU-10: mover el lanzador con A/D
 
 ### CP-01 — Tras un tiro, el lanzador aparece donde aterrizó la primera bola
+
+> **Reemplazado por HU-14** (2026-10-21): el lanzador ya no se reubica. El ID se conserva y su prueba automática comprueba la regla nueva; ver CP-36 en [`hu-14-casos-de-prueba.md`](hu-14-casos-de-prueba.md).
 - **Tipo:** regresión · **Prioridad:** Alta · **Técnica:** transición de estados · **Automatizable:** sí
 - **Precondición:** nivel 2 en `Aiming`, modo 1, sin mover el lanzador.
 - **Pasos:**
@@ -250,6 +252,8 @@
 - **Resultado esperado:** estado `Aiming`; bolas restantes en el turno = 3; TURNOS sigue mostrando 12 restantes (no 11); se puede volver a apuntar y disparar.
 
 ### CP-22 — El lanzador se reubica después de cada grupo y se puede ajustar antes del siguiente
+
+> **Reemplazado por HU-14** (2026-10-21): el lanzador se queda donde estaba después de cada grupo y A / D lo siguen ajustando. Ver CP-36 y CP-37 en [`hu-14-casos-de-prueba.md`](hu-14-casos-de-prueba.md).
 - **Tipo:** funcional positivo · **Prioridad:** Alta · **Técnica:** transición de estados · **Automatizable:** sí
 - **Precondición:** nivel 2, modo 2, lanzador en x = 540.
 - **Pasos:**

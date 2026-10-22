@@ -132,22 +132,22 @@ test.describe('launcher movement (HU-10)', () => {
     steps(s, 0.5);
     expect(x(s)).toBe(before);
     stepUntil(s, turnOver);
-    const relocated = x(s);
+    expect(x(s)).toBe(before); // HU-14: landings do not move it either
     s.dispatch({ type: 'PAUSE' });
     s.dispatch({ type: 'MOVE_START', dir: -1 });
     steps(s, 0.5);
-    expect(x(s)).toBe(relocated);
+    expect(x(s)).toBe(before);
   });
 
   test('CP-10 a key held when the volley fires does not move the launcher afterwards', () => {
     const s = boot();
     openField(s);
     s.dispatch({ type: 'MOVE_START', dir: 1 });
+    const before = x(s);
     fire(s);
     stepUntil(s, turnOver);
-    const relocated = x(s);
     steps(s, 0.5);
-    expect(x(s)).toBe(relocated);
+    expect(x(s)).toBe(before);
   });
 
   test('CP-11 A / D do nothing on the victory modal', () => {

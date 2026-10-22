@@ -1,7 +1,7 @@
 // Flag-gated test hook and determinism: openspec test-harness spec
 import { test, expect } from '@playwright/test';
 
-const METHODS = ['step', 'snapshot', 'loadLevel', 'fire', 'aim', 'action', 'setSeed', 'setVolley', 'start', 'audioLog', 'render', 'setFireMode'];
+const METHODS = ['step', 'snapshot', 'loadLevel', 'fire', 'aim', 'action', 'setSeed', 'setVolley', 'start', 'audioLog', 'render', 'setFireMode', 'move', 'setLauncherX'];
 const state = (page) => page.evaluate(() => window.__ANGLECRAFT__?.snapshot().state);
 const ready = async (page, url = '/?test=1') => {
   await page.goto(url);
@@ -14,6 +14,23 @@ test('hook exposes every method with ?test=1 and loadLevel from Title enters Aim
   expect(types).toEqual(METHODS.map(() => 'function'));
   await page.evaluate(() => window.__ANGLECRAFT__.loadLevel(0));
   expect(await state(page)).toBe('Aiming');
+});
+
+test('setLauncherX places and clamps the launcher in Aiming and is ignored in flight', async ({ page }) => {
+  await ready(page);
+  const out = await page.evaluate(() => {
+    const hook = window.__ANGLECRAFT__;
+    hook.loadLevel(0);
+    hook.setLauncherX(300);
+    const placed = hook.snapshot().launcherX;
+    hook.setLauncherX(2000);
+    const clamped = hook.snapshot().launcherX;
+    hook.fire(Math.PI / 2);
+    hook.step(1);
+    hook.setLauncherX(300);
+    return { placed, clamped, inFlight: hook.snapshot().launcherX };
+  });
+  expect(out).toEqual({ placed: 300, clamped: 1030, inFlight: 1030 });
 });
 
 test('hook is absent without the flag and the game still boots', async ({ page }) => {
