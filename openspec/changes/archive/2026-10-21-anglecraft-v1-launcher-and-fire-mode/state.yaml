@@ -7,8 +7,8 @@ phases:
   spec: done
   tasks: done
   apply: done  # slices 1-6 done
-  verify: pending
-  archive: pending
+  verify: done  # full suite green on main after PR #29
+  archive: done
 blocked_reason: none
 delivery:
   delivery_strategy: auto-chain

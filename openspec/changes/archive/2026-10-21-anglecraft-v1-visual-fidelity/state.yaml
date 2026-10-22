@@ -6,9 +6,9 @@ phases:
   design: done
   spec: done
   tasks: done
-  apply: done  # slices 1-6 merged into the tracker; design sign-off pending
-  verify: pending
-  archive: pending
+  apply: done  # slices 1-6 merged; design sign-off carried as open item
+  verify: done  # full suite green on main after PR #29
+  archive: done
 blocked_reason: none
 delivery:
   delivery_strategy: auto-chain

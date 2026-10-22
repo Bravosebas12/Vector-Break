@@ -42,16 +42,26 @@ A static HTTP server on `node:http` MUST serve the repository root over `http://
 
 ### Requirement: Flag-gated test hook (all HU)
 
-When the page is loaded with `?test=1`, the game MUST expose `window.__ANGLECRAFT__` offering `step(n)` (advance `n` fixed steps of 1/120 s), `snapshot()` (serializable game state), `loadLevel(x)`, `fire(angle)`, `aim(x, y)`, `action(a)`, `setSeed(seed)`, `setVolley(n)` (`n <= 50`), `start()` (same path as the Title left click) and `audioLog()`. Without the flag the hook MUST NOT be present.
+When the page is loaded with `?test=1`, the game MUST expose `window.__ANGLECRAFT__` offering `step(n)` (advance `n` fixed steps of 1/120 s), `snapshot()` (serializable game state), `loadLevel(x)`, `fire(angle)` (aim then FIRE one group in the current mode), `aim(x, y)`, `action(a)`, `setSeed(seed)`, `setVolley(n)` (`n <= 50`), `start()` (same path as the Title left click), `audioLog()`, `setFireMode(v)` with `v` in {1, 2, 3, 'turn'} and `move(dir, seconds)` that holds `A` (dir -1) or `D` (dir +1) for the given play time through the session (stepping included). `'turn'` is test-only: one `FIRE` emits every ball left in the turn, reproducing v1 behavior; it MUST NOT be reachable from game input. Without the flag the hook MUST NOT be present.
 
 Every hook method other than `snapshot()` MUST throw `NOT_READY` while the session state is `Loading`; tests wait for state `Title`. `loadLevel(x)` called from `Title` MUST be a legal Title -> Aiming transition (tests may skip `start()`).
 
 The following query flags MUST be honored only together with `?test=1`: `&loop=1` lets requestAnimationFrame step the session; `&audio=1` enables real sample loading (otherwise a Recording sink is used and audio assets settle immediately); `&stress=1` sets `sealedFloor` and `volleyCapS` to `Infinity`.
 
+#### Scenario: v1 behavior preserved for legacy tests
+- GIVEN `?test=1`, level 2 loaded and `setFireMode('turn')`
+- WHEN `fire(angle)` is called and the session is stepped until `Aiming`, `Victory` or `GameOver`
+- THEN exactly 5 balls were emitted by that single `FIRE` and shots used is 1
+
+#### Scenario: Turn mode unreachable from input
+- GIVEN the real game (no `?test=1`)
+- WHEN any key or HUD control is used
+- THEN the mode is always 1, 2 or 3
+
 #### Scenario: Hook present with flag
 - GIVEN the page loaded at `/?test=1` and the session state is `Title`
 - WHEN the hook is inspected
-- THEN `step`, `snapshot`, `loadLevel`, `fire`, `aim`, `action`, `setSeed`, `setVolley`, `start` and `audioLog` are functions
+- THEN `step`, `snapshot`, `loadLevel`, `fire`, `aim`, `action`, `setSeed`, `setVolley`, `start`, `audioLog`, `setFireMode` and `move` are functions
 - AND calling `loadLevel` from `Title` moves the session to `Aiming`
 
 #### Scenario: Hook not ready while loading
@@ -91,6 +101,47 @@ Pure modules (`engine`, `entities`, `system` minus DOM-bound parts) MUST be impo
 - GIVEN a test file with no `page` fixture
 - WHEN it imports a pure engine module by explicit `.js` path
 - THEN the import succeeds and its exports are callable
+
+### Requirement: Visual snapshot tests
+
+The suite MUST include Playwright screenshot tests (`expect(page).toHaveScreenshot()`) at a 1920x1080 viewport, DPR 1, Chromium, for these deterministic states: title (`Title`), level 1 `Aiming` with a fixed aim, level 1 paused, a victory with 2 stars and a defeat. Each capture MUST happen only after fonts and atlas have loaded, with a fixed RNG seed, the rAF loop stopped (a single explicit render through the test hook) and CSS animations disabled. Baselines MUST live in the repository and be updated only on purpose (`--update-snapshots`) after design approval.
+
+#### Scenario: Stable capture
+- GIVEN the visual tests
+- WHEN they run with `--repeat-each=5`
+- THEN every run passes against the same baselines
+
+#### Scenario: Regression detected
+- GIVEN a change that alters the board background color
+- WHEN the visual tests run
+- THEN the aiming snapshot fails with a pixel diff
+
+### Requirement: Single-frame render hook
+
+With `?test=1`, the test hook MUST expose `render()` that draws exactly one frame (canvas and HUD DOM) from the current session state at a caller-provided time, without starting the rAF loop. It MUST throw `NOT_READY` while `Loading`, like the other hook methods except `snapshot`.
+
+#### Scenario: Render once
+- GIVEN `?test=1` with level 1 loaded
+- WHEN `render(0)` is called twice
+- THEN the renderer frame counter increases by 2 and no rAF callback is scheduled
+
+### Requirement: Design comparison document
+
+For design sign-off, the change MUST produce `docs/visual-fidelity-comparison.md` placing each baseline next to the matching mockup or Key Art capture, listing every intentional deviation with its rule (A6, B1, C2, C3, HU-09).
+
+#### Scenario: Deviations listed
+- GIVEN the comparison document
+- WHEN read
+- THEN it lists the removed PRECISIÓN, Esc and right-click entries, the 9x12 board, and the centered title, each with its rule ID
+
+### Requirement: Traceability to the QA cases
+
+Automated tests for this change MUST reference the QA case IDs (`CP-01`…`CP-35` from `Design/casos/hu-10-11-casos-de-prueba.md`) in their titles, and every AC of HU-10 and HU-11 MUST be covered by at least one automated test.
+
+#### Scenario: Coverage check
+- GIVEN the test titles
+- WHEN they are searched for `CP-` IDs
+- THEN every case in the coverage matrix appears at least once
 
 ## Open Items
 
