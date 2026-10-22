@@ -3,7 +3,7 @@
 // boot; states never read DOM events. `allows` is the single gating table used by the session.
 
 const SPEED_KEYS = { 1: 1, 2: 2, 4: 4 };
-const PLAYING = ['Aiming', 'Firing', 'Simulating'];
+const PLAYING = ['Aiming', 'Firing', 'Simulating']; // also where FIRE, AIM and A / D act (HU-13)
 const GAMEPLAY = ['Aiming', 'Firing', 'Simulating', 'Resolving', 'Victory', 'GameOver'];
 const SKIPPABLE = ['Aiming', 'Firing', 'Simulating', 'Resolving', 'GameOver']; // HU-12: not Victory (D-12.4)
 
@@ -55,8 +55,9 @@ export function allows(state, paused, action) {
     case 'AIM':
     case 'FIRE':
     case 'MOVE_START':
+      return PLAYING.includes(state); // HU-13: in flight too; the session checks balls left and cadence
     case 'CYCLE_MODE':
-      return state === 'Aiming';
+      return state === 'Aiming'; // D-13.5: the mode stays locked in flight
     case 'SET_MODE':
       return state === 'Aiming' && [1, 2, 3].includes(action.v);
     case 'SET_SPEED':

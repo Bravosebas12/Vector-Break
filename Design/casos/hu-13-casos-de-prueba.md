@@ -7,7 +7,7 @@
 **Supuestos:**
 - S-QA1 y S-QA2 de los casos de HU-10/11 siguen vigentes (estado con el hook `?test=1`, tiempos con el reloj de la página o pasos fijos).
 - S-QA9: los tiempos de cadencia y del tope se miden en **tiempo de simulación** (escala con la velocidad); la cadencia es el intervalo entre bolas de un grupo, 1/12 s ≈ 0,083 s (el PO lo describió como 0,08 s).
-- S-QA10: el modo de disparo sigue bloqueado mientras hay bolas en vuelo (HU-11, CP-30); pregunta abierta al PO.
+- S-QA10: el modo de disparo sigue bloqueado mientras hay bolas en vuelo (HU-11, CP-30), confirmado por el PO (D-13.5).
 
 **Precondiciones generales:** sesión nueva, nivel en `Aiming`, velocidad 1X, sin pausa, modo 1 salvo que el caso indique otro.
 
@@ -169,7 +169,7 @@
 
 | Hueco | Motivo |
 |---|---|
-| Cambiar de modo con bolas en vuelo | Pregunta abierta al PO (S-QA10); hoy sigue bloqueado. |
+| Cambiar de modo con bolas en vuelo | Fuera de alcance: el PO lo mantiene bloqueado (D-13.5). |
 | Rendimiento a 60 FPS con 50 bolas disparadas en vuelo | Lo cubre la prueba de estrés de v1 (`&stress=1`); no se agrega caso propio. |
 | Firefox, Edge y Opera | Automatización solo en Chromium (E1). |
 

@@ -36,11 +36,12 @@ test.describe('input mapping for A, D and M', () => {
     expect(mapEvent({ type: 'keyup', key: 'p' })).toBeNull();
   });
 
-  test('MOVE_START is allowed only in Aiming and not paused; MOVE_STOP is always allowed once loaded', () => {
+  test('MOVE_START is allowed in Aiming and in flight (HU-13), not paused; MOVE_STOP is always allowed once loaded', () => {
     const start = { type: 'MOVE_START', dir: 1 };
     const stop = { type: 'MOVE_STOP', dir: 1 };
-    expect(allows('Aiming', false, start)).toBe(true);
-    for (const st of ['Loading', 'Title', 'Firing', 'Simulating', 'Resolving', 'Victory', 'GameOver']) expect(allows(st, false, start)).toBe(false);
+    for (const st of ['Aiming', 'Firing', 'Simulating']) expect(allows(st, false, start)).toBe(true);
+    for (const st of ['Loading', 'Title', 'Resolving', 'Victory', 'GameOver']) expect(allows(st, false, start)).toBe(false);
+    expect(allows('Simulating', true, start)).toBe(false);
     expect(allows('Aiming', true, start)).toBe(false);
     expect(allows('Aiming', true, stop)).toBe(true);
     expect(allows('Simulating', false, stop)).toBe(true);
@@ -123,31 +124,30 @@ test.describe('launcher movement (HU-10)', () => {
     expect(x(s)).toBeCloseTo(660, 0);
   });
 
-  test('CP-10 movement is ignored while a volley flies and while paused', () => {
+  // CP-10 is superseded by HU-13 (D-13.2): A / D move the launcher in flight; pause still blocks them.
+  test('CP-10 movement works while a volley flies (HU-13) and is ignored while paused', () => {
     const s = boot();
     openField(s);
     fire(s);
     s.dispatch({ type: 'MOVE_START', dir: -1 });
-    const before = x(s);
     steps(s, 0.5);
-    expect(x(s)).toBe(before);
+    s.dispatch({ type: 'MOVE_STOP', dir: -1 });
+    expect(x(s)).toBeCloseTo(300, 0);
     stepUntil(s, turnOver);
-    expect(x(s)).toBe(before); // HU-14: landings do not move it either
+    expect(x(s)).toBeCloseTo(300, 0); // HU-14: landings do not move it
     s.dispatch({ type: 'PAUSE' });
     s.dispatch({ type: 'MOVE_START', dir: -1 });
     steps(s, 0.5);
-    expect(x(s)).toBe(before);
+    expect(x(s)).toBeCloseTo(300, 0);
   });
 
-  test('CP-10 a key held when the volley fires does not move the launcher afterwards', () => {
+  test('CP-10 a key held through FIRE keeps moving the launcher in flight (HU-13)', () => {
     const s = boot();
     openField(s);
     s.dispatch({ type: 'MOVE_START', dir: 1 });
-    const before = x(s);
     fire(s);
-    stepUntil(s, turnOver);
-    steps(s, 0.5);
-    expect(x(s)).toBe(before);
+    steps(s, 0.25);
+    expect(x(s)).toBeCloseTo(660, 0);
   });
 
   test('CP-11 A / D do nothing on the victory modal', () => {

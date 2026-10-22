@@ -47,6 +47,7 @@ test('every method except snapshot throws NOT_READY while Loading', async ({ pag
     await route.continue();
   });
   await page.goto('/?test=1');
+  await page.waitForFunction(() => window.__ANGLECRAFT__ !== undefined); // installed by main.js, levels still held
   const outcome = await page.evaluate((names) => {
     const hook = window.__ANGLECRAFT__;
     const errors = names.filter((n) => n !== 'snapshot').map((n) => {

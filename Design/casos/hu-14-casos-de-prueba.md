@@ -17,7 +17,7 @@
 | Posición inicial de los niveles 1–6 | `launcher.x` = 0,5 → x = 540 |
 | Posición de prueba | x = 300 (mantener `A` 0,5 s desde 540) |
 | Ángulo de prueba | 60° (aterriza lejos del lanzador) |
-| Soluciones | `tests/fixtures/solutions.json` con `xs` y `solutions-mode1.json` con `x` en cada paso |
+| Soluciones | `tests/fixtures/solutions.json` con `xs` (los planes de modo 1 se retiraron con HU-13) |
 
 ## Técnicas aplicadas
 - **Transición de estados:** `Aiming → Firing → Simulating → Aiming` (entre grupos) y `→ Resolving → Aiming` (entre turnos), comprobando la posición en cada vuelta a `Aiming`.
