@@ -1,0 +1,28 @@
+change: anglecraft-v1-skip-level
+phases:
+  explore: done  # code map of input, session, progression, HUD and audio; CONTROL panel measured (61 px free)
+  research: skipped  # no external research needed
+  proposal: done
+  design: done
+  spec: done
+  tasks: done
+  apply: pending
+  verify: pending
+  archive: pending
+blocked_reason: none
+delivery:
+  delivery_strategy: auto-chain
+  chain_strategy: feature-branch-chain
+  tracker_branch: feature/anglecraft-v1-skip-level
+  review_budget_lines: 800
+inputs:
+  user_stories: Design/hu-12-14-saltar-nivel-disparo-simultaneo-lanzador-libre.md
+  test_cases: Design/casos/hu-12-casos-de-prueba.md
+confirmed_decisions:
+  D-12.1: "skip is immediate, no confirmation"
+  D-12.2: "the key is N"
+  D-12.3: "forward only; no way back to the previous level"
+  D-12.4: "victory modal unchanged: Siguiente nivel, no Saltar"
+  D-12.5: "skipped levels are marked sin resolver for the future level selector (HU-07)"
+pending_decisions:
+  OI-1: "design review of the CONTROL header Saltar nivel button and the two-button defeat modal (not blocking)"
