@@ -1,7 +1,7 @@
 # AngleCraft — HU-12, HU-13 y HU-14
 
 **Fecha:** 2026-10-21
-**Estado:** en refinamiento con PO. Decisiones del 2026-10-21: D-12.1, D-12.2 y D-14.1 (abajo); quedan preguntas abiertas en HU-12 y HU-13.
+**Estado:** en refinamiento con PO. HU-12 y HU-14 listas para desarrollo; HU-13 con una pregunta abierta (cadencia) y dos supuestos por confirmar.
 **Contexto:** HU-10 (mover el lanzador con A / D) y HU-11 (modo de disparo 1–3) están implementadas en `feature/anglecraft-v1-launcher-and-fire-mode`.
 
 ## Análisis previo: ¿el lanzador "vuelve al centro" cuando cae la bola?
@@ -39,6 +39,9 @@ Según el ángulo, el salto a donde cae la bola puede parecer una "vuelta al cen
 |---|---|
 | D-12.1 | Saltar es **inmediato, sin confirmación**. |
 | D-12.2 | La tecla es **`N`**. |
+| D-12.3 | **Solo se avanza**: no hay retroceso al nivel anterior. |
+| D-12.4 | El modal de **victoria** no cambia: ofrece "Siguiente nivel", no "Saltar". |
+| D-12.5 | Los niveles saltados quedan **marcados como "sin resolver"** para el futuro selector de niveles (HU-07). |
 
 ### Criterios de aceptación
 
@@ -83,12 +86,26 @@ Escenario: AC8 - Ignorado fuera de los niveles
   Dado que el juego está en la pantalla de inicio (Loading o Title)
   Cuando el jugador pulsa N
   Entonces no ocurre nada
+
+Escenario: AC9 - El nivel saltado queda "sin resolver" (D-12.5)
+  Dado que el nivel 3 nunca se resolvió
+  Cuando el jugador lo salta con N
+  Entonces el nivel 3 queda registrado como "sin resolver", sin estrellas ni puntaje
+  Y si más adelante lo resuelve, se guarda su récord normalmente y deja de estar "sin resolver"
+
+Escenario: AC10 - El modal de victoria no ofrece saltar (D-12.4)
+  Dado que el modal de victoria del nivel 2 está visible
+  Cuando se muestra
+  Entonces ofrece "Repetir" y "Siguiente nivel", sin botón "Saltar nivel"
+
+Escenario: AC11 - Solo avanzar (D-12.3)
+  Dado que el jugador está en el nivel 3
+  Cuando pulsa cualquier otra tecla o control
+  Entonces no existe forma de volver al nivel 2 salvo reiniciar la sesión
 ```
 
 ### Preguntas abiertas (PO)
-1. ¿También se puede **retroceder** al nivel anterior (por ejemplo con `B`), o solo avanzar?
-2. ¿El modal de **victoria** debe ofrecer también "Saltar", o ahí basta "Siguiente nivel"?
-3. ¿Los niveles saltados deben marcarse de alguna forma (por ejemplo "sin resolver") cuando exista el selector de niveles (HU-07)?
+Ninguna: HU-12 lista para desarrollo.
 
 ---
 
@@ -127,10 +144,11 @@ Escenario: AC4 - El turno termina cuando aterriza la última bola
   Cuando aterriza la última bola en vuelo
   Entonces el turno se resuelve (orbes, victoria o derrota) y se cuenta un turno
 
-Escenario: AC5 - Victoria con bolas en vuelo
-  Dado que una bola destruye el último núcleo mientras otras siguen en vuelo
-  Cuando aterriza la última bola en vuelo
-  Entonces el nivel termina en Victory
+Escenario: AC5 - Victoria inmediata al destruir el último núcleo (D-13.1)
+  Dado que hay bolas en vuelo y quedan bolas por disparar
+  Cuando una bola destruye el último núcleo
+  Entonces el nivel termina en Victory en ese momento
+  Y las bolas en vuelo desaparecen y las que quedaban por disparar no se disparan
 
 Escenario: AC6 - Respeta el modo de disparo
   Dado el modo 2 y un grupo en vuelo
@@ -146,14 +164,34 @@ Escenario: AC8 - Límite de bolas en pantalla
   Dado 50 bolas en vuelo (tope de v1)
   Cuando el jugador intenta disparar
   Entonces no sale ninguna bola hasta que alguna aterrice
+
+Escenario: AC9 - Mover el lanzador con bolas en el aire (D-13.2)
+  Dado que hay bolas en vuelo y el lanzador está en x = 540
+  Cuando el jugador mantiene D 0,5 s
+  Entonces el lanzador queda en x = 780 y el siguiente disparo sale desde ahí
+  Y las bolas que ya estaban en vuelo no cambian su trayectoria
+
+Escenario: AC10 - Tope de 45 s por turno (D-13.3)
+  Dado que el primer disparo del turno salió hace 45 s de simulación
+  Cuando se alcanza el tope
+  Entonces las bolas en vuelo cuentan como aterrizadas (el daño hecho se conserva)
+  Y el turno se resuelve; las bolas que no se dispararon se pierden (supuesto S-13.1)
 ```
 
+**Decisiones del PO:**
+
+| ID | Decisión |
+|---|---|
+| D-13.1 | Se gana **en el momento** en que se destruye el último núcleo. |
+| D-13.2 | **A / D funcionan con bolas en el aire.** |
+| D-13.3 | El tope de **45 s se mide por turno**, desde el primer disparo del turno. |
+
+**Supuestos por confirmar:**
+- S-13.1: al llegar al tope de 45 s, las bolas del turno que aún no se dispararon se pierden.
+- S-13.2: la velocidad elegida (2X / 4X) se mantiene mientras haya bolas en vuelo; vuelve a 1X al empezar el turno siguiente.
+
 ### Preguntas abiertas (PO)
-1. **Victoria:** ¿se gana en cuanto se destruye el último núcleo, o al aterrizar todas las bolas en vuelo (propuesta AC5)?
-2. **Cadencia:** ¿hay un tiempo mínimo entre disparos (por ejemplo 1/12 s, el intervalo actual entre bolas de un grupo) para evitar ráfagas por doble clic?
-3. **Mover el lanzador con bolas en vuelo:** ¿A / D funcionan mientras vuelan bolas? (Hoy solo en Aiming.) Con la HU-14 parece natural que sí.
-4. **Tope de 45 s:** hoy se mide por grupo; con grupos superpuestos, ¿se mide por bola o por turno?
-5. **Velocidad 2X / 4X:** ¿se mantiene al disparar de nuevo, o vuelve a 1X como hoy al volver a apuntar?
+1. **Cadencia mínima entre disparos:** ¿cuánto tiempo debe pasar, como mínimo, entre un disparo y el siguiente? Ejemplo: con un mínimo de 0,25 s, si el jugador hace doble clic muy rápido sale solo un grupo, y el segundo clic se ignora; si espera un cuarto de segundo, sale el segundo grupo. Opciones: (a) sin mínimo; (b) 0,08 s, el mismo intervalo que hay hoy entre bolas de un grupo; (c) 0,25 s; (d) otro valor.
 
 ---
 
