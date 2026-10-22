@@ -126,6 +126,7 @@ export function createSoundMapper({ audio, now }) {
       case 'UI_CLICK':
         return audio.play('sfx_ui_click', {});
       case 'UI_CONFIRM':
+      case 'SKIP': // HU-12: confirm only, never the victory or star sounds
         return audio.play('sfx_ui_confirm', {});
       case 'STARS':
         for (let i = 1; i <= a; i++) audio.play(`sfx_star_${i}`, {});

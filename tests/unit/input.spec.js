@@ -23,14 +23,17 @@ test.describe('Input.mapEvent (DOM-free event -> action)', () => {
     ['r', { type: 'RESTART' }],
     ['R', { type: 'RESTART' }],
     ['Enter', { type: 'CONFIRM' }],
+    ['n', { type: 'SKIP' }],
+    ['N', { type: 'SKIP' }],
   ];
   for (const [k, action] of keys) {
     test(`key ${k} -> ${action.type}`, () => expect(mapEvent(key(k))).toEqual(action));
   }
 
-  test('R and P ignore key auto-repeat; speed keys do not', () => {
+  test('R, P and N ignore key auto-repeat; speed keys do not', () => {
     expect(mapEvent(key('r', { repeat: true }))).toBeNull();
     expect(mapEvent(key('P', { repeat: true }))).toBeNull();
+    expect(mapEvent(key('n', { repeat: true }))).toBeNull();
     expect(mapEvent(key('4', { repeat: true }))).toEqual({ type: 'SET_SPEED', v: 4 });
   });
 
@@ -53,6 +56,7 @@ const ACTIONS = {
   NEXT: { type: 'NEXT' },
   CONFIRM: { type: 'CONFIRM' },
   PRESS: { type: 'PRESS', target: 'RESTART' },
+  SKIP: { type: 'SKIP' },
 };
 const accepted = (state, paused = false) =>
   Object.keys(ACTIONS).filter((name) => allows(state, paused, ACTIONS[name]));
@@ -65,12 +69,12 @@ test.describe('Input.allows (state gating)', () => {
   });
 
   const table = {
-    Aiming: ['AIM', 'FIRE', 'CLICK', 'PAUSE', 'RESTART'],
-    Firing: ['SPEED', 'PAUSE', 'RESTART'],
-    Simulating: ['SPEED', 'PAUSE', 'RESTART'],
-    Resolving: ['RESTART'],
-    Victory: ['RESTART', 'NEXT', 'CONFIRM', 'PRESS'],
-    GameOver: ['RESTART', 'CONFIRM', 'PRESS'],
+    Aiming: ['AIM', 'FIRE', 'CLICK', 'PAUSE', 'RESTART', 'SKIP'],
+    Firing: ['SPEED', 'PAUSE', 'RESTART', 'SKIP'],
+    Simulating: ['SPEED', 'PAUSE', 'RESTART', 'SKIP'],
+    Resolving: ['RESTART', 'SKIP'],
+    Victory: ['RESTART', 'NEXT', 'CONFIRM', 'PRESS'], // HU-12 D-12.4: no skip on victory
+    GameOver: ['RESTART', 'CONFIRM', 'PRESS', 'SKIP'],
   };
   for (const [state, expected] of Object.entries(table)) {
     test(`${state} accepts exactly ${expected.join(', ')}`, () => {
@@ -78,9 +82,9 @@ test.describe('Input.allows (state gating)', () => {
     });
   }
 
-  test('while paused only PAUSE and RESTART act', () => {
+  test('while paused only PAUSE, RESTART and SKIP act', () => {
     for (const state of ['Aiming', 'Firing', 'Simulating']) {
-      expect(accepted(state, true), state).toEqual(['PAUSE', 'RESTART']);
+      expect(accepted(state, true), state).toEqual(['PAUSE', 'RESTART', 'SKIP']);
     }
   });
 

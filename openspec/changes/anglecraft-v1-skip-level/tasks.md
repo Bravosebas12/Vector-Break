@@ -4,11 +4,11 @@ Strict TDD: write or update the failing test first, then the code. One PR per sl
 
 ## 1. Slice 1 - Skip in the session (game-state, progression, audio)
 
-- [ ] 1.1 Test (unit, `input.spec.js`): `n` / `N` → SKIP, repeat ignored; `allows` SKIP in Aiming, Firing, Simulating, Resolving, GameOver and paused; not in Loading, Title, Victory.
-- [ ] 1.2 Test (unit, `skip-level.spec.js`): skip from Aiming with turns used (CP-45), with balls in flight (CP-46), paused (CP-47), from GameOver (CP-49); last level does nothing (CP-52); ignored in Title / Victory (CP-54, CP-56); no `STARS`, no `STATE 6`, no record (CP-50); win set untouched, then win + NEXT works (CP-58); no action loads a previous level (CP-57); launcher at the level start (HU-14 CP-40 skip path).
-- [ ] 1.3 Test (unit, `progression.spec.js`): `markSkipped` / `status` / `submit` clears the mark; record kept on skip (CP-51, CP-55). Test (browser, `storage.spec.js`): mark persisted under `anglecraft.v1.skipped`, read back after reload, throwing storage tolerated.
-- [ ] 1.4 Test (unit): sound mapper plays `sfx_ui_confirm` on `SKIP`, nothing else.
-- [ ] 1.5 Implement D1–D4.
+- [x] 1.1 Test (unit, `input.spec.js`): `n` / `N` → SKIP, repeat ignored; `allows` SKIP in Aiming, Firing, Simulating, Resolving, GameOver and paused; not in Loading, Title, Victory.
+- [x] 1.2 Test (unit, `skip-level.spec.js`): skip from Aiming with turns used (CP-45), with balls in flight (CP-46), paused (CP-47), from GameOver (CP-49); last level does nothing (CP-52); ignored in Title / Victory (CP-54, CP-56); no `STARS`, no `STATE 6`, no record (CP-50); win set untouched, then win + NEXT works (CP-58); no action loads a previous level (CP-57); launcher at the level start (HU-14 CP-40 skip path).
+- [x] 1.3 Test (unit, `progression.spec.js`): `markSkipped` / `status` / `submit` clears the mark; record kept on skip (CP-51, CP-55). Test (browser, `storage.spec.js`): mark persisted under `anglecraft.v1.skipped`, read back after reload, throwing storage tolerated.
+- [x] 1.4 Test (unit): sound mapper plays `sfx_ui_confirm` on `SKIP`, nothing else.
+- [x] 1.5 Implement D1–D4.
 
 ## 2. Slice 2 - HUD and flows (hud, test-harness)
 

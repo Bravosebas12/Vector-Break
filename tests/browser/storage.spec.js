@@ -25,6 +25,29 @@ test('a win is stored under anglecraft.v1.records and read back after a reload',
   expect(after).toEqual([{ stars: 2, score: 700, shots: 4 }, false]);
 });
 
+test('CP-55 the sin resolver mark is stored under anglecraft.v1.skipped and read back after a reload', async ({ page }) => {
+  await run(page, `createProgression().markSkipped(2);`);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('anglecraft.v1.skipped')))).toEqual([2]);
+  await page.reload();
+  expect(await run(page, `return createProgression().status(2);`)).toBe('unsolved');
+  await run(page, `createProgression().submit(2, ${R});`);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('anglecraft.v1.skipped')))).toEqual([]);
+});
+
+test('a corrupt skipped value and a throwing storage still let a skip be marked in memory', async ({ page }) => {
+  await page.goto('/tests/blank.html');
+  await page.evaluate(() => localStorage.setItem('anglecraft.v1.skipped', '{oops'));
+  expect(await run(page, `return createProgression().status(4);`)).toBe('unplayed');
+  const out = await run(
+    page,
+    `const boom = () => { throw new Error('denied'); };
+     const p = createProgression({ storage: { getItem: boom, setItem: boom } });
+     p.markSkipped(4);
+     return p.status(4);`,
+  );
+  expect(out).toBe('unsolved');
+});
+
 test('a throwing localStorage never breaks the game; records live in memory', async ({ page }) => {
   const out = await run(
     page,

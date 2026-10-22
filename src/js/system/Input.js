@@ -5,6 +5,7 @@
 const SPEED_KEYS = { 1: 1, 2: 2, 4: 4 };
 const PLAYING = ['Aiming', 'Firing', 'Simulating'];
 const GAMEPLAY = ['Aiming', 'Firing', 'Simulating', 'Resolving', 'Victory', 'GameOver'];
+const SKIPPABLE = ['Aiming', 'Firing', 'Simulating', 'Resolving', 'GameOver']; // HU-12: not Victory (D-12.4)
 
 // event: { type: 'mousemove'|'mousedown'|'keydown'|'keyup', x?, y?, button?, key?, repeat? } -> action | null
 export function mapEvent(e) {
@@ -27,12 +28,13 @@ function mapKey({ key, repeat = false }) {
   if (key in SPEED_KEYS) return { type: 'SET_SPEED', v: SPEED_KEYS[key] };
   if (key === 'Enter') return { type: 'CONFIRM' }; // modal primary action
   const k = key.length === 1 ? key.toLowerCase() : key;
-  if (repeat) return null; // R, P, A, D and M ignore auto-repeat
+  if (repeat) return null; // R, P, A, D, M and N ignore auto-repeat
   if (k === 'p') return { type: 'PAUSE' };
   if (k === 'r') return { type: 'RESTART' };
   if (k === 'a') return { type: 'MOVE_START', dir: -1 }; // HU-10: hold to move the launcher
   if (k === 'd') return { type: 'MOVE_START', dir: 1 };
   if (k === 'm') return { type: 'CYCLE_MODE' }; // HU-11
+  if (k === 'n') return { type: 'SKIP' }; // HU-12: next level, no classification
   return null; // Esc and every other key
 }
 
@@ -48,7 +50,7 @@ export function allows(state, paused, action) {
   if (state === 'Loading') return false;
   if (action.type === 'MOVE_STOP') return true; // a release always clears the held key, even paused
   if (state === 'Title') return action.type === 'FIRE' && action.pointer === true;
-  if (paused) return action.type === 'PAUSE' || action.type === 'RESTART';
+  if (paused) return action.type === 'PAUSE' || action.type === 'RESTART' || action.type === 'SKIP';
   switch (action.type) {
     case 'AIM':
     case 'FIRE':
@@ -65,6 +67,8 @@ export function allows(state, paused, action) {
       return GAMEPLAY.includes(state);
     case 'NEXT':
       return state === 'Victory';
+    case 'SKIP':
+      return SKIPPABLE.includes(state);
     case 'CONFIRM':
     case 'PRESS': // modal button click, hit-tested by the adapter in logical coordinates
       return state === 'Victory' || state === 'GameOver';
