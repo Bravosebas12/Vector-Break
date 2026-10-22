@@ -82,10 +82,18 @@ test.describe('TIEMPO and PUNTOS formats', () => {
 });
 
 test.describe('Control panel', () => {
-  test('LANZAR is enabled only while Aiming and not paused', () => {
+  test('LANZAR is enabled while Aiming and not paused', () => {
     expect(hudModel(snap()).control.launch).toEqual({ label: strings.launch, key: 'Space', enabled: true });
-    expect(hudModel(snap({ state: 'Simulating' })).control.launch.enabled).toBe(false);
     expect(hudModel(snap({ paused: true })).control.launch.enabled).toBe(false);
+  });
+
+  test('CP-61 HU-13: LANZAR stays enabled in flight while the turn has balls left, disabled once all are fired', () => {
+    const launch = (over) => hudModel(snap(over)).control.launch.enabled;
+    expect(launch({ state: 'Simulating', volley: { size: 5, emitted: 2, active: 2 } })).toBe(true);
+    expect(launch({ state: 'Firing', volley: { size: 5, emitted: 3, active: 3 } })).toBe(true);
+    expect(launch({ state: 'Simulating', volley: { size: 5, emitted: 5, active: 3 } })).toBe(false);
+    expect(launch({ state: 'Simulating', paused: true, volley: { size: 5, emitted: 2, active: 2 } })).toBe(false);
+    expect(launch({ state: 'Resolving' })).toBe(false);
   });
 
   test('Pausa toggles to Seguir while paused; Reiniciar is always available in a level', () => {

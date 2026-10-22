@@ -54,5 +54,5 @@ Re-run `tests/fixtures/solutions.json` in `'turn'` mode (must still pass) and ad
 
 ## Open Items
 
-- OI-1: Balance review of levels 1–6 with free movement and per-group re-aim (design follow-up). Measured in slice 6: levels 1–3 are won in mode 1 in 2 turns (v1: 2–3 of 10–12); for levels 4–6 the greedy search finds no win in mode 1 nor mode 3 (core left at 30/210/239 and 21/211/241 HP), while v1 needs 9/12, 10/13 and 14/15 turns. Their mode-1 checks are `test.fixme` until HU-13 (simultaneous firing) or a rebalance.
+- OI-1: Balance review of levels 1–6 with free movement and per-group re-aim (design follow-up). Measured in slice 6: levels 1–3 are won in mode 1 in 2 turns (v1: 2–3 of 10–12); for levels 4–6 the greedy search finds no win in mode 1 nor mode 3 (core left at 30/210/239 and 21/211/241 HP), while v1 needs 9/12, 10/13 and 14/15 turns. Their mode-1 checks are `test.fixme` until HU-13 (simultaneous firing) or a rebalance. **Resolved by HU-13** (`anglecraft-v1-simultaneous-fire`, 2026-10-22): mode 1 fired at the cadence wins levels 1–6 with the v1 solutions, with the same shots and score; the `test.fixme` was removed.
 - OI-2: Hint enter/leave animations must respect `prefers-reduced-motion` (fade only) — confirm with design.

@@ -1,7 +1,7 @@
 # AngleCraft — HU-12, HU-13 y HU-14
 
 **Fecha:** 2026-10-21
-**Estado:** HU-14 implementada (cambio OpenSpec `anglecraft-v1-free-launcher`, casos CP-36 a CP-44). HU-12 implementada (cambio `anglecraft-v1-skip-level`, casos CP-45 a CP-58). HU-13 lista para desarrollo (con dos supuestos por confirmar, S-13.1 y S-13.2).
+**Estado:** HU-14 implementada (cambio OpenSpec `anglecraft-v1-free-launcher`, casos CP-36 a CP-44). HU-12 implementada (cambio `anglecraft-v1-skip-level`, casos CP-45 a CP-58). HU-13 implementada (cambio `anglecraft-v1-simultaneous-fire`, casos CP-59 a CP-74; S-13.1 y S-13.2 confirmados, D-13.5 modo bloqueado en vuelo).
 **Contexto:** HU-10 (mover el lanzador con A / D) y HU-11 (modo de disparo 1–3) están implementadas en `feature/anglecraft-v1-launcher-and-fire-mode`.
 
 ## Análisis previo: ¿el lanzador "vuelve al centro" cuando cae la bola?

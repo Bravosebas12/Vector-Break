@@ -55,7 +55,22 @@ test('at the left edge the left chevron is hidden', async ({ page }) => {
   expect(chev[0].x).toBeGreaterThan(50);
 });
 
-test('disabled while a group flies: no chevrons and no trail', async ({ page }) => {
-  const s = await run(page, `session.dispatch({ type: 'AIM', x: 540, y: 300 }); session.dispatch({ type: 'FIRE' }); return frame();`);
+// HU-13: in flight the launcher is ready while the turn has balls left (level 1: 3 balls), disabled once all are fired.
+test('CP-72 ready in flight with balls left; disabled once every ball of the turn is fired', async ({ page }) => {
+  const out = await run(
+    page,
+    `session.dispatch({ type: 'AIM', x: 540, y: 300 });
+     session.dispatch({ type: 'FIRE' });
+     const ready = frame();
+     for (let k = 0; k < 2; k++) { for (let i = 0; i < 11; i++) session.step(1 / 120); session.dispatch({ type: 'FIRE' }); }
+     return { ready, emitted: session.snapshot().volley.emitted, done: frame() };`,
+  );
+  expect(out.ready.filter((d) => d.kind === 'chevron').map((d) => d.alpha)).toEqual([0.35, 0.35]);
+  expect(out.emitted).toBe(3);
+  expect(out.done).toEqual([]);
+});
+
+test('disabled while paused in flight: no chevrons and no trail', async ({ page }) => {
+  const s = await run(page, `session.dispatch({ type: 'AIM', x: 540, y: 300 }); session.dispatch({ type: 'FIRE' }); session.dispatch({ type: 'PAUSE' }); return frame();`);
   expect(s).toEqual([]);
 });

@@ -89,6 +89,13 @@ function modeModel(snap) {
   };
 }
 
+// FIRE can be accepted by state (HU-13): Aiming, or in flight while the turn has balls left; never paused.
+export function canFire(snap) {
+  if (snap.paused) return false;
+  if (snap.state === 'Aiming') return true;
+  return RUNNING.includes(snap.state) && snap.volley.emitted < snap.volley.size;
+}
+
 export function hudModel(snap, { levelCount = 6 } = {}) {
   const { shots, volley, paused } = snap;
   const stage = pad2(snap.level.index + 1);
@@ -119,7 +126,7 @@ export function hudModel(snap, { levelCount = 6 } = {}) {
     },
     control: {
       title: strings.control,
-      launch: { label: strings.launch, key: 'Space', enabled: snap.state === 'Aiming' && !paused },
+      launch: { label: strings.launch, key: 'Space', enabled: canFire(snap) },
       pause: { label: paused ? strings.resume : strings.pauseButton, key: 'P', active: paused, enabled: playing },
       restart: { label: strings.restart, key: 'R', enabled: true },
       // HU-12: next level without classifying; none after the last level, and Victory offers Siguiente nivel.

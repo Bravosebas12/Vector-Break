@@ -12,12 +12,12 @@ Strict TDD: write or update the failing test first, then the code. One PR per sl
 
 ## 2. Slice 2 - HUD and levels (hud, test-harness)
 
-- [ ] 2.1 Test (unit, `hud-model.spec.js`): `LANZAR` enabled in flight with balls left, disabled with none left or paused (CP-61).
-- [ ] 2.2 Test (browser, `launcher-states.spec.js`): ready in flight with balls left, disabled once all are fired (CP-72).
-- [ ] 2.3 Test (e2e, `simultaneous-fire.spec.js`): real clicks / Space in flight, real `D` held in flight, sounds (CP-59, CP-61, CP-67).
-- [ ] 2.4 Implement D8 (`Hud.js`, `Renderer.js` launcher state).
-- [ ] 2.5 Record the levels 4-6 result in the archived OI-1 of `anglecraft-v1-launcher-and-fire-mode` (the replay itself landed in slice 1).
-- [ ] 2.6 Baselines regenerated where the immediate victory or the launcher state changed them (reviewed); `qa-coverage.spec.js` covers CP-59..CP-74; CP-10 marked superseded; README, comparison doc, HU-12-14 status.
+- [x] 2.1 Test (unit, `hud-model.spec.js`): `LANZAR` enabled in flight with balls left, disabled with none left or paused (CP-61).
+- [x] 2.2 Test (browser, `launcher-states.spec.js`): ready in flight with balls left, disabled once all are fired (CP-72).
+- [x] 2.3 Test (e2e, `simultaneous-fire.spec.js`): real clicks / Space in flight, real `D` held in flight, sounds (CP-59, CP-61, CP-67).
+- [x] 2.4 Implement D8 (`Hud.js`, `Renderer.js` launcher state).
+- [x] 2.5 Record the levels 4-6 result in the archived OI-1 of `anglecraft-v1-launcher-and-fire-mode` (the replay itself landed in slice 1).
+- [x] 2.6 Baselines: only the victory one changed (time, in slice 1); none in slice 2; `qa-coverage.spec.js` covers CP-59..CP-74; CP-10 marked superseded; README, comparison doc, HU-12-14 status.
 
 ## 3. Close
 
