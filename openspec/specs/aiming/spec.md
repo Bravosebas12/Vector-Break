@@ -53,18 +53,23 @@ When `|dir.y| < 0.05` the direction MUST be limited so `|dir.y| = 0.05`, preserv
 - WHEN the aim is computed
 - THEN the direction is unchanged
 
-### Requirement: Aim only in Aiming (HU-01 s1)
+### Requirement: Aim only in Aiming (HU-01 s1, HU-13 AC2)
 
-Cursor movement MUST update the preview only in `Aiming`; no preview is shown in other states.
+Cursor movement MUST update the aim and the preview whenever the next `FIRE` could be accepted by state: in `Aiming`, and in `Firing` / `Simulating` while the turn has balls left to fire, not paused. With no balls left to fire, while paused and in every other state no preview is shown.
+
+#### Scenario: Aim in flight
+- GIVEN `Simulating` with balls in flight and balls of the turn left to fire
+- WHEN the cursor moves
+- THEN the preview follows it and the next `FIRE` uses that direction
 
 #### Scenario: Not aiming
-- GIVEN state `Simulating`
+- GIVEN `Simulating` with every ball of the turn already fired
 - WHEN the cursor moves
 - THEN no aim preview is produced
 
-### Requirement: Fire locks direction (HU-01 s4)
+### Requirement: Fire locks direction (HU-01 s4, HU-13)
 
-In `Aiming` with a valid angle, left-click or `Space` MUST lock the direction and transition to `Firing`. `Space` default behavior MUST be prevented.
+When `FIRE` is accepted (see game-state "Simultaneous fire"), left-click or `Space` MUST lock the direction and the launcher x of that group and transition to `Firing`. Every ball of the group MUST leave from the locked x along the locked direction, even if the aim or the launcher change while it emits. `Space` default behavior MUST be prevented.
 
 #### Scenario: Click fire
 - GIVEN `Aiming` with direction `(0.6, -0.8)`
@@ -76,10 +81,15 @@ In `Aiming` with a valid angle, left-click or `Space` MUST lock the direction an
 - WHEN `Space` is pressed
 - THEN state is `Firing` and the page does not scroll
 
-#### Scenario: Fire outside Aiming ignored
-- GIVEN state `Simulating`
+#### Scenario: Group keeps its origin
+- GIVEN mode 3, a group fired from x 540
+- WHEN `D` is held while the group emits
+- THEN all 3 balls of the group leave from x 540
+
+#### Scenario: Fire with nothing left ignored
+- GIVEN state `Simulating` with every ball of the turn fired
 - WHEN left mouse button is pressed
-- THEN no new volley starts
+- THEN no new group starts
 
 ### Requirement: Reachability checking (HU-06 s1/s2, HU-08 s4)
 
@@ -95,9 +105,9 @@ A reachability query MUST report whether a given target cell is reachable from s
 - WHEN the query runs
 - THEN it returns no angle
 
-### Requirement: Launcher movement (HU-10, HU-14, D-10.2, D-10.3, D-14.1)
+### Requirement: Launcher movement (HU-10, HU-13 D-13.2, HU-14, D-10.2, D-10.3, D-14.1)
 
-In `Aiming` and not paused, a held `A` MUST move the launcher left and a held `D` right at 480 px/s of play time (independent of the speed multiplier), integrated on the fixed step. If a key is released having moved the launcher less than 8 px since its keydown, the launcher MUST be moved to exactly 8 px from where it was at that keydown (tap rule). With both keys held the launcher MUST NOT move; releasing one resumes the other. The launcher x MUST stay within `[50, 1030]` and MUST stop at the bound while the key stays held. Movement MUST NOT happen in any other state or while paused; keys held when leaving `Aiming` MUST not move the launcher until pressed again.
+In `Aiming`, `Firing` and `Simulating`, not paused, a held `A` MUST move the launcher left and a held `D` right at 480 px/s of play time (independent of the speed multiplier), integrated on the fixed step. If a key is released having moved the launcher less than 8 px since its keydown, the launcher MUST be moved to exactly 8 px from where it was at that keydown (tap rule). With both keys held the launcher MUST NOT move; releasing one resumes the other. The launcher x MUST stay within `[50, 1030]` and MUST stop at the bound while the key stays held. Movement MUST NOT happen while paused or in any other state; a key held through `FIRE` keeps moving the launcher. Moving the launcher MUST NOT change the trajectory of balls already in flight.
 
 During play only `A` / `D` MUST change the launcher x. Loading a level (start, next level, or a level skip) and restart (`R`) MUST set it to the level's starting x (`launcher.x` × board width).
 
@@ -126,10 +136,15 @@ During play only `A` / `D` MUST change the launcher x. Loading a level (start, n
 - WHEN `A` and `D` are both held for 0.5 s
 - THEN launcher x is 540
 
-#### Scenario: Ignored in flight
-- GIVEN `Simulating`, launcher x 540
+#### Scenario: Move in flight
+- GIVEN `Simulating` with balls in flight, launcher x 540
+- WHEN `D` is held for 0.5 s of play time
+- THEN launcher x is 780 (±2), the next group leaves from there and the balls in flight keep their trajectories
+
+#### Scenario: Ignored while paused
+- GIVEN paused with balls in flight, launcher x 540
 - WHEN `A` is held for 0.5 s
-- THEN launcher x is 540 when the next `Aiming` starts
+- THEN launcher x is 540
 
 #### Scenario: Restart returns to the start
 - GIVEN level 2 and launcher x 300
