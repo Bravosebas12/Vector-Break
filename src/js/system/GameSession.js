@@ -403,6 +403,10 @@ export function createSession({
       pinnedMode = v === 'turn' ? 'turn' : null;
       run.fireMode = v;
     },
+    // Test seam (openspec free-launcher D4): a position reachable with A / D, placed at once; Aiming only.
+    setLauncherX(x) {
+      if (fsm.state === 'Aiming') setLauncherX(x);
+    },
     dispatch,
     step,
     snapshot,

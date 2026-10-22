@@ -1,9 +1,10 @@
 // Levels stay solvable with fire groups (openspec change anglecraft-v1-launcher-and-fire-mode, task 6.1).
-// - 'turn' mode: the v1 solutions (tests/fixtures/solutions.json) still win, one FIRE per turn.
+// - 'turn' mode: the v1 solutions (tests/fixtures/solutions.json) still win, one FIRE per turn, with the launcher
+//   placed at the recorded x of each shot (`xs`, openspec change anglecraft-v1-free-launcher D3).
 // - mode 1: the v1 solutions do not transfer (they rely on several balls in flight at once), so each level has
 //   its own mode-1 plan in tests/fixtures/solutions-mode1.json, found offline by a greedy search over angles and
 //   launcher positions. Each step is { x, deg }: x = launcher x set before the shot (reachable with A / D,
-//   D-10.2) or null to stay where it was relocated; deg = aim angle. Replayed from a fresh session it must win
+//   D-10.2); deg = aim angle. Replayed from a fresh session it must win
 //   within the level's shots.
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
@@ -41,7 +42,12 @@ function shoot(s, deg) {
 for (let i = 0; i < 6; i++) {
   test(`level ${i + 1}: the v1 solution still wins in 'turn' mode`, () => {
     const s = start(i, 'turn');
-    for (const deg of V1.levels[i].angles) if (s.snapshot().state === 'Aiming') shoot(s, deg);
+    const { angles, xs } = V1.levels[i];
+    for (const [k, deg] of angles.entries()) {
+      if (s.snapshot().state !== 'Aiming') break;
+      s.setLauncherX(xs[k]);
+      shoot(s, deg);
+    }
     expect(s.snapshot().state).toBe('Victory');
   });
 
@@ -52,7 +58,7 @@ for (let i = 0; i < 6; i++) {
     const s = start(i, 1);
     for (const step of plan.steps) {
       if (s.snapshot().state !== 'Aiming') break;
-      if (step.x !== null) s.run.launcherX = step.x;
+      s.setLauncherX(step.x);
       shoot(s, step.deg);
     }
     const end = s.snapshot();

@@ -33,6 +33,7 @@ export function createTestHook(session, audioLog = [], drain = null, render = nu
     setSeed: guard((seed) => session.rng.setSeed(seed)),
     setVolley: guard((n) => session.setVolley(n)),
     setFireMode: guard((v) => session.setFireMode(v)),
+    setLauncherX: guard((x) => session.setLauncherX(x)),
     // Holds A (dir -1) or D (dir +1) for `seconds` of play time, stepping the session, then releases it.
     move: guard((dir, seconds) => {
       session.dispatch({ type: 'MOVE_START', dir });
