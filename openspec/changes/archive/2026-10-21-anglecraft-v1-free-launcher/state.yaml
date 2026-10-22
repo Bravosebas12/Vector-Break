@@ -7,8 +7,8 @@ phases:
   spec: done
   tasks: done
   apply: done  # slices 1-2 done; levels 4-6 mode-1 search result pending for OI-1
-  verify: pending
-  archive: pending
+  verify: done  # full suite 3x green on slice 2 (599 passed, 3 fixme)
+  archive: done
 blocked_reason: none
 delivery:
   delivery_strategy: auto-chain
