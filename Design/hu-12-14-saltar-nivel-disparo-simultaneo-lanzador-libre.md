@@ -1,7 +1,7 @@
 # AngleCraft — HU-12, HU-13 y HU-14
 
 **Fecha:** 2026-10-21
-**Estado:** borrador para refinamiento con PO (preguntas abiertas al final de cada historia)
+**Estado:** en refinamiento con PO. Decisiones del 2026-10-21: D-12.1, D-12.2 y D-14.1 (abajo); quedan preguntas abiertas en HU-12 y HU-13.
 **Contexto:** HU-10 (mover el lanzador con A / D) y HU-11 (modo de disparo 1–3) están implementadas en `feature/anglecraft-v1-launcher-and-fire-mode`.
 
 ## Análisis previo: ¿el lanzador "vuelve al centro" cuando cae la bola?
@@ -32,6 +32,13 @@ Según el ángulo, el salto a donde cae la bola puede parecer una "vuelta al cen
 * Facilita demos, pruebas de diseño y revisiones de nivel.
 
 **Regla clave:** un nivel saltado **no clasifica**: no otorga estrellas, puntos ni récord, y no cuenta como resuelto.
+
+**Decisiones del PO:**
+
+| ID | Decisión |
+|---|---|
+| D-12.1 | Saltar es **inmediato, sin confirmación**. |
+| D-12.2 | La tecla es **`N`**. |
 
 ### Criterios de aceptación
 
@@ -80,10 +87,8 @@ Escenario: AC8 - Ignorado fuera de los niveles
 
 ### Preguntas abiertas (PO)
 1. ¿También se puede **retroceder** al nivel anterior (por ejemplo con `B`), o solo avanzar?
-2. ¿Saltar pide **confirmación** ("¿Saltar sin clasificar?") o es inmediato?
-3. ¿El modal de **victoria** debe ofrecer también "Saltar", o ahí basta "Siguiente nivel"?
-4. ¿La tecla `N` está bien? (Libres hoy: N, B, entre otras; `1` `2` `4` son velocidad y `M` es el modo.)
-5. ¿Los niveles saltados deben marcarse de alguna forma (por ejemplo "sin resolver") cuando exista el selector de niveles (HU-07)?
+2. ¿El modal de **victoria** debe ofrecer también "Saltar", o ahí basta "Siguiente nivel"?
+3. ¿Los niveles saltados deben marcarse de alguna forma (por ejemplo "sin resolver") cuando exista el selector de niveles (HU-07)?
 
 ---
 
@@ -160,6 +165,8 @@ Escenario: AC8 - Límite de bolas en pantalla
 
 **Reemplaza:** D-10.1 y D-11.3 (reubicación automática donde cae la primera bola), HU-10 AC1 y HU-11 AC4.
 
+**Decisión del PO:** D-14.1 — **`R` (reiniciar) devuelve el lanzador a la posición inicial del nivel (centro)**, igual que cambiar de nivel.
+
 ### Criterios de aceptación
 
 ```gherkin
@@ -183,15 +190,19 @@ Escenario: AC4 - Al cambiar de nivel vuelve a la posición inicial
   Cuando se carga el nivel 2 (Siguiente nivel o Saltar nivel, HU-12)
   Entonces el lanzador está en la posición inicial del nivel 2 (centro, x = 540)
 
-Escenario: AC5 - Trayectoria estable
+Escenario: AC5 - Reiniciar devuelve el lanzador al centro (D-14.1)
+  Dado que el lanzador está en x = 300 en el nivel 2
+  Cuando el jugador pulsa R
+  Entonces el lanzador vuelve a la posición inicial del nivel 2 (centro, x = 540)
+
+Escenario: AC6 - Trayectoria estable
   Dado que el jugador apunta a un punto con el lanzador en x = 300
   Cuando caen las bolas del tiro
   Entonces la trayectoria mostrada sigue saliendo de x = 300 hacia el mismo punto
 ```
 
 ### Preguntas abiertas (PO)
-1. **Reiniciar (`R`):** ¿devuelve el lanzador al centro (es "volver a empezar el nivel") o mantiene la posición actual? Propuesta: vuelve al centro, igual que hoy.
-2. **Balance:** con el lanzador fijo, algunos puzzles diseñados con reubicación pueden cambiar de dificultad. ¿Se revisa el balance de los niveles 1 a 6 con diseño?
+1. **Balance:** con el lanzador fijo, algunos puzzles diseñados con reubicación pueden cambiar de dificultad. ¿Se revisa el balance de los niveles 1 a 6 con diseño?
 
 ---
 
