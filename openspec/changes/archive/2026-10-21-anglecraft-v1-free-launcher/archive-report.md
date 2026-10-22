@@ -4,7 +4,7 @@
 **Archived on**: 2026-10-21
 **Archived to**: `openspec/changes/archive/2026-10-21-anglecraft-v1-free-launcher/`
 **Traces to**: HU-14 (free launcher position), `Design/hu-12-14-saltar-nivel-disparo-simultaneo-lanzador-libre.md`, QA cases CP-36..CP-44 (`Design/casos/hu-14-casos-de-prueba.md`)
-**Archive status**: closed with one informational item pending (no blocking issue)
+**Archive status**: closed (no blocking issue)
 
 ## 1. Final State
 
@@ -18,7 +18,7 @@
 
 ### Open items carried
 
-- **OI-1 (balance)**: every v1 solution still wins with the same shots thanks to the recorded launcher positions (design D3), so levels 1-6 stay winnable without a rebalance. The felt difficulty without relocation is pending design review. The mode-1 search for levels 4-6 with the launcher fixed (design D7) was still running at archive time; it is informational only (those checks remain `test.fixme` until HU-13 or a rebalance).
+- **OI-1 (balance)**: every v1 solution still wins with the same shots thanks to the recorded launcher positions (design D3), so levels 1-6 stay winnable without a rebalance. The felt difficulty without relocation is pending design review. The mode-1 search for levels 4-6 with the launcher fixed (design D7) finished after the archive: no win, core left at 30 / 211 / 239 HP after 12 / 13 / 15 turns (70 / 89 / 132 groups). The result is the same as with relocation, so HU-14 neither helps nor hurts those levels in mode 1; the checks remain `test.fixme` until HU-13 or a rebalance.
 - **HU-12 dependency**: AC4's "Saltar nivel" path is added to CP-40 when HU-12 exists (S-QA6).
 
 ## 2. Spec Sync (openspec/specs/)

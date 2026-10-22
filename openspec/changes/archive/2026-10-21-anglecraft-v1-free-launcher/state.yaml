@@ -6,7 +6,7 @@ phases:
   design: done
   spec: done
   tasks: done
-  apply: done  # slices 1-2 done; levels 4-6 mode-1 search result pending for OI-1
+  apply: done  # slices 1-2 done
   verify: done  # full suite 3x green on slice 2 (599 passed, 3 fixme)
   archive: done
 blocked_reason: none
@@ -22,5 +22,5 @@ confirmed_decisions:
   D-14.0: "HU-14 supersedes D-10.1 and D-11.3 (automatic relocation) and HU-10 AC1 / HU-11 AC4; landing balls never move the launcher"
   D-14.1: "R (restart) returns the launcher to the level's starting x (center), like loading a level"
 pending_decisions:
-  OI-1: "PO question 1: balance with a fixed launcher; solutions keep levels winnable via recorded positions (design D3); felt difficulty pending design review"
+  OI-1: "PO question 1: balance with a fixed launcher; solutions keep levels winnable via recorded positions (design D3); felt difficulty pending design review; mode-1 search with fixed launcher, levels 4-6: no win, core 30/211/239 HP (same as with relocation)"
   OI-2: "on archive, remove aiming open item about launcher shift (resolved by HU-14)"

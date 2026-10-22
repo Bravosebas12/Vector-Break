@@ -16,7 +16,7 @@ Strict TDD: write or update the failing test first, then the code. One PR per sl
 - [x] 2.2 Test (e2e, `free-launcher.spec.js`): real keys move to 300, a shot lands elsewhere, the preview starts at 300 toward the same pointer (CP-42).
 - [x] 2.3 Migrate tests that assert relocation (design D6): `fire-groups` CP-01 CP-22, `volley` launcher shift, `volley-cap` cap after first landing, `launcher-move` CP-10 (x2). Watch them fail against the current code.
 - [x] 2.4 Implement D1: remove `run.firstLandX` and both relocation calls in `GameSession`.
-- [x] 2.5 Solutions replay with the launcher fixed: levels 1–6 in `'turn'`, levels 1–3 in mode 1 (CP-44); re-run the mode-1 search for levels 4–6 and record the result in OI-1 (D7). Replay done; search result pending (running at merge time).
+- [x] 2.5 Solutions replay with the launcher fixed: levels 1–6 in `'turn'`, levels 1–3 in mode 1 (CP-44); re-run the mode-1 search for levels 4–6 and record the result in OI-1 (D7). Result: no win in mode 1, core left at 30 / 211 / 239 HP, the same as with relocation.
 - [x] 2.6 `qa-coverage.spec.js` covers CP-36..CP-44; mark CP-01 / CP-22 superseded in `Design/casos/hu-10-11-casos-de-prueba.md`.
 - [x] 2.7 Docs: README (the launcher stays where you leave it), `docs/visual-fidelity-comparison.md` section 8, `Design/hu-12-14-...md` status.
 
